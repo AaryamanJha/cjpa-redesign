@@ -1,0 +1,159 @@
+"use client"
+
+import { useRef } from "react"
+import { motion, useInView } from "framer-motion"
+import {
+  Globe2,
+  BarChart2,
+  Landmark,
+  ArrowLeftRight,
+  Shield,
+  BookOpen,
+} from "lucide-react"
+
+const EASE = [0.25, 0.1, 0.25, 1] as const
+
+const SERVICES = [
+  {
+    icon: Globe2,
+    title: "Geopolitical Intelligence & Risk",
+    description:
+      "Senior-level assessment of political, regulatory, and security environments across emerging and frontier markets, drawn from direct government experience.",
+  },
+  {
+    icon: BarChart2,
+    title: "Capital Strategy & Investment Advisory",
+    description:
+      "Structuring and advising complex cross-border investments with command of political economy, sovereign risk, and the full architecture of international capital markets.",
+  },
+  {
+    icon: Landmark,
+    title: "Government & Policy Relations",
+    description:
+      "Engagement with governments, regulatory bodies, and multilateral institutions at principal level on behalf of corporate and private capital clients.",
+  },
+  {
+    icon: ArrowLeftRight,
+    title: "Cross-Border Transactions",
+    description:
+      "Specialist advisory on international M&A, foreign investment review, and jurisdictional complexity in high-stakes cross-border transactions.",
+  },
+  {
+    icon: Shield,
+    title: "Crisis & Reputational Counsel",
+    description:
+      "Confidential strategic counsel to organizations navigating regulatory, political, reputational, or operational crises across international jurisdictions.",
+  },
+  {
+    icon: BookOpen,
+    title: "Institutional Partnerships",
+    description:
+      "Long-term advisory relationships with sovereign governments and institutions building strategic policy, intelligence, and financial capabilities.",
+  },
+]
+
+function ServiceCard({
+  service,
+  delay,
+}: {
+  service: (typeof SERVICES)[number]
+  delay: number
+}) {
+  const ref = useRef(null)
+  const inView = useInView(ref, { once: true, margin: "-60px" })
+  const Icon = service.icon
+
+  return (
+    <motion.div
+      ref={ref}
+      initial={{ opacity: 0, y: 20 }}
+      animate={inView ? { opacity: 1, y: 0 } : {}}
+      transition={{ duration: 0.75, delay, ease: EASE }}
+      className="group relative bg-[#101827] border border-[#C8A96A]/10 hover:border-[#C8A96A]/25 transition-colors duration-400 p-8 flex flex-col gap-6 cursor-default"
+    >
+      {/* Gold top accent */}
+      <div className="absolute top-0 left-0 right-0 h-px bg-[#C8A96A] opacity-20 group-hover:opacity-50 transition-opacity duration-400" />
+
+      <Icon
+        size={22}
+        strokeWidth={1.25}
+        className="text-[#C8A96A] opacity-70 group-hover:opacity-100 transition-opacity duration-300"
+      />
+
+      <div className="flex flex-col gap-3">
+        {/* Service title — Playfair Display for variety */}
+        <h3
+          className="font-display text-[#F5F1E8] font-normal leading-snug"
+          style={{ fontSize: "clamp(18px, 1.8vw, 23px)" }}
+        >
+          {service.title}
+        </h3>
+        <p
+          className="text-[#A8B0C0] font-sans font-light leading-[1.8]"
+          style={{ fontSize: "14px" }}
+        >
+          {service.description}
+        </p>
+      </div>
+    </motion.div>
+  )
+}
+
+export function Services() {
+  const headerRef = useRef(null)
+  const headerInView = useInView(headerRef, { once: true, margin: "-60px" })
+  const lineRef = useRef(null)
+  const lineInView = useInView(lineRef, { once: true, margin: "-60px" })
+
+  return (
+    <section id="services" className="relative bg-[#070B14] py-28 lg:py-36">
+      {/* Top rule */}
+      <div className="max-w-7xl mx-auto px-6 lg:px-10">
+        <motion.div
+          ref={lineRef}
+          className="h-px bg-[#C8A96A] origin-left mb-16 lg:mb-20"
+          initial={{ scaleX: 0, opacity: 0 }}
+          animate={lineInView ? { scaleX: 1, opacity: 0.2 } : {}}
+          transition={{ duration: 1.1, ease: EASE }}
+        />
+      </div>
+
+      <div className="max-w-7xl mx-auto px-6 lg:px-10">
+        {/* Header */}
+        <div ref={headerRef} className="mb-16 lg:mb-20 max-w-2xl">
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={headerInView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.7, ease: EASE }}
+            className="flex items-center gap-3 mb-8"
+          >
+            <div className="h-px w-6 bg-[#C8A96A] opacity-50" />
+            <span
+              className="text-[#C8A96A] font-sans font-medium uppercase tracking-[0.3em]"
+              style={{ fontSize: "11px" }}
+            >
+              Services
+            </span>
+          </motion.div>
+
+          <motion.h2
+            initial={{ opacity: 0, y: 18 }}
+            animate={headerInView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.8, delay: 0.1, ease: EASE }}
+            className="font-serif text-[#F5F1E8] font-light leading-[1.06]"
+            style={{ fontSize: "clamp(38px, 5vw, 64px)" }}
+          >
+            Our Practice Areas
+          </motion.h2>
+        </div>
+
+        {/* Services grid */}
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-px bg-[#C8A96A]/6">
+          {SERVICES.map((service, i) => (
+            <ServiceCard key={service.title} service={service} delay={i * 0.07} />
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}

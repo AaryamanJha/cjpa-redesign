@@ -1,0 +1,100 @@
+@import "tailwindcss";
+
+@theme inline {
+  /* ── CJPA brand tokens ── */
+  --color-background: #070B14;
+  --color-foreground: #F5F1E8;
+  --color-card: #101827;
+  --color-gold: #C8A96A;
+  --color-muted: #A8B0C0;
+  --color-accent-blue: #3B82F6;
+
+  /* ── shadcn/ui bridge tokens (dark navy theme) ── */
+  --color-card-foreground: #F5F1E8;
+  --color-popover: #111927;
+  --color-popover-foreground: #F5F1E8;
+  --color-primary: #C8A96A;
+  --color-primary-foreground: #070B14;
+  --color-secondary: #1a2535;
+  --color-secondary-foreground: #F5F1E8;
+  --color-muted-background: #0D1520;
+  --color-muted-foreground: #A8B0C0;
+  --color-accent: #16243a;
+  --color-accent-foreground: #F5F1E8;
+  --color-destructive: #7f1d1d;
+  --color-destructive-foreground: #fca5a5;
+  --color-border: rgba(200, 169, 106, 0.14);
+  --color-input: #0D1520;
+  --color-ring: #C8A96A;
+
+  /* Cormorant Garamond — H1/H2 display headings */
+  --font-serif: var(--font-cormorant);
+  /* Playfair Display — H3, pull quotes, team names, track titles */
+  --font-display: var(--font-playfair);
+  /* Space Grotesk — all UI, labels, nav, body text */
+  --font-sans: var(--font-space);
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 88px; /* offset for fixed 80px navbar */
+  font-size: 16px;
+}
+
+body {
+  background: #070B14;
+  color: #F5F1E8;
+  font-family: var(--font-space), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.6;
+}
+
+::selection {
+  background: rgba(200, 169, 106, 0.18);
+  color: #F5F1E8;
+}
+
+::-webkit-scrollbar { width: 3px; }
+::-webkit-scrollbar-track { background: #070B14; }
+::-webkit-scrollbar-thumb { background: rgba(200, 169, 106, 0.25); border-radius: 2px; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ── Typography utility classes ── */
+.text-eyebrow {
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.text-meta {
+  font-size: 12px;
+}
+
+.text-body {
+  font-size: 14px;
+  line-height: 1.625;
+}
+
+.text-body-lg {
+  font-size: 15px;
+  line-height: 1.625;
+}
+
+.text-card-title {
+  font-size: 16px;
+}
+
+.text-section-title {
+  font-size: 18px;
+}
+
+.text-page-title {
+  font-size: clamp(20px, 2vw, 26px);
+}

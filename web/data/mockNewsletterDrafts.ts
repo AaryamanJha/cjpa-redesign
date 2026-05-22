@@ -1,0 +1,102 @@
+import { NewsletterDraft } from "@/types/portal"
+
+export const mockNewsletterDrafts: NewsletterDraft[] = [
+  {
+    id: "nl-001",
+    title: "Transatlantic Capital Flows Under Stress",
+    issue: "Vol. 4 · Issue 5 · May 2026",
+    coverTheme:
+      "How rising sovereign debt spreads and political fragmentation in Europe are reshaping cross-border capital allocation for institutional investors.",
+    status: "In Review",
+    author: "Dr. Amara Singh",
+    lastEdited: "2026-05-15",
+    publishDate: "2026-05-28",
+    wordCount: 2840,
+    sections: [
+      "Opening Analysis: The New Fragmentation",
+      "Sovereign Spread Watch: Italy, France, and the ECB's Limits",
+      "Capital Reallocation Trends — Q1 2026 Data",
+      "Regulatory Flashpoint: EU AI Act and Investment Screening",
+      "CJPA Outlook: Where Principal Capital Is Moving",
+    ],
+    tags: ["Europe", "Capital Markets", "Sovereign Risk", "Regulation"],
+  },
+  {
+    id: "nl-002",
+    title: "Gulf Capital: Beyond Petrodollar Recycling",
+    issue: "Vol. 4 · Issue 4 · April 2026",
+    coverTheme:
+      "Sovereign wealth funds in the GCC are redefining their mandates — moving from passive rebalancing to active geopolitical positioning.",
+    status: "Published",
+    author: "Carlton J. Porter",
+    lastEdited: "2026-04-22",
+    publishDate: "2026-04-30",
+    wordCount: 3100,
+    sections: [
+      "From Recycling to Repositioning",
+      "ADIA, PIF, and QIA: Three Diverging Strategies",
+      "The Transatlantic Window — EU Corridor Opportunities",
+      "Political Risk Overlay for GCC Outbound Investment",
+      "CJPA Advisory: Structuring for Regulatory Pre-clearance",
+    ],
+    tags: ["Gulf", "Sovereign Wealth", "Geopolitics", "Capital Strategy"],
+  },
+  {
+    id: "nl-003",
+    title: "East Africa's Infrastructure Moment",
+    issue: "Vol. 4 · Issue 6 · June 2026",
+    coverTheme:
+      "A new generation of infrastructure mandates is emerging across Kenya, Rwanda, and Tanzania — and international capital is watching closely.",
+    status: "Draft",
+    author: "Priya Menon",
+    lastEdited: "2026-05-17",
+    publishDate: "2026-06-30",
+    wordCount: 1420,
+    sections: [
+      "The Regional Moment: Political Stability and Investment Readiness",
+      "Kenya's Post-Election Infrastructure Agenda",
+      "Rwanda's SEZ Strategy and Foreign Capital",
+      "Risk Matrix: What Institutional Investors Need to Know",
+      "CJPA Outlook [DRAFT]",
+    ],
+    tags: ["East Africa", "Infrastructure", "Political Risk", "Emerging Markets"],
+  },
+  {
+    id: "nl-004",
+    title: "ASEAN's Digital Divide: Policy and Investment",
+    issue: "Vol. 4 · Issue 7 · July 2026",
+    coverTheme:
+      "Digital economy policy fragmentation across ASEAN member states is creating both risk and opportunity for institutional investors.",
+    status: "Draft",
+    author: "Dr. Amara Singh",
+    lastEdited: "2026-05-10",
+    wordCount: 680,
+    sections: [
+      "Introduction: The ASEAN Digital Mosaic",
+      "Regulatory Divergence Across Member States [PLACEHOLDER]",
+      "Investment Opportunity Mapping [PLACEHOLDER]",
+      "CJPA Outlook [TBD]",
+    ],
+    tags: ["ASEAN", "Digital Economy", "Regulation", "Investment"],
+  },
+  {
+    id: "nl-005",
+    title: "Sovereign Debt Restructuring: Lessons for Creditors",
+    issue: "Vol. 4 · Issue 3 · March 2026",
+    coverTheme:
+      "The Ghana, Zambia, and Sri Lanka restructurings offer institutional creditors a new framework for navigating sovereign default risk.",
+    status: "Published",
+    author: "Carlton J. Porter",
+    lastEdited: "2026-03-20",
+    publishDate: "2026-03-31",
+    wordCount: 2950,
+    sections: [
+      "Three Defaults, Three Lessons",
+      "The IMF Framework and Its Political Limits",
+      "Creditor Committee Strategy in Practice",
+      "Implications for Active Portfolio Management",
+      "CJPA Advisory: Early Warning Indicators",
+    ],
+    tags: ["Sovereign Debt", "Restructuring", "Credit Risk", "IMF"],
+  },
+]

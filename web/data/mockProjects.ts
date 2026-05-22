@@ -1,0 +1,87 @@
+import { Project } from "@/types/portal"
+
+export const mockProjects: Project[] = [
+  {
+    id: "proj-001",
+    clientId: "client-001",
+    clientName: "Nairobi Infrastructure Partners",
+    projectName: "East Africa Infrastructure Advisory",
+    projectType: "Market Entry Strategy",
+    lead: "Carlton J. Porter",
+    team: ["Dr. Amara Singh", "Priya Menon"],
+    status: "Analysis",
+    priority: "High",
+    startDate: "2026-03-15",
+    targetDeadline: "2026-07-01",
+    summary:
+      "Strategic advisory on infrastructure investment entry across Kenya, Rwanda, and Tanzania. Covering political risk, regulatory landscape, and stakeholder mapping.",
+    keyDeliverables: [
+      "Political risk matrix",
+      "Market entry framework",
+      "Stakeholder mapping",
+      "Final advisory report",
+    ],
+  },
+  {
+    id: "proj-002",
+    clientId: "client-002",
+    clientName: "Gulf Capital Sovereign Fund",
+    projectName: "Gulf Sovereign Capital Redeployment Strategy",
+    projectType: "Capital Advisory",
+    lead: "James Whitmore",
+    team: ["Dr. Amara Singh", "Marcus Reid"],
+    status: "Review",
+    priority: "Critical",
+    startDate: "2026-02-01",
+    targetDeadline: "2026-06-15",
+    summary:
+      "Strategic advisory on redeployment of sovereign capital across transatlantic markets, with focus on political risk, regulatory clearance, and portfolio optimization.",
+    keyDeliverables: [
+      "Portfolio analysis",
+      "Allocation framework",
+      "Risk assessment",
+      "Regulatory clearance review",
+    ],
+  },
+  {
+    id: "proj-003",
+    clientId: "client-003",
+    clientName: "European Development Finance Institute",
+    projectName: "EU Regulatory Risk Assessment",
+    projectType: "Geopolitical Risk Analysis",
+    lead: "Dr. Amara Singh",
+    team: ["Thomas Osei"],
+    status: "Research",
+    priority: "Medium",
+    startDate: "2026-04-01",
+    targetDeadline: "2026-08-30",
+    summary:
+      "Comprehensive assessment of the EU regulatory landscape affecting cross-border investment flows, with focus on the AI Act, DORA, and foreign investment screening mechanisms.",
+    keyDeliverables: [
+      "Regulatory mapping",
+      "Risk analysis brief",
+      "Policy recommendations",
+      "Client Q&A briefing",
+    ],
+  },
+  {
+    id: "proj-004",
+    clientId: "client-004",
+    clientName: "ASEAN Digital Initiative Secretariat",
+    projectName: "ASEAN Digital Economy Advisory",
+    projectType: "Commissioned Research",
+    lead: "Dr. Amara Singh",
+    team: ["Carlton J. Porter", "Priya Menon"],
+    status: "Drafting",
+    priority: "High",
+    startDate: "2026-04-15",
+    targetDeadline: "2026-09-30",
+    summary:
+      "Research brief on digital economy policy developments across ASEAN member states, with investment opportunity mapping for institutional clients.",
+    keyDeliverables: [
+      "Research brief",
+      "Policy landscape overview",
+      "Investment opportunity map",
+    ],
+  },
+]

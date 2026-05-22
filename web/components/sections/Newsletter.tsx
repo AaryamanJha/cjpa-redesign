@@ -1,0 +1,141 @@
+"use client"
+
+import { useRef, useState } from "react"
+import { motion, useInView } from "framer-motion"
+import { ArrowRight } from "lucide-react"
+
+const EASE = [0.25, 0.1, 0.25, 1] as const
+
+export function Newsletter() {
+  const ref = useRef(null)
+  const inView = useInView(ref, { once: true, margin: "-60px" })
+  const [email, setEmail] = useState("")
+  const [submitted, setSubmitted] = useState(false)
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (email) setSubmitted(true)
+  }
+
+  return (
+    <section id="newsletter" className="relative bg-[#070B14]">
+      <div className="max-w-7xl mx-auto px-6 lg:px-10">
+        <motion.div
+          ref={ref}
+          initial={{ opacity: 0, y: 20 }}
+          animate={inView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.85, ease: EASE }}
+          className="relative bg-[#101827] border border-[#C8A96A]/12 px-10 py-16 lg:px-20 lg:py-20 overflow-hidden"
+        >
+          {/* Corner accents */}
+          <div className="absolute top-0 left-0 w-16 h-px bg-[#C8A96A] opacity-30" />
+          <div className="absolute top-0 left-0 h-16 w-px bg-[#C8A96A] opacity-30" />
+          <div className="absolute bottom-0 right-0 w-16 h-px bg-[#C8A96A] opacity-30" />
+          <div className="absolute bottom-0 right-0 h-16 w-px bg-[#C8A96A] opacity-30" />
+
+          <div className="grid lg:grid-cols-[1.1fr_0.9fr] gap-10 lg:gap-20 items-center">
+            {/* Left */}
+            <div>
+              <div className="flex items-center gap-3 mb-6">
+                <div className="h-px w-6 bg-[#C8A96A] opacity-50" />
+                <span
+                  className="text-[#C8A96A] font-sans font-medium uppercase tracking-[0.3em]"
+                  style={{ fontSize: "11px" }}
+                >
+                  Intelligence Briefing
+                </span>
+              </div>
+              {/* Playfair Display for this heading */}
+              <h2
+                className="font-display text-[#F5F1E8] font-normal leading-[1.1] mb-5"
+                style={{ fontSize: "clamp(28px, 3.2vw, 44px)" }}
+              >
+                Geopolitical Intelligence,
+                <br />
+                <em className="text-[#F5F1E8]/75">Delivered Quarterly</em>
+              </h2>
+              <p
+                className="text-[#A8B0C0] font-sans font-light leading-[1.85]"
+                style={{ fontSize: "15px" }}
+              >
+                A concise assessment of geopolitical developments, capital flow
+                shifts, and regulatory changes that matter to international investors
+                and institutions. No noise. No filler.
+              </p>
+            </div>
+
+            {/* Right — form */}
+            <div>
+              {submitted ? (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, ease: EASE }}
+                  className="flex flex-col gap-3"
+                >
+                  <div className="h-px w-10 bg-[#C8A96A] opacity-50" />
+                  <p
+                    className="font-display text-[#F5F1E8] font-normal"
+                    style={{ fontSize: "clamp(20px, 2vw, 26px)" }}
+                  >
+                    You&rsquo;re on the list.
+                  </p>
+                  <p
+                    className="text-[#A8B0C0] font-sans font-light"
+                    style={{ fontSize: "14px" }}
+                  >
+                    We&rsquo;ll be in touch with the next briefing.
+                  </p>
+                </motion.div>
+              ) : (
+                <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+                  <div className="flex flex-col gap-2">
+                    <label
+                      htmlFor="newsletter-email"
+                      className="text-[#A8B0C0]/60 font-sans font-medium uppercase"
+                      style={{ fontSize: "10px", letterSpacing: "0.2em" }}
+                    >
+                      Work Email
+                    </label>
+                    <input
+                      id="newsletter-email"
+                      type="email"
+                      required
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="name@organization.com"
+                      className="bg-transparent border-b border-[#C8A96A]/25 focus:border-[#C8A96A]/60 text-[#F5F1E8] placeholder:text-[#A8B0C0]/30 font-sans font-light py-3 outline-none transition-colors duration-300"
+                      style={{ fontSize: "15px" }}
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    className="group flex items-center justify-between border border-[#C8A96A]/30 hover:border-[#C8A96A]/60 hover:bg-[#C8A96A]/6 text-[#C8A96A] px-6 py-4 transition-all duration-300 cursor-pointer"
+                  >
+                    <span
+                      className="font-sans font-medium uppercase tracking-[0.2em]"
+                      style={{ fontSize: "11px" }}
+                    >
+                      Subscribe
+                    </span>
+                    <ArrowRight
+                      size={15}
+                      strokeWidth={1.5}
+                      className="opacity-60 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300"
+                    />
+                  </button>
+                  <p
+                    className="text-[#A8B0C0]/40 font-sans font-light"
+                    style={{ fontSize: "12px" }}
+                  >
+                    Quarterly only. Unsubscribe at any time.
+                  </p>
+                </form>
+              )}
+            </div>
+          </div>
+        </motion.div>
+      </div>
+    </section>
+  )
+}
