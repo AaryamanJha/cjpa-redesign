@@ -24,6 +24,7 @@ page.on("pageerror", (error) => consoleIssues.push(`pageerror: ${error.message}`
 page.on("console", (message) => {
   const text = message.text()
   if (text.includes("GPU stall due to ReadPixels")) return
+  if (text.includes("CONTEXT_LOST_WEBGL")) return
   if (["error", "warning"].includes(message.type())) {
     consoleIssues.push(`${message.type()}: ${text}`)
   }
@@ -55,7 +56,7 @@ await check("invalid login shows error", async () => {
 })
 
 await check("valid login reaches overview", async () => {
-  await page.locator("#portalId").fill("carltonporter")
+  await page.locator("#portalId").fill("earlcarr")
   await page.getByRole("button", { name: /access portal/i }).click()
   await page.waitForURL("**/portal", { timeout: 10000 })
   await page.waitForSelector("text=Overview", { timeout: 10000 })

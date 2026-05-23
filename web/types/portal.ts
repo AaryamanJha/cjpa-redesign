@@ -28,6 +28,12 @@ export interface PortalUser {
   title: string
   role: PortalRole
   permissions: string[]
+  image?: string
+  bio?: string
+  email?: string
+  region?: string
+  publicRole?: string
+  group?: string
   isPortalAdmin?: boolean
 }
 

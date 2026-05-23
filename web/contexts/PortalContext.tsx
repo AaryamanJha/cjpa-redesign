@@ -5,19 +5,21 @@
 
 import React, { createContext, useContext, useEffect, useState, useCallback } from "react"
 import { useRouter } from "next/navigation"
-import { PortalUser, PortalRole, Task, TaskStatus, Project, Client, CalendarEvent } from "@/types/portal"
+import { PortalUser, PortalRole, Task, TaskStatus, Project, Client, CalendarEvent, Announcement } from "@/types/portal"
 import { portalUsers } from "@/data/portalUsers"
 import { mockTasks } from "@/data/mockTasks"
 import { mockProjects } from "@/data/mockProjects"
 import { mockClients } from "@/data/mockClients"
 import { mockCalendarEvents } from "@/data/mockCalendarEvents"
+import { mockAnnouncements } from "@/data/mockAnnouncements"
 
 const AUTH_KEY     = "cjpa_portal_user_id"
-const TEAM_KEY     = "cjpa_team_members_v2"
-const TASKS_KEY    = "cjpa_tasks_v1"
-const PROJECTS_KEY = "cjpa_projects_v2"   // bumped — re-seeds with clientId
-const CLIENTS_KEY  = "cjpa_clients_v3"    // bumped — re-seeds with new statuses + driveLink
-const CAL_KEY      = "cjpa_calendar_v1"
+const TEAM_KEY     = "cjpa_team_members_v4"
+const TASKS_KEY    = "cjpa_tasks_v2"
+const PROJECTS_KEY = "cjpa_projects_v5"
+const CLIENTS_KEY  = "cjpa_clients_v5"
+const CAL_KEY      = "cjpa_calendar_v2"
+const ANN_KEY      = "cjpa_announcements_v1"
 
 // ─── shared CalEvent type (used by context + calendar page) ───────────────────
 
@@ -31,6 +33,10 @@ export interface CalEvent {
   category?: string
   location?: string
   attendees?: string[]
+  isAllDay?: boolean
+  recurrenceId?: string
+  recurrenceLabel?: string
+  visibility?: "team"
 }
 
 // ─── role permission map ──────────────────────────────────────────────────────
@@ -101,6 +107,16 @@ function loadClients(): Client[] {
   return seed
 }
 
+function loadAnnouncements(): Announcement[] {
+  try {
+    const raw = localStorage.getItem(ANN_KEY)
+    if (raw) return JSON.parse(raw) as Announcement[]
+  } catch {}
+  const seed = [...mockAnnouncements]
+  localStorage.setItem(ANN_KEY, JSON.stringify(seed))
+  return seed
+}
+
 const CAT_COLOR: Record<string, string> = {
   "Client Call": "gold", "Meeting": "blue", "Deadline": "red",
   "Internal": "green", "Travel": "amber",
@@ -122,6 +138,8 @@ function seedEventToCalEvent(e: CalendarEvent): CalEvent {
     category:  e.type,
     location:  e.location,
     attendees: e.participants,
+    isAllDay:  e.isAllDay,
+    visibility: "team",
   }
 }
 
@@ -151,6 +169,7 @@ interface PortalContextValue {
   tasks:         Task[]
   projects:      Project[]
   clients:       Client[]
+  announcements: Announcement[]
   calendarEvents: CalEvent[]
   login:               (userId: string) => { success: boolean; error?: string }
   logout:              () => void
@@ -164,6 +183,8 @@ interface PortalContextValue {
   updateProject:       (id: string, updates: Partial<Project>) => void
   addClient:           (client: Client) => void
   updateClient:        (id: string, updates: Partial<Client>) => void
+  addAnnouncement:     (announcement: Announcement) => void
+  updateAnnouncement:  (id: string, updates: Partial<Announcement>) => void
   addCalendarEvent:    (event: CalEvent) => void
   updateCalendarEvent: (id: string, updates: Partial<CalEvent>) => void
   deleteCalendarEvent: (id: string) => void
@@ -181,6 +202,7 @@ export function PortalProvider({ children }: { children: React.ReactNode }) {
   const [tasks,          setTasks]         = useState<Task[]>([])
   const [projects,       setProjects]      = useState<Project[]>([])
   const [clients,        setClients]       = useState<Client[]>([])
+  const [announcements,  setAnnouncements] = useState<Announcement[]>([])
   const [calendarEvents, setCalendarEvents] = useState<CalEvent[]>([])
 
   useEffect(() => {
@@ -190,6 +212,7 @@ export function PortalProvider({ children }: { children: React.ReactNode }) {
     setTasks(loadTasks())
     setProjects(loadProjects())
     setClients(loadClients())
+    setAnnouncements(loadAnnouncements())
     setCalendarEvents(loadCalEvents())
 
     const storedId = localStorage.getItem(AUTH_KEY)
@@ -216,6 +239,7 @@ export function PortalProvider({ children }: { children: React.ReactNode }) {
     setTasks(loadTasks())
     setProjects(loadProjects())
     setClients(loadClients())
+    setAnnouncements(loadAnnouncements())
     setCalendarEvents(loadCalEvents())
     return { success: true }
   }, [])
@@ -324,6 +348,20 @@ export function PortalProvider({ children }: { children: React.ReactNode }) {
     setClients(updated)
   }, [])
 
+  const addAnnouncement = useCallback((announcement: Announcement) => {
+    const current = loadAnnouncements()
+    const updated = [announcement, ...current]
+    localStorage.setItem(ANN_KEY, JSON.stringify(updated))
+    setAnnouncements(updated)
+  }, [])
+
+  const updateAnnouncement = useCallback((id: string, updates: Partial<Announcement>) => {
+    const current = loadAnnouncements()
+    const updated = current.map((a) => a.id === id ? { ...a, ...updates } : a)
+    localStorage.setItem(ANN_KEY, JSON.stringify(updated))
+    setAnnouncements(updated)
+  }, [])
+
   // ── calendar management ──
 
   const addCalendarEvent = useCallback((event: CalEvent) => {
@@ -349,12 +387,13 @@ export function PortalProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <PortalContext.Provider value={{
-      user, isLoading, teamMembers, isAdmin, tasks, projects, clients, calendarEvents,
+      user, isLoading, teamMembers, isAdmin, tasks, projects, clients, announcements, calendarEvents,
       login, logout, hasPermission,
       addTeamMember, removeTeamMember, updateTeamMember,
       addTask, updateTaskStatus,
       addProject, updateProject,
       addClient, updateClient,
+      addAnnouncement, updateAnnouncement,
       addCalendarEvent, updateCalendarEvent, deleteCalendarEvent,
     }}>
       {children}

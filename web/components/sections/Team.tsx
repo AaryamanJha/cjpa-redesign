@@ -56,9 +56,9 @@ export function Team() {
               className="font-serif text-[#F5F1E8] font-light leading-[1.06]"
               style={{ fontSize: "clamp(38px, 5vw, 64px)" }}
             >
-              Senior Practitioners,
+              Advisors, Analysts,
               <br />
-              <em className="not-italic text-[#F5F1E8]/80">Not Consultants</em>
+              <em className="not-italic text-[#F5F1E8]/80">and Global Specialists</em>
             </motion.h2>
           </div>
 
@@ -69,9 +69,9 @@ export function Team() {
             className="text-[#A8B0C0] font-sans font-light leading-[1.8] max-w-sm lg:text-right"
             style={{ fontSize: "15px" }}
           >
-            Every engagement is led by a principal — a former senior government
-            official, central banker, or institutional leader — not delegated to
-            junior analysts.
+            CJPA brings together senior consultants, advisors, analysts, legal
+            counsel, technology specialists, and regional experts across Asia,
+            Africa, the Caribbean, Europe, and the United States.
           </motion.p>
         </div>
 

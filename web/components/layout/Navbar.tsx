@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import Link from "next/link"
 import { motion, AnimatePresence } from "framer-motion"
 import { Menu, X } from "lucide-react"
+import { ThemeToggle } from "@/components/theme/ThemeToggle"
 
 const NAV_LINKS = [
   { label: "About",        id: "about"        },
@@ -76,7 +77,8 @@ export function Navbar() {
         </div>
 
         {/* Desktop CTA */}
-        <div className="hidden lg:flex items-center shrink-0">
+        <div className="hidden lg:flex items-center gap-3 shrink-0">
+          <ThemeToggle compact />
           <Link
             href="/login"
             className="uppercase font-sans font-medium tracking-[0.16em] text-[#C8A96A] border border-[#C8A96A]/35 hover:border-[#C8A96A]/70 hover:bg-[#C8A96A]/6 px-4 py-2.5 transition-all duration-300 cursor-pointer"
@@ -125,6 +127,9 @@ export function Navbar() {
               >
                 Client Portal
               </Link>
+              <div className="pt-1">
+                <ThemeToggle />
+              </div>
             </div>
           </motion.div>
         )}

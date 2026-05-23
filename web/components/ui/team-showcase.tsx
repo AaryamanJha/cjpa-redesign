@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { FaLinkedinIn } from "react-icons/fa"
 import { cn } from "@/lib/utils"
+import { publicTeamMembers } from "@/data/teamMembers"
 
 export interface TeamMember {
   id: string
@@ -14,44 +15,15 @@ export interface TeamMember {
   linkedin?: string
 }
 
-const CJPA_TEAM: TeamMember[] = [
-  {
-    id: "1",
-    name: "Carlton J. Porter",
-    role: "Founder & Chairman",
-    region: "Washington, D.C.",
-    image: "",
-    bio: "Former Deputy Secretary of State and Senior Director, National Security Council.",
-    linkedin: "#",
-  },
-  {
-    id: "2",
-    name: "Dr. Amara Singh",
-    role: "Managing Director",
-    region: "London",
-    image: "",
-    bio: "Former Senior Economist, International Monetary Fund.",
-    linkedin: "#",
-  },
-  {
-    id: "3",
-    name: "James Whitmore",
-    role: "Senior Advisor, Capital Markets",
-    region: "New York",
-    image: "",
-    bio: "Former Managing Director, Goldman Sachs International.",
-    linkedin: "#",
-  },
-  {
-    id: "4",
-    name: "Dr. Elena Marchetti",
-    role: "Director, European Affairs",
-    region: "Geneva",
-    image: "",
-    bio: "Former senior official, EU External Action Service.",
-    linkedin: "#",
-  },
-]
+const CJPA_TEAM: TeamMember[] = publicTeamMembers.map((member) => ({
+  id: member.id,
+  name: member.name,
+  role: member.publicRole,
+  region: member.region,
+  image: member.image,
+  bio: member.bio,
+  linkedin: member.linkedin,
+}))
 
 interface TeamShowcaseProps {
   members?: TeamMember[]
@@ -137,7 +109,8 @@ function PhotoCard({
     .slice(0, 2)
     .map((part) => part[0])
     .join("")
-  const tone = Number(member.id) % 2 === 0 ? "135deg" : "45deg"
+  const hash = member.id.split("").reduce((sum, char) => sum + char.charCodeAt(0), 0)
+  const tone = hash % 2 === 0 ? "135deg" : "45deg"
 
   return (
     <div
@@ -161,17 +134,27 @@ function PhotoCard({
             : "grayscale(1) brightness(0.65)",
         }}
       >
+        {member.image ? (
+          <img
+            src={member.image}
+            alt={member.name}
+            className="absolute inset-0 h-full w-full object-cover"
+            loading="lazy"
+          />
+        ) : (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <span
+              className="font-serif text-[#F5F1E8]/85"
+              style={{ fontSize: "clamp(28px, 4vw, 48px)", letterSpacing: "0.08em" }}
+            >
+              {initials}
+            </span>
+          </div>
+        )}
+        <div className="absolute inset-0 bg-[#070B14]/10 mix-blend-multiply" />
         <div className="absolute inset-x-4 top-4 h-px bg-[#C8A96A]/35" />
         <div className="absolute left-4 top-8 bottom-4 w-px bg-[#F5F1E8]/10" />
         <div className="absolute right-4 bottom-4 h-10 w-10 border border-[#C8A96A]/25" />
-        <div className="absolute inset-0 flex items-center justify-center">
-          <span
-            className="font-serif text-[#F5F1E8]/85"
-            style={{ fontSize: "clamp(28px, 4vw, 48px)", letterSpacing: "0.08em" }}
-          >
-            {initials}
-          </span>
-        </div>
       </div>
     </div>
   )

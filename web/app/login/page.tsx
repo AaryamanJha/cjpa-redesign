@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
 import { ArrowRight, AlertCircle, Shield } from "lucide-react"
 import { usePortal } from "@/contexts/PortalContext"
+import { portalUsers } from "@/data/portalUsers"
 
 export default function LoginPage() {
   const { user, login } = usePortal()
@@ -166,22 +167,15 @@ export default function LoginPage() {
               Dev: Available Portal IDs
             </summary>
             <div className="px-4 py-3 border-t border-[#C8A96A]/10 space-y-1.5">
-              {[
-                ["carltonporter", "Carlton J. Porter - CEO"],
-                ["amarasingh", "Dr. Amara Singh - Managing Director"],
-                ["jameswhitmore", "James Whitmore - Senior Advisor"],
-                ["marcusreid", "Marcus Reid - Senior Associate"],
-                ["priyamenon", "Priya Menon - Research Analyst"],
-                ["thomasosei", "Thomas Osei - Intern Analyst"],
-              ].map(([id, label]) => (
+              {portalUsers.slice(0, 12).map((member) => (
                 <button
-                  key={id}
+                  key={member.id}
                   type="button"
-                  onClick={() => setPortalId(id)}
+                  onClick={() => setPortalId(member.id)}
                   className="block w-full text-left text-[#A8B0C0]/70 hover:text-[#C8A96A] font-sans transition-colors"
                   style={{ fontSize: "12px" }}
                 >
-                  <span className="text-[#C8A96A]/70">{id}</span> - {label}
+                  <span className="text-[#C8A96A]/70">{member.id}</span> - {member.name} - {member.title}
                 </button>
               ))}
             </div>

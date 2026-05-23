@@ -79,7 +79,7 @@ export function Hero() {
                 >
                   Geopolitical Intelligence
                   <span className="mx-2 opacity-50">·</span>
-                  Capital Strategy
+                  Capital & Resources
                 </span>
               </div>
             </FadeUp>
@@ -90,10 +90,10 @@ export function Hero() {
                 className="font-serif text-[#F5F1E8] font-light leading-[1.06]"
                 style={{ fontSize: "clamp(48px, 7vw, 88px)" }}
               >
-                Strategic Advisory
+                Connecting Global Insight,
                 <br />
                 <em className="font-light not-italic text-[#F5F1E8]/90">
-                  For a Complex World
+                  People, Capital & Resources
                 </em>
               </h1>
             </FadeUp>
@@ -104,9 +104,10 @@ export function Hero() {
                 className="text-[#A8B0C0] font-sans font-light leading-relaxed max-w-lg"
                 style={{ fontSize: "15px", lineHeight: "1.75" }}
               >
-                CJPA Global Advisors provides senior counsel at the intersection
-                of capital strategy, geopolitical intelligence, and cross-border
-                policy — serving governments, institutions, and private capital.
+                CJPA Global Advisors provides data-driven scenario planning,
+                strategic advisory, geopolitical analysis, and capital access for
+                clients navigating global markets, infrastructure opportunities,
+                supply chain risk, and cross-border expansion.
               </p>
             </FadeUp>
 
@@ -158,7 +159,7 @@ export function Hero() {
               />
               <GlobeInteractive className="w-full" />
 
-              {/* Location tag — Washington DC */}
+              {/* Location tag */}
               <div
                 className="absolute bottom-[18%] right-[8%] flex items-center gap-1.5 pointer-events-none"
                 style={{ opacity: 0.7 }}
@@ -168,7 +169,7 @@ export function Hero() {
                   className="text-[#C8A96A] font-sans font-light uppercase"
                   style={{ fontSize: "8px", letterSpacing: "0.2em" }}
                 >
-                  Washington, D.C.
+                  New York City
                 </span>
               </div>
             </div>

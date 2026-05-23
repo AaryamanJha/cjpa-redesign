@@ -58,6 +58,7 @@ export default function CalendarPage() {
   const displayEvents = myTasksOnly ? myTaskEvents : allEvents
 
   function handleCreate(event: CalEvent) {
+    setMyTasksOnly(false)
     addCalendarEvent(event)
   }
 

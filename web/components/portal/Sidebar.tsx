@@ -116,8 +116,19 @@ export function Sidebar() {
       {/* User footer */}
       {user && open && (
         <div className="px-4 py-4 border-t border-[#C8A96A]/10 space-y-2">
-          <p className="font-sans font-medium text-[#F5F1E8] truncate" style={{ fontSize: "13px" }}>{user.name}</p>
-          <p className="font-sans text-[#A8B0C0] truncate" style={{ fontSize: "12px" }}>{user.title}</p>
+          <div className="flex items-center gap-3">
+            {user.image && (
+              <img
+                src={user.image}
+                alt={user.name}
+                className="h-9 w-9 rounded-sm object-cover ring-1 ring-[#C8A96A]/25"
+              />
+            )}
+            <div className="min-w-0">
+              <p className="font-sans font-medium text-[#F5F1E8] truncate" style={{ fontSize: "13px" }}>{user.name}</p>
+              <p className="font-sans text-[#A8B0C0] truncate" style={{ fontSize: "12px" }}>{user.title}</p>
+            </div>
+          </div>
           <RoleBadge role={user.role} size="sm" />
           <button
             onClick={logout}

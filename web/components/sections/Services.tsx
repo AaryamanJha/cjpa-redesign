@@ -16,39 +16,39 @@ const EASE = [0.25, 0.1, 0.25, 1] as const
 const SERVICES = [
   {
     icon: Globe2,
-    title: "Geopolitical Intelligence & Risk",
+    title: "Research & Risk Analysis",
     description:
-      "Senior-level assessment of political, regulatory, and security environments across emerging and frontier markets, drawn from direct government experience.",
+      "Customized research reports for multinational clients exploring new markets, with emphasis on trade policy, geopolitical risk, macro trends, tariffs, domestic policy impact, ESG, and values-based investing.",
   },
   {
     icon: BarChart2,
-    title: "Capital Strategy & Investment Advisory",
+    title: "Venture Capital & Project Finance",
     description:
-      "Structuring and advising complex cross-border investments with command of political economy, sovereign risk, and the full architecture of international capital markets.",
+      "Connecting high-quality infrastructure projects with venture capitalists, individual investors, family offices, RIAs, and development finance institutions.",
   },
   {
     icon: Landmark,
-    title: "Government & Policy Relations",
+    title: "Infrastructure & Renewable Energy",
     description:
-      "Engagement with governments, regulatory bodies, and multilateral institutions at principal level on behalf of corporate and private capital clients.",
+      "Capital and advisory support for infrastructure opportunities across renewable energy, solar, battery projects, 5G, green hydrogen, lithium iron phosphate, and construction robotics.",
   },
   {
     icon: ArrowLeftRight,
-    title: "Cross-Border Transactions",
+    title: "Market Entry Strategy",
     description:
-      "Specialist advisory on international M&A, foreign investment review, and jurisdictional complexity in high-stakes cross-border transactions.",
+      "Guidance for foreign companies entering the U.S. market, including market dynamics, regulatory requirements, competitive landscapes, and integration strategy.",
   },
   {
     icon: Shield,
-    title: "Crisis & Reputational Counsel",
+    title: "Consulting for Multinationals & Governments",
     description:
-      "Confidential strategic counsel to organizations navigating regulatory, political, reputational, or operational crises across international jurisdictions.",
+      "Strategic intelligence for organizations investing in China or the Indo-Pacific, along with grant support, fundraising, board development, and ESG policy guidance.",
   },
   {
     icon: BookOpen,
-    title: "Institutional Partnerships",
+    title: "Training & Financial Literacy",
     description:
-      "Long-term advisory relationships with sovereign governments and institutions building strategic policy, intelligence, and financial capabilities.",
+      "Workshops for nonprofits, government agencies, student organizations, and businesses on asset allocation, risk tolerance, retirement saving, crypto due diligence, and values-based investing.",
   },
 ]
 
@@ -143,7 +143,7 @@ export function Services() {
             className="font-serif text-[#F5F1E8] font-light leading-[1.06]"
             style={{ fontSize: "clamp(38px, 5vw, 64px)" }}
           >
-            Our Practice Areas
+            Our Services
           </motion.h2>
         </div>
 

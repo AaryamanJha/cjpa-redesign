@@ -1,88 +1,69 @@
-// PROTOTYPE ONLY — not production authentication
-// These are mock users with local state. No real auth, no passwords, no session tokens.
-// Future version: replace with real auth (Clerk, Auth.js, or Microsoft Entra ID).
+// PROTOTYPE ONLY: localStorage-backed portal users. No real auth, passwords, or sessions.
+// Future version: replace with production authentication before using real credentials.
 
-import { PortalUser } from "@/types/portal"
+import { PortalRole, PortalUser } from "@/types/portal"
+import { teamMembers } from "@/data/teamMembers"
 
-export const portalUsers: PortalUser[] = [
-  {
-    id: "carltonporter",
-    name: "Carlton J. Porter",
-    title: "Chief Executive Officer",
-    role: "CEO",
-    permissions: ["all"],
-  },
-  {
-    id: "amarasingh",
-    name: "Dr. Amara Singh",
-    title: "Managing Director",
-    role: "Senior Advisor",
-    permissions: [
-      "view_all_projects",
-      "assign_tasks",
-      "manage_calendar",
-      "view_clients",
-      "add_group_meeting",
-      "upload_deliverables",
-      "review_project_progress",
-      "manage_team",
-    ],
-  },
-  {
-    id: "jameswhitmore",
-    name: "James Whitmore",
-    title: "Senior Advisor, Capital Markets",
-    role: "Advisor",
-    permissions: [
-      "view_projects",
-      "assign_tasks",
-      "manage_own_calendar",
-      "add_project_notes",
-      "update_project_status",
-      "view_relevant_clients",
-    ],
-  },
-  {
-    id: "marcusreid",
-    name: "Marcus Reid",
-    title: "Senior Associate",
-    role: "Associate",
-    permissions: [
-      "view_assigned_projects",
-      "update_tasks",
-      "manage_own_calendar",
-      "add_research_notes",
-      "upload_working_files",
-    ],
-  },
-  {
-    id: "priyamenon",
-    name: "Priya Menon",
-    title: "Research Analyst",
-    role: "Analyst",
-    permissions: [
-      "view_assigned_projects",
-      "update_tasks",
-      "manage_own_calendar",
-      "add_research_notes",
-      "view_deadlines",
-      "view_group_meetings",
-    ],
-  },
-  {
-    id: "thomasosei",
-    name: "Thomas Osei",
-    title: "Intern Analyst",
-    role: "Intern Analyst",
-    permissions: [
-      "view_assigned_tasks",
-      "update_tasks",
-      "manage_own_calendar",
-      "add_research_notes",
-      "view_deadlines",
-    ],
-  },
-]
+const ROLE_PERMISSIONS: Record<PortalRole, string[]> = {
+  CEO: ["all"],
+  "Senior Advisor": [
+    "view_all_projects",
+    "assign_tasks",
+    "manage_calendar",
+    "view_clients",
+    "add_group_meeting",
+    "upload_deliverables",
+    "review_project_progress",
+    "manage_team",
+  ],
+  Advisor: [
+    "view_projects",
+    "assign_tasks",
+    "manage_own_calendar",
+    "add_project_notes",
+    "update_project_status",
+    "view_relevant_clients",
+  ],
+  Associate: [
+    "view_assigned_projects",
+    "update_tasks",
+    "manage_own_calendar",
+    "add_research_notes",
+    "upload_working_files",
+  ],
+  Analyst: [
+    "view_assigned_projects",
+    "update_tasks",
+    "manage_own_calendar",
+    "add_research_notes",
+    "view_deadlines",
+    "view_group_meetings",
+  ],
+  "Intern Analyst": [
+    "view_assigned_tasks",
+    "update_tasks",
+    "manage_own_calendar",
+    "add_research_notes",
+    "view_deadlines",
+  ],
+}
+
+export const portalUsers: PortalUser[] = teamMembers
+  .filter((member) => member.portalEnabled)
+  .map((member) => ({
+    id: member.id,
+    name: member.name,
+    title: member.title,
+    role: member.portalRole,
+    permissions: ROLE_PERMISSIONS[member.portalRole],
+    image: member.image,
+    bio: member.bio,
+    email: member.email,
+    region: member.region,
+    publicRole: member.publicRole,
+    group: member.group,
+    isPortalAdmin: member.isPortalAdmin,
+  }))
 
 export function findUser(id: string): PortalUser | undefined {
   return portalUsers.find((u) => u.id === id.toLowerCase().trim())

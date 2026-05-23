@@ -30,10 +30,10 @@ function Reveal({
 }
 
 const STATS = [
-  { value: "30+", label: "Years of senior government\n& institutional service" },
-  { value: "40+", label: "Governments engaged\nacross six continents" },
-  { value: "$50B+", label: "In cross-border transactions\nadvised" },
-  { value: "6", label: "Regional practice areas\nworldwide" },
+  { value: "25+", label: "Years of founder experience\nacross finance and global affairs" },
+  { value: "16+", label: "Years of senior China, Southeast Asia\nand U.S. operating experience" },
+  { value: "30+", label: "Years of legal and capital markets\nexperience on the advisory bench" },
+  { value: "6", label: "Core specializations across risk,\ntrade, ESG, and financial literacy" },
 ]
 
 export function About() {
@@ -77,10 +77,10 @@ export function About() {
                 className="font-serif text-[#F5F1E8] font-light leading-[1.06]"
                 style={{ fontSize: "clamp(38px, 5vw, 64px)" }}
               >
-                Counsel Forged at the
+                Data-Driven Counsel for
                 <br />
                 <em className="not-italic text-[#F5F1E8]/85">
-                  Highest Levels of Global Affairs
+                  Global Market Complexity
                 </em>
               </h2>
             </Reveal>
@@ -92,10 +92,10 @@ export function About() {
                   className="text-[#A8B0C0] font-sans font-light leading-[1.85]"
                   style={{ fontSize: "16px" }}
                 >
-                  CJPA Global Advisors was founded on a singular conviction:
-                  that the decisions which shape capital flows, government policy,
-                  and cross-border strategy require counsel from those who have
-                  themselves operated at the apex of international affairs.
+                  CJPA Global Advisors is an international consulting and advisory
+                  company dedicated to data-driven scenario planning, strategic
+                  advisory, and geopolitical analysis for clients navigating the
+                  dynamics of globalization.
                 </p>
               </Reveal>
               <Reveal delay={0.28}>
@@ -103,11 +103,11 @@ export function About() {
                   className="text-[#A8B0C0] font-sans font-light leading-[1.85]"
                   style={{ fontSize: "16px" }}
                 >
-                  Our partners have held senior roles in the United States
-                  government, the International Monetary Fund, the World Bank,
-                  and leading global financial institutions. We bring that lived
-                  experience — and the networks it has built — to every
-                  engagement.
+                  The firm began as a global research unit and grew into a
+                  multidisciplinary consultancy informed by global finance, policy,
+                  and research best practices. CJPA helps clients understand major
+                  geopolitical events, cultural dynamics, and supply chain
+                  disruption risks.
                 </p>
               </Reveal>
             </div>
@@ -119,8 +119,7 @@ export function About() {
                   className="font-display text-[#F5F1E8]/80 font-normal italic leading-[1.5]"
                   style={{ fontSize: "clamp(20px, 2.4vw, 28px)" }}
                 >
-                  &ldquo;We advise where complexity is highest and conventional
-                  guidance falls short.&rdquo;
+                  &ldquo;Connecting global insight, people, capital, and resources.&rdquo;
                 </p>
               </blockquote>
             </Reveal>

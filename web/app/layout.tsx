@@ -45,6 +45,7 @@ export default function RootLayout({
       lang="en"
       data-scroll-behavior="smooth"
       className={`${cormorant.variable} ${playfair.variable} ${spaceGrotesk.variable} h-full`}
+      data-theme="dark"
     >
       <body className="min-h-full bg-[#070B14] flex flex-col">
         {children}

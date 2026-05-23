@@ -2,33 +2,33 @@ import { Announcement } from "@/types/portal"
 
 export const mockAnnouncements: Announcement[] = [
   {
-    id: "ann-001",
-    title: "Q2 Strategy Review — All Hands",
+    id: "ann-projects-may-2026",
+    title: "May 2026 Project Pipeline Loaded",
     message:
-      "All advisors and senior staff are required to attend the Q2 strategy review on June 3rd at 10:00 AM EST. The session will cover active mandates, pipeline status, and firm-wide priorities for the second half of 2026. Calendar invites have been issued.",
-    postedBy: "Carlton J. Porter",
-    date: "2026-05-16",
+      "The portal now reflects the May 2026 project list: September book release, monthly newsletter, social growth, contracted symposium, thought leadership, and William Adjei project finance pipeline. Please review assignments and flag any scope gaps.",
+    postedBy: "Earl Carr",
+    date: "2026-05-22",
     priority: "Important",
     audience: "All Team",
   },
   {
-    id: "ann-002",
-    title: "New Engagement: Gulf Sovereign Fund — Phase II Scope Confirmed",
+    id: "ann-infra-diligence",
+    title: "Infrastructure Fund Pipeline Requires First-Pass Diligence",
     message:
-      "Phase II of the Gulf Sovereign Capital Redeployment mandate has been formally confirmed. Scope includes portfolio stress-testing and regulatory pre-clearance review for the EU corridor. Project team to coordinate with James Whitmore directly for role assignments.",
-    postedBy: "Dr. Amara Singh",
-    date: "2026-05-14",
-    priority: "Standard",
-    audience: "Advisors",
+      "Associates and analysts should prioritize the infrastructure fund diligence matrix across SunTerra, Renouvo, Draper International, ZamGrow, Belize RFP, Coaqua, Bridgeway Advisors, Hiely's, Taoyuan government, and Spectrum Robotics.",
+    postedBy: "Earl Carr",
+    date: "2026-05-22",
+    priority: "Urgent",
+    audience: "Project Team",
   },
   {
-    id: "ann-003",
-    title: "Updated Deliverable Submission Protocol",
+    id: "ann-portal-prototype",
+    title: "Prototype Portal Reminder",
     message:
-      "Effective immediately, all client-ready deliverables must be uploaded to the project folder at least 48 hours before the scheduled client presentation. Internal review requests should be submitted through the portal task system. Please update any active timelines accordingly.",
-    postedBy: "Carlton J. Porter",
-    date: "2026-05-10",
-    priority: "Urgent",
+      "This portal remains a prototype. Login IDs, team data, project records, and task assignments are stored locally in the browser and are not production authentication or a secure document system.",
+    postedBy: "Earl Carr",
+    date: "2026-05-22",
+    priority: "Standard",
     audience: "All Team",
   },
 ]

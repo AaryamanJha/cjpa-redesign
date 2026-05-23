@@ -8,17 +8,17 @@ import { LiquidButton } from "@/components/ui/liquid-glass-button"
 const EASE = [0.25, 0.1, 0.25, 1] as const
 
 const OFFICES = [
-  { city: "Washington, D.C.", address: "1050 Connecticut Avenue NW", role: "Global Headquarters" },
-  { city: "London", address: "10 St James's Square", role: "European Operations" },
-  { city: "Geneva", address: "Rue de la Paix 1", role: "International Affairs" },
-  { city: "Singapore", address: "Marina Bay Financial Centre", role: "Asia-Pacific" },
+  { city: "New York", address: "45 Rockefeller Plaza, New York, NY 10111", role: "Headquarters" },
+  { city: "Global Network", address: "Asia-Pacific, Caribbean, Europe, Africa", role: "Subject-Matter Experts" },
 ]
 
 const INQUIRY_TYPES = [
-  "Strategic Mandate",
-  "Principal Advisory Retainer",
-  "Transaction Intelligence",
-  "Institutional Partnership",
+  "Venture Capital",
+  "Research and Risk Analysis",
+  "Infrastructure and Renewable Energy",
+  "Training and Financial Literacy",
+  "Consulting",
+  "Market Entry Strategy",
   "Other",
 ]
 
@@ -106,9 +106,9 @@ export function Contact() {
             className="text-[#A8B0C0] font-sans font-light leading-[1.8] max-w-xl"
             style={{ fontSize: "15px" }}
           >
-            All engagements begin with a confidential discussion. We do not accept
-            speculative inquiries. Please describe the nature of your organization
-            and the challenge you are navigating.
+            To help us best serve your inquiry, describe the issue you are
+            navigating and what you want to achieve. You may also email or call
+            to make an appointment.
           </motion.p>
         </div>
 
@@ -125,7 +125,7 @@ export function Contact() {
                 className="text-[#A8B0C0]/50 font-sans font-light uppercase mb-8"
                 style={{ fontSize: "8px", letterSpacing: "0.3em" }}
               >
-                Regional Offices
+                Contact
               </p>
               <div className="flex flex-col gap-7">
                 {OFFICES.map((office) => (
@@ -164,7 +164,9 @@ export function Contact() {
                 className="text-[#A8B0C0] font-sans font-light"
                 style={{ fontSize: "14px" }}
               >
-                inquiries@cjpa.us
+                info@cjpa.us
+                <br />
+                (646) 428-5382
               </p>
             </div>
           </motion.div>
@@ -188,8 +190,8 @@ export function Contact() {
                   className="text-[#A8B0C0] font-sans font-light leading-[1.8]"
                   style={{ fontSize: "14px" }}
                 >
-                  A principal will review your message and respond within two business
-                  days. All communications are treated as strictly confidential.
+                  A member of the CJPA team will review your message and respond
+                  within one business day.
                 </p>
               </div>
             ) : (

@@ -32,6 +32,15 @@ const REGION_DOT: Record<string, string> = {
 }
 
 const REGIONS = [
+  "New York, Global",
+  "United States",
+  "Global Emerging Markets",
+  "Belize, Caribbean",
+  "Taiwan",
+  "Taiwan and United States",
+  "Latin America",
+  "Germany",
+  "Africa",
   "East Africa",
   "Gulf Cooperation Council",
   "European Union",
@@ -151,8 +160,8 @@ function ClientFormFields({ form, setField, errors, today }: {
         <Textarea placeholder="Background, sensitivities, context..." value={form.notes} onChange={(e) => setField("notes", e.target.value)} rows={3} />
       </Field>
 
-      <Field label="Google Drive Folder Link">
-        <Input type="url" placeholder="https://drive.google.com/drive/folders/..." value={form.driveLink} onChange={(e) => setField("driveLink", e.target.value)} />
+      <Field label="Source or Folder Link">
+        <Input placeholder="/portal/cjpa-projects-may-2026.pdf or https://drive.google.com/..." value={form.driveLink} onChange={(e) => setField("driveLink", e.target.value)} />
       </Field>
     </div>
   )
@@ -334,14 +343,14 @@ function ClientPanel({ client, onClose, onEdit, linkedProjects }: {
           {client.driveLink && (
             <>
               <div className="h-px bg-[rgba(200,169,106,0.10)]" />
-              <PanelSection label="Drive Folder">
+              <PanelSection label="Source / Folder">
                 <a
                   href={client.driveLink}
-                  target="_blank"
+                  target={client.driveLink.startsWith("/") ? undefined : "_blank"}
                   rel="noopener noreferrer"
                   className="text-[13px] text-[#C8A96A] hover:underline break-all"
                 >
-                  Open in Google Drive
+                  Open source document
                 </a>
               </PanelSection>
             </>

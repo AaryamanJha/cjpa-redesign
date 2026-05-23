@@ -14,7 +14,7 @@ interface GlobeInteractiveProps {
 }
 
 const CJPA_MARKERS: GlobeMarker[] = [
-  { location: [38.9, -77.0], size: 0.04 },    // Washington DC
+  { location: [40.7128, -74.006], size: 0.04 }, // New York City
   { location: [51.5, -0.12], size: 0.035 },   // London
   { location: [25.2, 55.27], size: 0.032 },   // Dubai
   { location: [1.35, 103.82], size: 0.03 },   // Singapore
@@ -76,6 +76,12 @@ export function GlobeInteractive({
     let globe: ReturnType<typeof createGlobe> | null = null
     let animationId: number
     let phi = 1.5
+    const handleContextLost = (event: Event) => {
+      event.preventDefault()
+      canvas.style.opacity = "0"
+    }
+
+    canvas.addEventListener("webglcontextlost", handleContextLost, false)
 
     function init() {
       if (!canvas || globe) return
@@ -140,6 +146,7 @@ export function GlobeInteractive({
     })
 
     return () => {
+      canvas.removeEventListener("webglcontextlost", handleContextLost)
       cancelAnimationFrame(frameId)
       if (animationId) cancelAnimationFrame(animationId)
       if (globe) globe.destroy()
@@ -153,6 +160,24 @@ export function GlobeInteractive({
         className="absolute inset-0 rounded-full"
         style={{ background: "#070B14" }}
       />
+
+      <div className="absolute inset-[4%] rounded-full overflow-hidden border border-[#3B82F6]/10">
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              "radial-gradient(circle at 52% 48%, rgba(59,130,246,0.14), rgba(7,11,20,0.18) 44%, rgba(7,11,20,0.95) 72%), radial-gradient(circle at 42% 50%, rgba(59,130,246,0.35) 0 1px, transparent 1.8px)",
+            backgroundSize: "100% 100%, 9px 9px",
+          }}
+        />
+        <div
+          className="absolute inset-0 rounded-full"
+          style={{
+            background:
+              "radial-gradient(circle at 18% 42%, rgba(200,169,106,0.9) 0 3px, transparent 3.5px), radial-gradient(circle at 48% 35%, rgba(200,169,106,0.85) 0 2.5px, transparent 3px), radial-gradient(circle at 68% 56%, rgba(200,169,106,0.75) 0 2px, transparent 2.5px)",
+          }}
+        />
+      </div>
 
       {/* Subtle gold ambient glow */}
       <div

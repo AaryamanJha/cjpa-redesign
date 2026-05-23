@@ -50,6 +50,119 @@ body {
   line-height: 1.6;
 }
 
+.theme-toggle {
+  color: #C8A96A;
+  border-color: rgba(200, 169, 106, 0.28);
+  background: rgba(7, 11, 20, 0.34);
+}
+
+.theme-toggle:hover {
+  border-color: rgba(200, 169, 106, 0.62);
+  background: rgba(200, 169, 106, 0.08);
+}
+
+html[data-theme="light"] body {
+  background: #F6F1E7;
+  color: #111827;
+}
+
+html[data-theme="light"] .bg-\[\#070B14\],
+html[data-theme="light"] .bg-\[\#0A1120\],
+html[data-theme="light"] .bg-\[\#0D1520\],
+html[data-theme="light"] .bg-\[\#0A0F1C\],
+html[data-theme="light"] .bg-\[\#101827\] {
+  background-color: #F6F1E7 !important;
+}
+
+html[data-theme="light"] .bg-\[\#111d2e\],
+html[data-theme="light"] .bg-\[\#111927\],
+html[data-theme="light"] .bg-\[\#16243a\],
+html[data-theme="light"] .bg-\[\#1a2535\] {
+  background-color: #E9DFC9 !important;
+}
+
+html[data-theme="light"] .text-\[\#F5F1E8\],
+html[data-theme="light"] .text-\[\#F5F1E8\]\/80,
+html[data-theme="light"] .text-\[\#F5F1E8\]\/85,
+html[data-theme="light"] .text-\[\#F5F1E8\]\/90,
+html[data-theme="light"] .text-white,
+html[data-theme="light"] .group-hover\:text-white:hover {
+  color: #111827 !important;
+}
+
+html[data-theme="light"] .text-\[\#A8B0C0\],
+html[data-theme="light"] .text-\[\#A8B0C0\]\/70,
+html[data-theme="light"] .text-\[\#A8B0C0\]\/60,
+html[data-theme="light"] .text-\[\#A8B0C0\]\/55,
+html[data-theme="light"] .text-\[\#A8B0C0\]\/50,
+html[data-theme="light"] .text-\[\#A8B0C0\]\/45,
+html[data-theme="light"] .text-\[\#A8B0C0\]\/40,
+html[data-theme="light"] .text-\[\#A8B0C0\]\/30 {
+  color: #4B5563 !important;
+}
+
+html[data-theme="light"] .border-\[\#C8A96A\]\/10,
+html[data-theme="light"] .border-\[\#C8A96A\]\/12,
+html[data-theme="light"] .border-\[\#C8A96A\]\/14,
+html[data-theme="light"] .border-\[\#C8A96A\]\/15,
+html[data-theme="light"] .border-\[\#C8A96A\]\/20,
+html[data-theme="light"] .border-\[\#C8A96A\]\/25,
+html[data-theme="light"] .border-\[\#C8A96A\]\/35,
+html[data-theme="light"] .border-\[\#C8A96A\]\/40 {
+  border-color: rgba(138, 111, 55, 0.28) !important;
+}
+
+html[data-theme="light"] .bg-\[\#C8A96A\]\/6,
+html[data-theme="light"] .bg-\[\#C8A96A\]\/8,
+html[data-theme="light"] .bg-\[\#C8A96A\]\/10,
+html[data-theme="light"] .bg-\[\#C8A96A\]\/12 {
+  background-color: rgba(138, 111, 55, 0.12) !important;
+}
+
+html[data-theme="light"] .theme-toggle {
+  color: #8A6F37;
+  border-color: rgba(138, 111, 55, 0.34);
+  background: rgba(255, 255, 255, 0.46);
+}
+
+html[data-theme="light"] [class*="text-[#F5F1E8"] {
+  color: #111827 !important;
+}
+
+html[data-theme="light"] [class*="text-[#A8B0C0"] {
+  color: #4B5563 !important;
+}
+
+html[data-theme="light"] [class*="bg-[#070B14"],
+html[data-theme="light"] [class*="bg-[#0D1520"],
+html[data-theme="light"] [class*="bg-[#0A0F1C"],
+html[data-theme="light"] [class*="bg-[#101827"] {
+  background-color: #F6F1E7 !important;
+}
+
+html[data-theme="light"] [class*="bg-[#0A1120"] {
+  background-color: #111827 !important;
+}
+
+html[data-theme="light"] [class*="hover:bg-[#101827"]:hover,
+html[data-theme="light"] [class*="hover:bg-[#0D1420"]:hover {
+  background-color: #ECE2D1 !important;
+}
+
+html[data-theme="light"] [class*="border-[#C8A96A"] {
+  border-color: rgba(138, 111, 55, 0.28) !important;
+}
+
+html[data-theme="light"] .fixed,
+html[data-theme="light"] .sticky {
+  backdrop-filter: blur(12px);
+}
+
+html[data-theme="light"] ::selection {
+  background: rgba(138, 111, 55, 0.18);
+  color: #111827;
+}
+
 ::selection {
   background: rgba(200, 169, 106, 0.18);
   color: #F5F1E8;

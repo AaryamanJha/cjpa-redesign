@@ -251,8 +251,8 @@ function EditProjectDialog({ open, onClose, project, onSave, clients, teamMember
             <Textarea value={form.keyDeliverables} onChange={(e) => set("keyDeliverables", e.target.value)} rows={4} placeholder="Political risk matrix&#10;Market entry framework&#10;Final report" />
           </Field>
 
-          <Field label="Google Drive Folder Link">
-            <Input type="url" value={form.driveLink} onChange={(e) => set("driveLink", e.target.value)} placeholder="https://drive.google.com/drive/folders/..." />
+          <Field label="Source or Folder Link">
+            <Input value={form.driveLink} onChange={(e) => set("driveLink", e.target.value)} placeholder="/portal/cjpa-projects-may-2026.pdf or https://drive.google.com/..." />
           </Field>
         </div>
 
@@ -370,15 +370,15 @@ function ProjectDetailPanel({ project, onClose, allTasks, onEdit }: {
 
         {project.driveLink && (
           <div>
-            <p className="text-[#A8B0C0] font-sans uppercase mb-2" style={{ fontSize: "10px", letterSpacing: "0.15em" }}>Drive Folder</p>
+            <p className="text-[#A8B0C0] font-sans uppercase mb-2" style={{ fontSize: "10px", letterSpacing: "0.15em" }}>Source / Folder</p>
             <a
               href={project.driveLink}
-              target="_blank"
+              target={project.driveLink.startsWith("/") ? undefined : "_blank"}
               rel="noopener noreferrer"
               className="font-sans text-[#C8A96A] hover:underline"
               style={{ fontSize: "13px" }}
             >
-              Open in Google Drive
+              Open source document
             </a>
           </div>
         )}

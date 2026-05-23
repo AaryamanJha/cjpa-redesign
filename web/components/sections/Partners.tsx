@@ -8,33 +8,33 @@ const EASE = [0.25, 0.1, 0.25, 1] as const
 const TRACKS = [
   {
     number: "01",
-    title: "Strategic Mandate",
+    title: "USITC",
     description:
-      "For organizations requiring focused, time-defined counsel on a specific challenge — regulatory clearance, market entry assessment, political risk evaluation, or preparation for high-stakes diplomatic engagement. We engage at principal level from day one.",
+      "Engagements and research connected to trade, competitiveness, market intelligence, and the policy questions shaping international commerce.",
   },
   {
     number: "02",
-    title: "Principal Advisory Retainer",
+    title: "International Career Advancement Program",
     description:
-      "An ongoing relationship providing sustained access to senior judgment across evolving political, regulatory, and capital market environments. Retainer clients benefit from priority access to our principals and continuous geopolitical intelligence.",
+      "A values-aligned network focused on representation, leadership, and widening access to international affairs careers.",
   },
   {
     number: "03",
-    title: "Transaction Intelligence",
+    title: "Augustus Global Investment",
     description:
-      "Embedded advisory support on cross-border transactions, foreign investment reviews, sovereign debt negotiations, and multi-jurisdictional M&A requiring geopolitical depth that conventional financial advisors cannot provide.",
+      "Investment partnership context for cross-border growth, infrastructure, and capital advisory opportunities.",
   },
 ]
 
 const CLIENT_TYPES = [
   "Sovereign Governments",
-  "Central Banks",
   "Multilateral Institutions",
-  "Development Finance",
-  "Global Asset Managers",
+  "Development Finance Institutions",
+  "Infrastructure Sponsors",
+  "Renewable Energy Developers",
   "Multinational Corporations",
-  "Private Equity & Infrastructure",
-  "Family Offices",
+  "Nonprofits & Foundations",
+  "Family Offices & RIAs",
 ]
 
 function TrackCard({

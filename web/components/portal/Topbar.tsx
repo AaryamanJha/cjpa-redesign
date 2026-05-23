@@ -3,6 +3,7 @@
 import { LogOut, Bell } from "lucide-react"
 import { usePortal } from "@/contexts/PortalContext"
 import { RoleBadge } from "./RoleBadge"
+import { ThemeToggle } from "@/components/theme/ThemeToggle"
 
 interface TopbarProps {
   title: string
@@ -32,6 +33,10 @@ export function Topbar({ title, subtitle }: TopbarProps) {
       {/* Right: user info */}
       {user && (
         <div className="flex items-center gap-4">
+          <ThemeToggle compact />
+
+          <div className="h-4 w-px bg-[#C8A96A]/15" />
+
           <button
             className="text-[#A8B0C0]/50 hover:text-[#A8B0C0] transition-colors"
             aria-label="Notifications"
@@ -50,6 +55,13 @@ export function Topbar({ title, subtitle }: TopbarProps) {
                 {user.title}
               </p>
             </div>
+            {user.image && (
+              <img
+                src={user.image}
+                alt={user.name}
+                className="h-9 w-9 rounded-sm object-cover ring-1 ring-[#C8A96A]/25"
+              />
+            )}
             <RoleBadge role={user.role} size="sm" />
           </div>
 
