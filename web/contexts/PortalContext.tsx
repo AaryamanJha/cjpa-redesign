@@ -70,7 +70,19 @@ const ROLE_PERMISSIONS: Record<PortalRole, string[]> = {
 function loadTeam(): PortalUser[] {
   try {
     const raw = localStorage.getItem(TEAM_KEY)
-    if (raw) return JSON.parse(raw) as PortalUser[]
+    if (raw) {
+      const stored = JSON.parse(raw) as PortalUser[]
+      const storedIds = new Set(stored.map((member) => member.id))
+      const missingSeedMembers = portalUsers.filter((member) => !storedIds.has(member.id))
+
+      if (missingSeedMembers.length > 0) {
+        const merged = [...stored, ...missingSeedMembers]
+        localStorage.setItem(TEAM_KEY, JSON.stringify(merged))
+        return merged
+      }
+
+      return stored
+    }
   } catch {}
   const seed = [...portalUsers]
   localStorage.setItem(TEAM_KEY, JSON.stringify(seed))

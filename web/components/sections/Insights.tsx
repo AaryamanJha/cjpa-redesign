@@ -38,6 +38,16 @@ const ARTICLES = [
 
 const PRESS = [
   {
+    publication: "Press Release",
+    headline: "CJPA Global Advisors attends BMO's 21st Annual Global Farm to Market | Chemicals Conference",
+    date: "May 14, 2026",
+    image: "/press/press-release-bank-montreal-1.png",
+    href: "/press/cjpa-bmo-2026-press-release.docx",
+    attachmentLabel: "Open release",
+    attachmentHref: "/press/cjpa-bmo-2026-press-release.docx",
+    attachmentType: "document",
+  },
+  {
     publication: "Hinrich Foundation",
     headline: "China's rising influence in the Caribbean through infrastructure and soft power",
     date: "June 2024",
@@ -176,9 +186,8 @@ export function Insights() {
             initial={{ opacity: 0, y: 16 }}
             animate={headerInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.7, ease: EASE }}
-            className="flex items-center gap-3 mb-8"
+            className="mb-8"
           >
-            <div className="h-px w-6 bg-[#C8A96A] opacity-50" />
             <span
               className="text-[#C8A96A] font-sans font-medium uppercase tracking-[0.3em]"
               style={{ fontSize: "11px" }}
@@ -232,7 +241,7 @@ export function Insights() {
 
             <div className="space-y-0">
               {PRESS.map((item, i) => {
-                const AttachmentIcon = item.attachmentType === "pdf" ? FileText : ImageIcon
+                const AttachmentIcon = item.attachmentType === "image" ? ImageIcon : FileText
 
                 return (
                 <motion.a
