@@ -35,6 +35,58 @@
   --font-sans: var(--font-space);
 }
 
+.cjpa-globe-pin {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: #C8A96A;
+  box-shadow: 0 0 0 5px rgba(200, 169, 106, 0.16);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 3;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  will-change: left, top, opacity;
+}
+
+.cjpa-globe-label {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transform: translate(13px, -50%);
+  pointer-events: none;
+  z-index: 4;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  will-change: left, top, opacity;
+}
+
+.cjpa-globe-label-line {
+  display: block;
+  width: 22px;
+  height: 1px;
+  background: rgba(200, 169, 106, 0.78);
+}
+
+.cjpa-globe-label-text {
+  display: block;
+  white-space: nowrap;
+  color: #C8A96A;
+  font-family: var(--font-sans), system-ui, sans-serif;
+  font-size: 8px;
+  font-weight: 300;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  text-shadow: 0 1px 8px rgba(7, 11, 20, 0.9);
+}
+
+
 html {
   scroll-behavior: smooth;
   scroll-padding-top: 88px; /* offset for fixed 80px navbar */

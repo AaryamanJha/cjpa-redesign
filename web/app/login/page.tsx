@@ -87,7 +87,7 @@ export default function LoginPage() {
               className="font-serif text-[#F5F1E8] font-light"
               style={{ fontSize: "clamp(24px, 2.5vw, 30px)" }}
             >
-              Client Portal Access
+              Portal Access
             </h1>
             <p className="mt-2 text-[#A8B0C0] font-sans" style={{ fontSize: "14px" }}>
               Enter your assigned Portal ID to continue.

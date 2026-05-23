@@ -103,10 +103,10 @@ function ArticleCard({
         <img
           src={article.image}
           alt=""
-          className="h-full w-full object-cover grayscale group-hover:grayscale-0 transition duration-500"
+          className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]"
           loading="lazy"
         />
-        <div className="absolute inset-0 bg-[#070B14]/25 group-hover:bg-transparent transition-colors duration-500" />
+        <div className="absolute inset-0 bg-[#070B14]/10 group-hover:bg-transparent transition-colors duration-500" />
       </div>
       <div className="flex items-center gap-3 mb-4">
         <span
@@ -249,7 +249,7 @@ export function Insights() {
                     <img
                       src={item.image}
                       alt=""
-                      className="h-full w-full object-cover grayscale group-hover:grayscale-0 transition duration-500"
+                      className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]"
                       loading="lazy"
                     />
                   </div>

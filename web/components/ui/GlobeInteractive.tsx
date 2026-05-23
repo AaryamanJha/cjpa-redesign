@@ -6,6 +6,7 @@ import createGlobe from "cobe"
 interface GlobeMarker {
   location: [number, number]
   size: number
+  id?: string
 }
 
 interface GlobeInteractiveProps {
@@ -14,7 +15,7 @@ interface GlobeInteractiveProps {
 }
 
 const CJPA_MARKERS: GlobeMarker[] = [
-  { location: [40.7128, -74.006], size: 0.04 }, // New York City
+  { location: [40.7128, -74.006], size: 0.052, id: "nyc" }, // New York City
   { location: [51.5, -0.12], size: 0.035 },   // London
   { location: [25.2, 55.27], size: 0.032 },   // Dubai
   { location: [1.35, 103.82], size: 0.03 },   // Singapore
@@ -23,6 +24,37 @@ const CJPA_MARKERS: GlobeMarker[] = [
   { location: [48.85, 2.35], size: 0.03 },    // Paris
   { location: [35.68, 139.65], size: 0.028 }, // Tokyo
 ]
+
+const NYC_LOCATION: [number, number] = [40.7128, -74.006]
+
+function locationToVector([lat, lng]: [number, number]) {
+  const latRad = (lat * Math.PI) / 180
+  const lngRad = (lng * Math.PI) / 180
+  const radius = Math.cos(latRad)
+  return [radius * Math.cos(lngRad), Math.sin(latRad), -radius * Math.sin(lngRad)]
+}
+
+function projectLocation(location: [number, number], phi: number, theta: number) {
+  const [x, y, z] = locationToVector(location)
+  const cosTheta = Math.cos(theta)
+  const sinTheta = Math.sin(theta)
+  const cosPhi = Math.cos(phi)
+  const sinPhi = Math.sin(phi)
+  const elevatedRadius = 0.85
+  const px = x * elevatedRadius
+  const py = y * elevatedRadius
+  const pz = z * elevatedRadius
+
+  const projectedX = cosPhi * px + sinPhi * pz
+  const projectedY = sinPhi * sinTheta * px + cosTheta * py - cosPhi * sinTheta * pz
+  const projectedZ = -sinPhi * cosTheta * px + sinTheta * py + cosPhi * cosTheta * pz
+
+  return {
+    x: ((projectedX + 1) / 2) * 100,
+    y: ((-projectedY + 1) / 2) * 100,
+    visible: projectedZ >= -0.06,
+  }
+}
 
 export function GlobeInteractive({
   className = "",
@@ -34,6 +66,8 @@ export function GlobeInteractive({
   const phiOffsetRef = useRef(0)
   const thetaOffsetRef = useRef(0)
   const isPausedRef = useRef(false)
+  const pinRef = useRef<HTMLDivElement>(null)
+  const labelRef = useRef<HTMLDivElement>(null)
 
   const handlePointerDown = useCallback((e: React.PointerEvent) => {
     pointerInteracting.current = { x: e.clientX, y: e.clientY }
@@ -75,7 +109,7 @@ export function GlobeInteractive({
 
     let globe: ReturnType<typeof createGlobe> | null = null
     let animationId: number
-    let phi = 1.5
+    let phi = -0.9
     const handleContextLost = (event: Event) => {
       event.preventDefault()
       canvas.style.opacity = "0"
@@ -99,7 +133,7 @@ export function GlobeInteractive({
         devicePixelRatio: Math.min(window.devicePixelRatio || 1, 2),
         width,
         height: width,
-        phi: 1.5,
+        phi: -0.9,
         theta: 0.18,
         dark: 1,
         diffuse: 1.2,
@@ -113,10 +147,24 @@ export function GlobeInteractive({
 
       const animate = () => {
         if (!isPausedRef.current) phi += speed
+        const currentPhi = phi + phiOffsetRef.current + dragOffset.current.phi
+        const currentTheta = 0.15 + thetaOffsetRef.current + dragOffset.current.theta
         globe?.update({
-          phi: phi + phiOffsetRef.current + dragOffset.current.phi,
-          theta: 0.15 + thetaOffsetRef.current + dragOffset.current.theta,
+          phi: currentPhi,
+          theta: currentTheta,
         })
+        const nyc = projectLocation(NYC_LOCATION, currentPhi, currentTheta)
+        const opacity = nyc.visible ? "1" : "0"
+        if (pinRef.current) {
+          pinRef.current.style.left = `${nyc.x}%`
+          pinRef.current.style.top = `${nyc.y}%`
+          pinRef.current.style.opacity = opacity
+        }
+        if (labelRef.current) {
+          labelRef.current.style.left = `${nyc.x}%`
+          labelRef.current.style.top = `${nyc.y}%`
+          labelRef.current.style.opacity = opacity
+        }
         animationId = requestAnimationFrame(animate)
       }
       animate()
@@ -205,6 +253,12 @@ export function GlobeInteractive({
         aria-label="Interactive globe showing CJPA global presence"
         role="img"
       />
+
+      <div ref={pinRef} className="cjpa-globe-pin" aria-hidden="true" />
+      <div ref={labelRef} className="cjpa-globe-label" aria-hidden="true">
+        <span className="cjpa-globe-label-line" />
+        <span className="cjpa-globe-label-text">New York City</span>
+      </div>
     </div>
   )
 }

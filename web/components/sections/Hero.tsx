@@ -158,20 +158,6 @@ export function Hero() {
                 }}
               />
               <GlobeInteractive className="w-full" />
-
-              {/* Location tag */}
-              <div
-                className="absolute bottom-[18%] right-[8%] flex items-center gap-1.5 pointer-events-none"
-                style={{ opacity: 0.7 }}
-              >
-                <div className="w-1 h-1 rounded-full bg-[#C8A96A]" />
-                <span
-                  className="text-[#C8A96A] font-sans font-light uppercase"
-                  style={{ fontSize: "8px", letterSpacing: "0.2em" }}
-                >
-                  New York City
-                </span>
-              </div>
             </div>
           </motion.div>
         </div>
