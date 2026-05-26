@@ -19,7 +19,7 @@ import { Topbar } from "@/components/portal/Topbar"
 import { RoleBadge } from "@/components/portal/RoleBadge"
 import { usePortal } from "@/contexts/PortalContext"
 import { mockAnnouncements } from "@/data/mockAnnouncements"
-import { TaskStatus, ProjectStatus } from "@/types/portal"
+import { TaskStatus, ProjectStatus, Project } from "@/types/portal"
 
 // ─── helpers ───────────────────────────────────────────────────────────────
 
@@ -233,6 +233,20 @@ const PROJECT_PRIORITY_RANK = {
   Low: 3,
 } as const
 
+function compareProjects(a: Project, b: Project) {
+  const aRanked = typeof a.rank === "number"
+  const bRanked = typeof b.rank === "number"
+
+  if (aRanked && bRanked && a.rank !== b.rank) return (a.rank as number) - (b.rank as number)
+  if (aRanked && !bRanked) return -1
+  if (!aRanked && bRanked) return 1
+
+  const priorityDelta = PROJECT_PRIORITY_RANK[a.priority] - PROJECT_PRIORITY_RANK[b.priority]
+  if (priorityDelta !== 0) return priorityDelta
+
+  return daysUntil(a.targetDeadline) - daysUntil(b.targetDeadline)
+}
+
 // ─── main ─────────────────────────────────────────────────────────────────
 
 export default function PortalOverview() {
@@ -259,11 +273,7 @@ export default function PortalOverview() {
   const activeProjects = useMemo(() =>
     myProjects
       .filter((p) => !["Delivered", "Archived"].includes(p.status))
-      .sort((a, b) => {
-        const priorityDelta = PROJECT_PRIORITY_RANK[a.priority] - PROJECT_PRIORITY_RANK[b.priority]
-        if (priorityDelta !== 0) return priorityDelta
-        return daysUntil(a.targetDeadline) - daysUntil(b.targetDeadline)
-      })
+      .sort(compareProjects)
       .slice(0, 4),
     [myProjects]
   )

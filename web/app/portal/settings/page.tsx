@@ -154,7 +154,7 @@ export default function SettingsPage() {
           <div className="py-4 space-y-3">
             <div className="flex items-center justify-between text-sm">
               <span className="text-[#A8B0C0]">Authentication method</span>
-              <span className="text-[#F5F1E8]/60 font-mono text-[12px]">localStorage (prototype)</span>
+              <span className="text-[#F5F1E8]/60 font-mono text-[12px]">CJPA ID mock + Supabase sync</span>
             </div>
             <div className="h-px bg-[rgba(200,169,106,0.06)]" />
             <button

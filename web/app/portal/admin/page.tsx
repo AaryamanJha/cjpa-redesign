@@ -256,7 +256,7 @@ export default function AdminPage() {
             <ShieldCheck size={14} className="text-[#C8A96A] shrink-0 mt-0.5" strokeWidth={1.5} />
             <p className="font-sans text-[#A8B0C0]" style={{ fontSize: "13px", lineHeight: 1.6 }}>
               <span className="text-[#C8A96A] font-medium">Prototype admin panel.</span>{" "}
-              Changes are stored in your browser&apos;s localStorage and shared across all accounts on this device.
+              Changes sync through Supabase when configured, with localStorage fallback on this device.
               In production, this connects to a real user directory.
             </p>
           </div>

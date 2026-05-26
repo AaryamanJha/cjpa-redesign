@@ -1,11 +1,11 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, type DragEvent } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { X, Users, Calendar, Target, ChevronRight, Pencil, Plus } from "lucide-react"
+import { X, Users, Calendar, Target, ChevronRight, Pencil, Plus, GripVertical } from "lucide-react"
 import { Topbar } from "@/components/portal/Topbar"
 import { usePortal } from "@/contexts/PortalContext"
-import { Project, ProjectStatus, PortalUser } from "@/types/portal"
+import { Project, ProjectStatus, PortalUser, ClientStatus } from "@/types/portal"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
@@ -42,6 +42,27 @@ const PRIORITY_RANK: Record<Project["priority"], number> = {
 }
 
 const ALL_STATUSES: ProjectStatus[] = ["Discovery", "Research", "Analysis", "Drafting", "Review", "Client Ready", "Delivered", "Archived"]
+
+function compareProjects(a: Project, b: Project) {
+  const aRanked = typeof a.rank === "number"
+  const bRanked = typeof b.rank === "number"
+
+  if (aRanked && bRanked && a.rank !== b.rank) return (a.rank as number) - (b.rank as number)
+  if (aRanked && !bRanked) return -1
+  if (!aRanked && bRanked) return 1
+
+  const priorityDelta = PRIORITY_RANK[a.priority] - PRIORITY_RANK[b.priority]
+  if (priorityDelta !== 0) return priorityDelta
+
+  const deadlineDelta = daysUntil(a.targetDeadline) - daysUntil(b.targetDeadline)
+  if (deadlineDelta !== 0) return deadlineDelta
+
+  return a.projectName.localeCompare(b.projectName)
+}
+
+function sortProjects(projects: Project[]) {
+  return [...projects].sort(compareProjects)
+}
 
 function daysUntil(dateStr: string) {
   const now = new Date()
@@ -127,13 +148,55 @@ function newProjectForm(teamMembers: PortalUser[]): EditForm {
   }
 }
 
-function projectFromForm(form: EditForm, clients: Client[]): Project {
+function slugFromName(name: string) {
+  return name.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "client"
+}
+
+function shortNameFromName(name: string) {
+  const cleaned = name.trim()
+  const initials = cleaned
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((part) => part[0])
+    .join("")
+    .slice(0, 5)
+    .toUpperCase()
+
+  return initials || cleaned.slice(0, 12) || "Client"
+}
+
+function clientFromProjectForm(form: EditForm, clients: Client[]): Client | null {
+  if (form.clientId || !form.clientName.trim()) return null
+
+  const name = form.clientName.trim()
+  const existing = clients.find((client) => client.name.toLowerCase() === name.toLowerCase())
+  if (existing) return existing
+
+  return {
+    id: `client-${slugFromName(name)}-${Date.now()}`,
+    name,
+    shortName: shortNameFromName(name),
+    industry: form.projectType.trim() || "Advisory",
+    region: "Global",
+    contactName: "",
+    contactTitle: "",
+    contactEmail: "",
+    linkedProjects: [],
+    status: "Proposal" as ClientStatus,
+    since: isoDateFromToday(),
+    notes: "Added from a new project. Update client details when available.",
+    driveLink: form.driveLink.trim() || undefined,
+  }
+}
+
+function projectFromForm(form: EditForm, clients: Client[], createdClient?: Client | null): Project {
   const selectedClient = clients.find((c) => c.id === form.clientId)
+  const linkedClient = selectedClient ?? createdClient
   return {
     id: `project-${Date.now()}`,
     projectName: form.projectName.trim(),
-    clientId: form.clientId || undefined,
-    clientName: selectedClient?.name ?? form.clientName.trim(),
+    clientId: linkedClient?.id,
+    clientName: linkedClient?.name ?? form.clientName.trim(),
     projectType: form.projectType.trim() || "General Advisory",
     lead: form.lead,
     team: form.team.filter((n) => n !== form.lead),
@@ -150,7 +213,7 @@ function projectFromForm(form: EditForm, clients: Client[]): Project {
 function AddProjectDialog({ open, onClose, onCreate, clients, teamMembers }: {
   open: boolean
   onClose: () => void
-  onCreate: (project: Project) => void
+  onCreate: (project: Project, createdClient?: Client | null) => void
   clients: Client[]
   teamMembers: PortalUser[]
 }) {
@@ -182,11 +245,12 @@ function AddProjectDialog({ open, onClose, onCreate, clients, teamMembers }: {
     const e = validate()
     if (Object.keys(e).length) { setErrors(e); return }
 
-    const project = projectFromForm(form, clients)
+    const createdClient = clientFromProjectForm(form, clients)
+    const project = projectFromForm(form, clients, createdClient)
     if (project.keyDeliverables.length === 0) {
       project.keyDeliverables = ["Project scope", "Workplan", "Client-ready deliverable"]
     }
-    onCreate(project)
+    onCreate(project, createdClient)
     setForm(newProjectForm(teamMembers))
     setErrors({})
     onClose()
@@ -621,21 +685,44 @@ function ProjectDetailPanel({ project, onClose, allTasks, onEdit }: {
 // ─── main page ────────────────────────────────────────────────────────────────
 
 export default function ProjectsPage() {
-  const { tasks, projects, clients, teamMembers, addProject, updateProject } = usePortal()
+  const { tasks, projects, clients, teamMembers, addProject, updateProject, addClient } = usePortal()
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [isAdding, setIsAdding] = useState(false)
   const [filterStatus, setFilterStatus] = useState<ProjectStatus | "All">("All")
+  const [draggedProjectId, setDraggedProjectId] = useState<string | null>(null)
+  const [dragOverProjectId, setDragOverProjectId] = useState<string | null>(null)
 
   const visibleProjects = useMemo(() => {
     let list = projects
     if (filterStatus !== "All") list = list.filter((p) => p.status === filterStatus)
-    return [...list].sort((a, b) => {
-      const priorityDelta = PRIORITY_RANK[a.priority] - PRIORITY_RANK[b.priority]
-      if (priorityDelta !== 0) return priorityDelta
-      return daysUntil(a.targetDeadline) - daysUntil(b.targetDeadline)
-    })
+    return sortProjects(list)
   }, [filterStatus, projects])
+
+  function handleProjectDrop(targetId: string) {
+    if (!draggedProjectId || draggedProjectId === targetId) {
+      setDraggedProjectId(null)
+      setDragOverProjectId(null)
+      return
+    }
+
+    const ranked = sortProjects(projects)
+    const fromIndex = ranked.findIndex((project) => project.id === draggedProjectId)
+    const toIndex = ranked.findIndex((project) => project.id === targetId)
+    if (fromIndex === -1 || toIndex === -1) return
+
+    const next = [...ranked]
+    const [moved] = next.splice(fromIndex, 1)
+    next.splice(toIndex, 0, moved)
+
+    next.forEach((project, index) => {
+      if (project.rank !== index + 1) updateProject(project.id, { rank: index + 1 })
+    })
+
+    setSelectedId(draggedProjectId)
+    setDraggedProjectId(null)
+    setDragOverProjectId(null)
+  }
 
   const selectedProject = projects.find((p) => p.id === selectedId) ?? null
   const editingProject  = projects.find((p) => p.id === editingId) ?? null
@@ -693,8 +780,36 @@ export default function ProjectsPage() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.06, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
                   onClick={() => setSelectedId(isSelected ? null : p.id)}
-                  className="text-left bg-[#0D1520] border rounded-sm p-5 transition-all cursor-pointer hover:border-[#C8A96A]/20"
-                  style={{ borderColor: isSelected ? "rgba(200,169,106,0.3)" : "rgba(200,169,106,0.10)" }}
+                  draggable
+                  onDragStart={(event) => {
+                    const dragEvent = event as unknown as DragEvent<HTMLButtonElement>
+                    setDraggedProjectId(p.id)
+                    dragEvent.dataTransfer.effectAllowed = "move"
+                    dragEvent.dataTransfer.setData("text/plain", p.id)
+                  }}
+                  onDragOver={(event) => {
+                    const dragEvent = event as unknown as DragEvent<HTMLButtonElement>
+                    event.preventDefault()
+                    dragEvent.dataTransfer.dropEffect = "move"
+                    setDragOverProjectId(p.id)
+                  }}
+                  onDrop={(event) => {
+                    event.preventDefault()
+                    handleProjectDrop(p.id)
+                  }}
+                  onDragEnd={() => {
+                    setDraggedProjectId(null)
+                    setDragOverProjectId(null)
+                  }}
+                  className="text-left bg-[#0D1520] border rounded-sm p-5 transition-all cursor-grab active:cursor-grabbing hover:border-[#C8A96A]/20"
+                  style={{
+                    borderColor: dragOverProjectId === p.id
+                      ? "rgba(200,169,106,0.55)"
+                      : isSelected
+                        ? "rgba(200,169,106,0.3)"
+                        : "rgba(200,169,106,0.10)",
+                    opacity: draggedProjectId === p.id ? 0.55 : 1,
+                  }}
                 >
                   <div className="flex items-start justify-between gap-3 mb-3">
                     <div className="flex items-center gap-2 flex-wrap">
@@ -702,6 +817,9 @@ export default function ProjectsPage() {
                         fontSize: "10px", letterSpacing: "0.1em", padding: "2px 7px",
                         background: "rgba(200,169,106,0.14)", color: "#C8A96A", border: "1px solid rgba(200,169,106,0.28)",
                       }}>#{i + 1}</span>
+                      <span className="inline-flex items-center text-[#A8B0C0]/35" aria-hidden="true">
+                        <GripVertical size={13} strokeWidth={1.5} />
+                      </span>
                       <span className="font-sans rounded-sm" style={{
                         fontSize: "10px", letterSpacing: "0.1em", padding: "2px 7px",
                         background: `${color}12`, color, border: `1px solid ${color}25`,
@@ -763,9 +881,13 @@ export default function ProjectsPage() {
           key="add-project"
           open={isAdding}
           onClose={() => setIsAdding(false)}
-          onCreate={(project) => {
-            addProject(project)
-            setSelectedId(project.id)
+          onCreate={(project, createdClient) => {
+            if (createdClient && !clients.some((client) => client.id === createdClient.id)) {
+              addClient({ ...createdClient, linkedProjects: [project.id] })
+            }
+            const nextProject = { ...project, rank: projects.length + 1 }
+            addProject(nextProject)
+            setSelectedId(nextProject.id)
           }}
           clients={clients}
           teamMembers={teamMembers}

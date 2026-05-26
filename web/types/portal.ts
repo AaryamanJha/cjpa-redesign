@@ -63,6 +63,7 @@ export interface Project {
   team: string[]
   status: ProjectStatus
   priority: "Low" | "Medium" | "High" | "Critical"
+  rank?: number
   startDate: string
   targetDeadline: string
   summary: string
