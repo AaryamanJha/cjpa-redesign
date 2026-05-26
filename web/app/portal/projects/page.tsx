@@ -34,6 +34,13 @@ const PRIORITY_COLOR: Record<string, string> = {
   Critical: "#FC8181",
 }
 
+const PRIORITY_RANK: Record<Project["priority"], number> = {
+  Critical: 0,
+  High: 1,
+  Medium: 2,
+  Low: 3,
+}
+
 const ALL_STATUSES: ProjectStatus[] = ["Discovery", "Research", "Analysis", "Drafting", "Review", "Client Ready", "Delivered", "Archived"]
 
 function daysUntil(dateStr: string) {
@@ -416,7 +423,11 @@ export default function ProjectsPage() {
   const visibleProjects = useMemo(() => {
     let list = projects
     if (filterStatus !== "All") list = list.filter((p) => p.status === filterStatus)
-    return list
+    return [...list].sort((a, b) => {
+      const priorityDelta = PRIORITY_RANK[a.priority] - PRIORITY_RANK[b.priority]
+      if (priorityDelta !== 0) return priorityDelta
+      return daysUntil(a.targetDeadline) - daysUntil(b.targetDeadline)
+    })
   }, [filterStatus, projects])
 
   const selectedProject = projects.find((p) => p.id === selectedId) ?? null

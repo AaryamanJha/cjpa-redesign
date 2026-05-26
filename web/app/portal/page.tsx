@@ -226,6 +226,13 @@ const FADE_UP: Variants = {
   }),
 }
 
+const PROJECT_PRIORITY_RANK = {
+  Critical: 0,
+  High: 1,
+  Medium: 2,
+  Low: 3,
+} as const
+
 // ─── main ─────────────────────────────────────────────────────────────────
 
 export default function PortalOverview() {
@@ -250,7 +257,14 @@ export default function PortalOverview() {
   )
 
   const activeProjects = useMemo(() =>
-    myProjects.filter((p) => !["Delivered", "Archived"].includes(p.status)).slice(0, 4),
+    myProjects
+      .filter((p) => !["Delivered", "Archived"].includes(p.status))
+      .sort((a, b) => {
+        const priorityDelta = PROJECT_PRIORITY_RANK[a.priority] - PROJECT_PRIORITY_RANK[b.priority]
+        if (priorityDelta !== 0) return priorityDelta
+        return daysUntil(a.targetDeadline) - daysUntil(b.targetDeadline)
+      })
+      .slice(0, 4),
     [myProjects]
   )
 
