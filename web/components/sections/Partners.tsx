@@ -107,9 +107,8 @@ export function Partners() {
               initial={{ opacity: 0, y: 16 }}
               animate={headerInView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.7, ease: EASE }}
-              className="flex items-center gap-3 mb-8"
+              className="mb-8"
             >
-              <div className="h-px w-6 bg-[#C8A96A] opacity-50" />
               <span
                 className="text-[#C8A96A] font-sans font-medium uppercase tracking-[0.3em]"
                 style={{ fontSize: "11px" }}

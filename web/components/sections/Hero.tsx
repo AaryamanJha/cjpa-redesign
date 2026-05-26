@@ -71,15 +71,12 @@ export function Hero() {
           <div className="flex flex-col justify-center gap-8 lg:py-24">
             {/* Eyebrow */}
             <FadeUp delay={0.1}>
-              <div className="flex items-center gap-3">
-                <div className="h-px w-8 bg-[#C8A96A] opacity-60 shrink-0" />
+              <div>
                 <span
                   className="text-[#C8A96A] font-sans font-light uppercase"
                   style={{ fontSize: "10px", letterSpacing: "0.2em", lineHeight: 1.6 }}
                 >
-                  Geopolitical Intelligence
-                  <span className="mx-2 opacity-50">·</span>
-                  Capital & Resources
+                  Geopolitical Intelligence Capital & Resources
                 </span>
               </div>
             </FadeUp>

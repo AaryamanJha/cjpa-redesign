@@ -408,19 +408,16 @@ function ProjectDetailPanel({ project, onClose, allTasks, onEdit }: {
 // ─── main page ────────────────────────────────────────────────────────────────
 
 export default function ProjectsPage() {
-  const { user, hasPermission, tasks, projects, clients, teamMembers, updateProject } = usePortal()
+  const { tasks, projects, clients, teamMembers, updateProject } = usePortal()
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [filterStatus, setFilterStatus] = useState<ProjectStatus | "All">("All")
 
   const visibleProjects = useMemo(() => {
     let list = projects
-    if (!hasPermission("view_all_projects") && !hasPermission("all")) {
-      list = list.filter((p) => p.lead === user?.name || p.team.includes(user?.name ?? ""))
-    }
     if (filterStatus !== "All") list = list.filter((p) => p.status === filterStatus)
     return list
-  }, [user, hasPermission, filterStatus, projects])
+  }, [filterStatus, projects])
 
   const selectedProject = projects.find((p) => p.id === selectedId) ?? null
   const editingProject  = projects.find((p) => p.id === editingId) ?? null

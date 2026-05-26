@@ -60,8 +60,7 @@ export function About() {
           <div className="flex flex-col gap-10">
             {/* Section label */}
             <Reveal delay={0}>
-              <div className="flex items-center gap-3">
-                <div className="h-px w-6 bg-[#C8A96A] opacity-50" />
+              <div>
                 <span
                   className="text-[#C8A96A] font-sans font-medium uppercase tracking-[0.3em]"
                   style={{ fontSize: "11px" }}

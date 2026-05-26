@@ -131,15 +131,13 @@ const Logos3 = ({
   return (
     <section className={cn("relative overflow-hidden py-24 lg:py-32", className)}>
       <div className="mx-auto flex max-w-7xl flex-col px-6 text-center lg:px-10">
-        <div className="mx-auto mb-6 flex items-center gap-3">
-          <span className="h-px w-8 bg-[#C8A96A]/60" />
+        <div className="mx-auto mb-6">
           <span
             className="font-sans font-medium uppercase text-[#C8A96A]"
             style={{ fontSize: "11px", letterSpacing: "0.3em" }}
           >
             {eyebrow}
           </span>
-          <span className="h-px w-8 bg-[#C8A96A]/60" />
         </div>
         <h2
           className="font-serif font-light leading-[1.06] text-[#F5F1E8]"

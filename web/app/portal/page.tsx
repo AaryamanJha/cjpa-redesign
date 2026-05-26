@@ -238,10 +238,8 @@ export default function PortalOverview() {
   }, [user, hasPermission, tasks])
 
   const myProjects = useMemo(() => {
-    if (!user) return []
-    if (hasPermission("view_all_projects") || hasPermission("all")) return projects
-    return projects.filter((p) => p.lead === user.name || p.team.includes(user.name))
-  }, [user, hasPermission, projects])
+    return projects
+  }, [projects])
 
   const upcomingTasks = useMemo(() =>
     myTasks

@@ -36,8 +36,7 @@ export function Newsletter() {
           <div className="grid lg:grid-cols-[1.1fr_0.9fr] gap-10 lg:gap-20 items-center">
             {/* Left */}
             <div>
-              <div className="flex items-center gap-3 mb-6">
-                <div className="h-px w-6 bg-[#C8A96A] opacity-50" />
+              <div className="mb-6">
                 <span
                   className="text-[#C8A96A] font-sans font-medium uppercase tracking-[0.3em]"
                   style={{ fontSize: "11px" }}
@@ -73,7 +72,6 @@ export function Newsletter() {
                   transition={{ duration: 0.5, ease: EASE }}
                   className="flex flex-col gap-3"
                 >
-                  <div className="h-px w-10 bg-[#C8A96A] opacity-50" />
                   <p
                     className="font-display text-[#F5F1E8] font-normal"
                     style={{ fontSize: "clamp(20px, 2vw, 26px)" }}
