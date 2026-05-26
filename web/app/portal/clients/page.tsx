@@ -463,7 +463,7 @@ export default function ClientsPage() {
             <div className="grid grid-cols-[auto_1fr_1fr_auto_auto] gap-0">
               {/* Header */}
               <div className="contents">
-                {["", "Client", "Industry", "Region", "Status"].map((h, i) => (
+                {["Rank", "Client", "Industry", "Region", "Status"].map((h, i) => (
                   <div key={i} className="px-4 py-2.5 bg-[#0D1520] text-[10px] text-[#A8B0C0] tracking-widest uppercase font-medium border-b border-[rgba(200,169,106,0.10)]">
                     {h}
                   </div>
@@ -476,9 +476,10 @@ export default function ClientsPage() {
                   No clients match the current filter.
                 </div>
               ) : (
-                filtered.map((client) => (
+                filtered.map((client, index) => (
                   <button key={client.id} onClick={() => setSelected(client)} className="contents group cursor-pointer">
-                    <div className="flex items-center justify-center px-4 py-4 border-b border-[rgba(200,169,106,0.06)] bg-[#070B14] group-hover:bg-[#101827] transition-colors">
+                    <div className="flex items-center justify-center gap-2 px-4 py-4 border-b border-[rgba(200,169,106,0.06)] bg-[#070B14] group-hover:bg-[#101827] transition-colors">
+                      <span className="min-w-6 text-right text-[12px] font-medium tabular-nums text-[#C8A96A]">#{index + 1}</span>
                       <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: REGION_DOT[client.region] ?? "#A8B0C0" }} />
                     </div>
                     <div className="flex flex-col justify-center px-4 py-4 border-b border-[rgba(200,169,106,0.06)] bg-[#070B14] group-hover:bg-[#101827] transition-colors">

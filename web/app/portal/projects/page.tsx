@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { X, Users, Calendar, Target, ChevronRight, Pencil } from "lucide-react"
+import { X, Users, Calendar, Target, ChevronRight, Pencil, Plus } from "lucide-react"
 import { Topbar } from "@/components/portal/Topbar"
 import { usePortal } from "@/contexts/PortalContext"
 import { Project, ProjectStatus, PortalUser } from "@/types/portal"
@@ -101,6 +101,212 @@ function toEditForm(p: Project): EditForm {
     keyDeliverables: p.keyDeliverables.join("\n"),
     driveLink: p.driveLink ?? "",
   }
+}
+
+function isoDateFromToday(offsetDays = 0) {
+  const date = new Date()
+  date.setDate(date.getDate() + offsetDays)
+  return date.toISOString().split("T")[0]
+}
+
+function newProjectForm(teamMembers: PortalUser[]): EditForm {
+  return {
+    projectName: "",
+    clientId: "",
+    clientName: "",
+    projectType: "",
+    lead: teamMembers[0]?.name ?? "",
+    team: [],
+    status: "Discovery",
+    priority: "Medium",
+    startDate: isoDateFromToday(),
+    targetDeadline: isoDateFromToday(30),
+    summary: "",
+    keyDeliverables: "",
+    driveLink: "",
+  }
+}
+
+function projectFromForm(form: EditForm, clients: Client[]): Project {
+  const selectedClient = clients.find((c) => c.id === form.clientId)
+  return {
+    id: `project-${Date.now()}`,
+    projectName: form.projectName.trim(),
+    clientId: form.clientId || undefined,
+    clientName: selectedClient?.name ?? form.clientName.trim(),
+    projectType: form.projectType.trim() || "General Advisory",
+    lead: form.lead,
+    team: form.team.filter((n) => n !== form.lead),
+    status: form.status,
+    priority: form.priority,
+    startDate: form.startDate || isoDateFromToday(),
+    targetDeadline: form.targetDeadline,
+    summary: form.summary.trim() || "New project pending full scoping.",
+    keyDeliverables: form.keyDeliverables.split("\n").map((s) => s.trim()).filter(Boolean),
+    driveLink: form.driveLink.trim() || undefined,
+  }
+}
+
+function AddProjectDialog({ open, onClose, onCreate, clients, teamMembers }: {
+  open: boolean
+  onClose: () => void
+  onCreate: (project: Project) => void
+  clients: Client[]
+  teamMembers: PortalUser[]
+}) {
+  const [form, setForm] = useState<EditForm>(() => newProjectForm(teamMembers))
+  const [errors, setErrors] = useState<Partial<Record<keyof EditForm, string>>>({})
+
+  function set<K extends keyof EditForm>(k: K, v: EditForm[K]) {
+    setForm((f) => ({ ...f, [k]: v }))
+    setErrors((e) => ({ ...e, [k]: undefined }))
+  }
+
+  function toggleTeamMember(name: string) {
+    setForm((f) => ({
+      ...f,
+      team: f.team.includes(name) ? f.team.filter((n) => n !== name) : [...f.team, name],
+    }))
+  }
+
+  function validate() {
+    const e: Partial<Record<keyof EditForm, string>> = {}
+    if (!form.projectName.trim()) e.projectName = "Required"
+    if (!form.clientId && !form.clientName.trim()) e.clientName = "Select a client or enter a client name"
+    if (!form.lead.trim()) e.lead = "Required"
+    if (!form.targetDeadline) e.targetDeadline = "Required"
+    return e
+  }
+
+  function handleCreate() {
+    const e = validate()
+    if (Object.keys(e).length) { setErrors(e); return }
+
+    const project = projectFromForm(form, clients)
+    if (project.keyDeliverables.length === 0) {
+      project.keyDeliverables = ["Project scope", "Workplan", "Client-ready deliverable"]
+    }
+    onCreate(project)
+    setForm(newProjectForm(teamMembers))
+    setErrors({})
+    onClose()
+  }
+
+  const teamOptions = teamMembers.filter((m) => m.name !== form.lead)
+
+  return (
+    <Dialog open={open} onOpenChange={(v) => { if (!v) onClose() }}>
+      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Add Project</DialogTitle>
+        </DialogHeader>
+
+        <div className="space-y-4 mt-2">
+          <Field label="Project Name" error={errors.projectName} required>
+            <Input value={form.projectName} onChange={(e) => set("projectName", e.target.value)} placeholder="e.g. BMO conference follow-up" />
+          </Field>
+
+          <div className="grid grid-cols-2 gap-4">
+            <Field label="Client">
+              <Select value={form.clientId} onValueChange={(v) => set("clientId", v)}>
+                <SelectTrigger><SelectValue placeholder="Select client" /></SelectTrigger>
+                <SelectContent>
+                  {clients.map((c) => (
+                    <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </Field>
+            <Field label="Client Name" error={errors.clientName}>
+              <Input value={form.clientName} onChange={(e) => set("clientName", e.target.value)} placeholder="Or enter a new client" />
+            </Field>
+          </div>
+
+          <Field label="Project Type">
+            <Input value={form.projectType} onChange={(e) => set("projectType", e.target.value)} placeholder="e.g. Market Entry Strategy" />
+          </Field>
+
+          <div className="grid grid-cols-2 gap-4">
+            <Field label="Status">
+              <Select value={form.status} onValueChange={(v) => set("status", v as ProjectStatus)}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {ALL_STATUSES.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </Field>
+            <Field label="Priority">
+              <Select value={form.priority} onValueChange={(v) => set("priority", v as EditForm["priority"])}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {["Low", "Medium", "High", "Critical"].map((p) => <SelectItem key={p} value={p}>{p}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </Field>
+          </div>
+
+          <Field label="Lead" error={errors.lead} required>
+            <Select value={form.lead} onValueChange={(v) => set("lead", v)}>
+              <SelectTrigger><SelectValue placeholder="Select lead" /></SelectTrigger>
+              <SelectContent>
+                {teamMembers.map((m) => <SelectItem key={m.id} value={m.name}>{m.name}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </Field>
+
+          <Field label="Team Members">
+            <div className="flex flex-wrap gap-2 pt-1">
+              {teamOptions.map((m) => {
+                const active = form.team.includes(m.name)
+                return (
+                  <button
+                    key={m.id}
+                    type="button"
+                    onClick={() => toggleTeamMember(m.name)}
+                    className="rounded-sm px-2.5 py-1 font-sans transition-colors cursor-pointer"
+                    style={{
+                      fontSize: "12px",
+                      background: active ? "rgba(200,169,106,0.14)" : "rgba(168,176,192,0.06)",
+                      color: active ? "#C8A96A" : "#A8B0C0",
+                      border: `1px solid ${active ? "rgba(200,169,106,0.35)" : "rgba(168,176,192,0.15)"}`,
+                    }}
+                  >
+                    {m.name}
+                  </button>
+                )
+              })}
+            </div>
+          </Field>
+
+          <div className="grid grid-cols-2 gap-4">
+            <Field label="Start Date">
+              <Input type="date" value={form.startDate} onChange={(e) => set("startDate", e.target.value)} className="cursor-pointer" />
+            </Field>
+            <Field label="Target Deadline" error={errors.targetDeadline} required>
+              <Input type="date" value={form.targetDeadline} onChange={(e) => set("targetDeadline", e.target.value)} className="cursor-pointer" />
+            </Field>
+          </div>
+
+          <Field label="Summary">
+            <Textarea value={form.summary} onChange={(e) => set("summary", e.target.value)} rows={3} placeholder="Project overview..." />
+          </Field>
+
+          <Field label="Key Deliverables (one per line)">
+            <Textarea value={form.keyDeliverables} onChange={(e) => set("keyDeliverables", e.target.value)} rows={4} placeholder="Political risk matrix&#10;Market entry framework&#10;Final report" />
+          </Field>
+
+          <Field label="Source or Folder Link">
+            <Input value={form.driveLink} onChange={(e) => set("driveLink", e.target.value)} placeholder="/portal/cjpa-projects-may-2026.pdf or https://drive.google.com/..." />
+          </Field>
+        </div>
+
+        <div className="flex justify-end gap-2 mt-2 pt-4 border-t border-border">
+          <Button variant="ghost" onClick={onClose}>Cancel</Button>
+          <Button onClick={handleCreate}>Create Project</Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  )
 }
 
 function EditProjectDialog({ open, onClose, project, onSave, clients, teamMembers }: {
@@ -415,9 +621,10 @@ function ProjectDetailPanel({ project, onClose, allTasks, onEdit }: {
 // ─── main page ────────────────────────────────────────────────────────────────
 
 export default function ProjectsPage() {
-  const { tasks, projects, clients, teamMembers, updateProject } = usePortal()
+  const { tasks, projects, clients, teamMembers, addProject, updateProject } = usePortal()
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [editingId, setEditingId] = useState<string | null>(null)
+  const [isAdding, setIsAdding] = useState(false)
   const [filterStatus, setFilterStatus] = useState<ProjectStatus | "All">("All")
 
   const visibleProjects = useMemo(() => {
@@ -440,22 +647,36 @@ export default function ProjectsPage() {
       <div className="flex flex-1 overflow-hidden">
         <div className="flex-1 flex flex-col min-w-0">
           {/* Filters */}
-          <div className="px-7 py-4 border-b border-[#C8A96A]/10 flex items-center gap-2 flex-wrap">
-            {(["All", ...ALL_STATUSES] as const).map((s) => (
-              <button
-                key={s}
-                onClick={() => setFilterStatus(s)}
-                className="font-sans rounded-sm px-3.5 py-2 transition-colors cursor-pointer"
-                style={{
-                  fontSize: "12px",
-                  background: filterStatus === s ? "rgba(200,169,106,0.12)" : "rgba(168,176,192,0.06)",
-                  color: filterStatus === s ? "#C8A96A" : s === "All" ? "#A8B0C0" : STATUS_COLOR[s as ProjectStatus],
-                  border: `1px solid ${filterStatus === s ? "rgba(200,169,106,0.3)" : "rgba(168,176,192,0.12)"}`,
-                }}
-              >
-                {s}
-              </button>
-            ))}
+          <div className="px-7 py-4 border-b border-[#C8A96A]/10 flex items-center justify-between gap-4 flex-wrap">
+            <div className="flex items-center gap-2 flex-wrap">
+              {(["All", ...ALL_STATUSES] as const).map((s) => (
+                <button
+                  key={s}
+                  onClick={() => setFilterStatus(s)}
+                  className="font-sans rounded-sm px-3.5 py-2 transition-colors cursor-pointer"
+                  style={{
+                    fontSize: "12px",
+                    background: filterStatus === s ? "rgba(200,169,106,0.12)" : "rgba(168,176,192,0.06)",
+                    color: filterStatus === s ? "#C8A96A" : s === "All" ? "#A8B0C0" : STATUS_COLOR[s as ProjectStatus],
+                    border: `1px solid ${filterStatus === s ? "rgba(200,169,106,0.3)" : "rgba(168,176,192,0.12)"}`,
+                  }}
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
+            <button
+              onClick={() => setIsAdding(true)}
+              className="ml-auto flex items-center gap-2 rounded-sm px-3.5 py-2 font-sans font-medium transition-colors cursor-pointer hover:opacity-85"
+              style={{
+                fontSize: "12px",
+                background: "rgba(200,169,106,0.14)",
+                color: "#C8A96A",
+                border: "1px solid rgba(200,169,106,0.35)",
+              }}
+            >
+              <Plus size={13} strokeWidth={2} /> Add Project
+            </button>
           </div>
 
           {/* Project cards */}
@@ -477,6 +698,10 @@ export default function ProjectsPage() {
                 >
                   <div className="flex items-start justify-between gap-3 mb-3">
                     <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-sans rounded-sm" style={{
+                        fontSize: "10px", letterSpacing: "0.1em", padding: "2px 7px",
+                        background: "rgba(200,169,106,0.14)", color: "#C8A96A", border: "1px solid rgba(200,169,106,0.28)",
+                      }}>#{i + 1}</span>
                       <span className="font-sans rounded-sm" style={{
                         fontSize: "10px", letterSpacing: "0.1em", padding: "2px 7px",
                         background: `${color}12`, color, border: `1px solid ${color}25`,
@@ -532,6 +757,20 @@ export default function ProjectsPage() {
           )}
         </AnimatePresence>
       </div>
+
+      {isAdding && (
+        <AddProjectDialog
+          key="add-project"
+          open={isAdding}
+          onClose={() => setIsAdding(false)}
+          onCreate={(project) => {
+            addProject(project)
+            setSelectedId(project.id)
+          }}
+          clients={clients}
+          teamMembers={teamMembers}
+        />
+      )}
 
       {editingProject && (
         <EditProjectDialog
