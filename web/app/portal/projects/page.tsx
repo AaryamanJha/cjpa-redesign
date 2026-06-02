@@ -2,7 +2,7 @@
 
 import { useState, useMemo, type DragEvent } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { X, Users, Calendar, Target, ChevronRight, Pencil, Plus, GripVertical, Trash2 } from "lucide-react"
+import { X, Users, Calendar, Target, ChevronRight, Pencil, Plus, GripVertical, Trash2, Search } from "lucide-react"
 import { Topbar } from "@/components/portal/Topbar"
 import { usePortal } from "@/contexts/PortalContext"
 import { Project, ProjectStatus, PortalUser, ClientStatus } from "@/types/portal"
@@ -698,14 +698,25 @@ export default function ProjectsPage() {
   const [isAdding, setIsAdding] = useState(false)
   const [deleteTarget, setDeleteTarget] = useState<Project | null>(null)
   const [filterStatus, setFilterStatus] = useState<ProjectStatus | "All">("All")
+  const [search, setSearch] = useState("")
   const [draggedProjectId, setDraggedProjectId] = useState<string | null>(null)
   const [dragOverProjectId, setDragOverProjectId] = useState<string | null>(null)
 
   const visibleProjects = useMemo(() => {
     let list = projects
     if (filterStatus !== "All") list = list.filter((p) => p.status === filterStatus)
+    if (search.trim()) {
+      const q = search.toLowerCase()
+      list = list.filter((p) =>
+        p.projectName.toLowerCase().includes(q) ||
+        p.clientName.toLowerCase().includes(q) ||
+        p.projectType.toLowerCase().includes(q) ||
+        p.lead.toLowerCase().includes(q) ||
+        p.summary?.toLowerCase().includes(q)
+      )
+    }
     return sortProjects(list)
-  }, [filterStatus, projects])
+  }, [filterStatus, search, projects])
 
   function handleProjectDrop(targetId: string) {
     if (!draggedProjectId || draggedProjectId === targetId) {
@@ -742,7 +753,28 @@ export default function ProjectsPage() {
       <div className="flex flex-1 overflow-hidden">
         <div className="flex-1 flex flex-col min-w-0">
           {/* Filters */}
-          <div className="px-7 py-4 border-b border-[#C8A96A]/10 flex items-center justify-between gap-4 flex-wrap">
+          <div className="px-7 py-4 border-b border-[#C8A96A]/10 space-y-3">
+            {/* Search row */}
+            <div className="flex items-center gap-3">
+              <div className="relative flex-1 max-w-xs">
+                <Search size={13} strokeWidth={1.5} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#A8B0C0]/40 pointer-events-none" />
+                <input
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Search project, client, lead, type…"
+                  className="w-full bg-[#0D1520] border border-[rgba(200,169,106,0.15)] rounded-sm pl-8 pr-3 py-2 font-sans text-[#F5F1E8] placeholder:text-[#A8B0C0]/35 outline-none focus:border-[#C8A96A]/40 transition-colors"
+                  style={{ fontSize: "13px" }}
+                />
+              </div>
+              <button
+                onClick={() => setIsAdding(true)}
+                className="ml-auto flex items-center gap-2 rounded-sm px-3.5 py-2 font-sans font-medium transition-colors cursor-pointer hover:opacity-85"
+                style={{ fontSize: "12px", background: "rgba(200,169,106,0.14)", color: "#C8A96A", border: "1px solid rgba(200,169,106,0.35)" }}
+              >
+                <Plus size={13} strokeWidth={2} /> Add Project
+              </button>
+            </div>
+            {/* Status filter chips */}
             <div className="flex items-center gap-2 flex-wrap">
               {(["All", ...ALL_STATUSES] as const).map((s) => (
                 <button
@@ -760,18 +792,6 @@ export default function ProjectsPage() {
                 </button>
               ))}
             </div>
-            <button
-              onClick={() => setIsAdding(true)}
-              className="ml-auto flex items-center gap-2 rounded-sm px-3.5 py-2 font-sans font-medium transition-colors cursor-pointer hover:opacity-85"
-              style={{
-                fontSize: "12px",
-                background: "rgba(200,169,106,0.14)",
-                color: "#C8A96A",
-                border: "1px solid rgba(200,169,106,0.35)",
-              }}
-            >
-              <Plus size={13} strokeWidth={2} /> Add Project
-            </button>
           </div>
 
           {/* Project cards */}

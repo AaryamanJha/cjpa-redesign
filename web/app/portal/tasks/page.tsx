@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { Filter, ChevronDown, X, Clock, CheckCircle2, Circle, Loader2, AlertCircle, LayoutList, Columns3, Plus, Pencil, Trash2 } from "lucide-react"
+import { Filter, ChevronDown, X, Clock, CheckCircle2, Circle, Loader2, AlertCircle, LayoutList, Columns3, Plus, Pencil, Trash2, Search } from "lucide-react"
 import { Topbar } from "@/components/portal/Topbar"
 import { usePortal } from "@/contexts/PortalContext"
 import { Task, TaskStatus, TaskPriority } from "@/types/portal"
@@ -193,9 +193,15 @@ interface NewTaskForm {
   deadline: string; description: string; notes: string
 }
 
+function nextDayISO() {
+  const d = new Date()
+  d.setDate(d.getDate() + 1)
+  return d.toISOString().split("T")[0]
+}
+
 const EMPTY_FORM: NewTaskForm = {
   title: "", project: "", assignedTo: "", priority: "Medium",
-  deadline: "", description: "", notes: "",
+  deadline: nextDayISO(), description: "", notes: "",
 }
 
 function CreateTaskDialog({ open, onClose, onSave, user }: {
@@ -523,10 +529,18 @@ export default function TasksPage() {
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [filterStatus, setFilterStatus] = useState<TaskStatus | "All">("All")
   const [filterPriority, setFilterPriority] = useState<TaskPriority | "All">("All")
+  const [filterAssignee, setFilterAssignee] = useState<string>("All")
+  const [search, setSearch] = useState("")
   const [view, setView] = useState<"list" | "kanban">("list")
   const [createOpen, setCreateOpen] = useState(false)
   const [editTask, setEditTask] = useState<Task | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<Task | null>(null)
+
+  // All unique assignees across tasks the current user can see
+  const allAssignees = useMemo(() => {
+    const ids = [...new Set(tasks.map((t) => t.assignedTo))]
+    return ids.map((id) => ({ id, name: getMemberName(id) })).sort((a, b) => a.name.localeCompare(b.name))
+  }, [tasks, teamMembers])
 
   const visibleTasks = useMemo(() => {
     let list = tasks
@@ -535,8 +549,18 @@ export default function TasksPage() {
     }
     if (filterStatus !== "All") list = list.filter((t) => t.status === filterStatus)
     if (filterPriority !== "All") list = list.filter((t) => t.priority === filterPriority)
+    if (filterAssignee !== "All") list = list.filter((t) => t.assignedTo === filterAssignee)
+    if (search.trim()) {
+      const q = search.toLowerCase()
+      list = list.filter((t) =>
+        t.title.toLowerCase().includes(q) ||
+        t.project.toLowerCase().includes(q) ||
+        getMemberName(t.assignedTo).toLowerCase().includes(q) ||
+        t.description.toLowerCase().includes(q)
+      )
+    }
     return [...list].sort((a, b) => daysUntil(a.deadline) - daysUntil(b.deadline))
-  }, [tasks, user, hasPermission, filterStatus, filterPriority])
+  }, [tasks, user, hasPermission, filterStatus, filterPriority, filterAssignee, search])
 
   const selectedTask = tasks.find((t) => t.id === selectedId) ?? null
 
@@ -547,48 +571,23 @@ export default function TasksPage() {
         <div className="flex-1 flex flex-col min-w-0">
 
           {/* Filters + controls */}
-          <div className="px-7 py-4 border-b border-[#C8A96A]/10 flex items-center gap-3 flex-wrap">
-            <div className="flex items-center gap-2 text-[#A8B0C0]">
-              <Filter size={13} strokeWidth={1.5} />
-              <span className="font-sans uppercase" style={{ fontSize: "11px", letterSpacing: "0.15em" }}>Filter</span>
-            </div>
-
-            {/* Status chips */}
-            <div className="flex items-center gap-1.5 flex-wrap">
-              {(["All", ...ALL_STATUSES] as const).map((s) => (
-                <button key={s} onClick={() => setFilterStatus(s)}
-                  className="font-sans rounded-sm px-3.5 py-2 transition-colors cursor-pointer"
-                  style={{
-                    fontSize: "12px",
-                    background: filterStatus === s ? "rgba(200,169,106,0.12)" : "rgba(168,176,192,0.06)",
-                    color: filterStatus === s ? "#C8A96A" : "#A8B0C0",
-                    border: `1px solid ${filterStatus === s ? "rgba(200,169,106,0.3)" : "rgba(168,176,192,0.12)"}`,
-                  }}>{s}</button>
-              ))}
-            </div>
-
-            <div className="h-4 w-px bg-[#C8A96A]/15" />
-
-            {/* Priority chips */}
-            <div className="flex items-center gap-1.5 flex-wrap">
-              {(["All", "Urgent", "High", "Medium", "Low"] as const).map((p) => (
-                <button key={p} onClick={() => setFilterPriority(p)}
-                  className="font-sans rounded-sm px-3.5 py-2 transition-colors cursor-pointer"
-                  style={{
-                    fontSize: "12px",
-                    background: filterPriority === p ? "rgba(200,169,106,0.12)" : "rgba(168,176,192,0.06)",
-                    color: filterPriority === p ? "#C8A96A" : p === "All" ? "#A8B0C0" : PRIORITY_COLOR[p as TaskPriority],
-                    border: `1px solid ${filterPriority === p ? "rgba(200,169,106,0.3)" : "rgba(168,176,192,0.12)"}`,
-                  }}>{p}</button>
-              ))}
-            </div>
-
-            <span className="font-sans text-[#A8B0C0]/60" style={{ fontSize: "12px" }}>
-              {visibleTasks.length} task{visibleTasks.length !== 1 ? "s" : ""}
-            </span>
-
-            <div className="ml-auto flex items-center gap-2">
-              {/* New task button */}
+          <div className="px-7 py-4 border-b border-[#C8A96A]/10 space-y-3">
+            {/* Row 1: Search + New Task */}
+            <div className="flex items-center gap-3">
+              <div className="relative flex-1 max-w-xs">
+                <Search size={13} strokeWidth={1.5} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#A8B0C0]/40 pointer-events-none" />
+                <input
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Search title, project, assignee…"
+                  className="w-full bg-[#0D1520] border border-[rgba(200,169,106,0.15)] rounded-sm pl-8 pr-3 py-2 font-sans text-[#F5F1E8] placeholder:text-[#A8B0C0]/35 outline-none focus:border-[#C8A96A]/40 transition-colors"
+                  style={{ fontSize: "13px" }}
+                />
+              </div>
+              <span className="font-sans text-[#A8B0C0]/50" style={{ fontSize: "12px" }}>
+                {visibleTasks.length} task{visibleTasks.length !== 1 ? "s" : ""}
+              </span>
+              <div className="ml-auto flex items-center gap-2">
               <button
                 onClick={() => setCreateOpen(true)}
                 className="flex items-center gap-1.5 rounded-sm px-3 py-1.5 font-sans font-medium transition-colors cursor-pointer"
@@ -607,6 +606,68 @@ export default function TasksPage() {
                   className={`p-1.5 rounded-sm transition-colors ${view === "kanban" ? "bg-[#C8A96A] text-[#070B14]" : "text-[#A8B0C0] hover:text-[#F5F1E8]"}`}>
                   <Columns3 size={13} />
                 </button>
+              </div>
+              </div>
+            </div>
+
+            {/* Row 2: Status + Priority + Assignee chips */}
+            <div className="flex items-center gap-3 flex-wrap">
+              <div className="flex items-center gap-2 text-[#A8B0C0]/60">
+                <Filter size={12} strokeWidth={1.5} />
+              </div>
+
+              {/* Status */}
+              <div className="flex items-center gap-1.5 flex-wrap">
+                {(["All", ...ALL_STATUSES] as const).map((s) => (
+                  <button key={s} onClick={() => setFilterStatus(s)}
+                    className="font-sans rounded-sm px-3 py-1.5 transition-colors cursor-pointer"
+                    style={{
+                      fontSize: "12px",
+                      background: filterStatus === s ? "rgba(200,169,106,0.12)" : "rgba(168,176,192,0.06)",
+                      color: filterStatus === s ? "#C8A96A" : "#A8B0C0",
+                      border: `1px solid ${filterStatus === s ? "rgba(200,169,106,0.3)" : "rgba(168,176,192,0.12)"}`,
+                    }}>{s}</button>
+                ))}
+              </div>
+
+              <div className="h-4 w-px bg-[#C8A96A]/15" />
+
+              {/* Priority */}
+              <div className="flex items-center gap-1.5 flex-wrap">
+                {(["All", "Urgent", "High", "Medium", "Low"] as const).map((p) => (
+                  <button key={p} onClick={() => setFilterPriority(p)}
+                    className="font-sans rounded-sm px-3 py-1.5 transition-colors cursor-pointer"
+                    style={{
+                      fontSize: "12px",
+                      background: filterPriority === p ? "rgba(200,169,106,0.12)" : "rgba(168,176,192,0.06)",
+                      color: filterPriority === p ? "#C8A96A" : p === "All" ? "#A8B0C0" : PRIORITY_COLOR[p as TaskPriority],
+                      border: `1px solid ${filterPriority === p ? "rgba(200,169,106,0.3)" : "rgba(168,176,192,0.12)"}`,
+                    }}>{p}</button>
+                ))}
+              </div>
+
+              <div className="h-4 w-px bg-[#C8A96A]/15" />
+
+              {/* Assignee */}
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <button onClick={() => setFilterAssignee("All")}
+                  className="font-sans rounded-sm px-3 py-1.5 transition-colors cursor-pointer"
+                  style={{
+                    fontSize: "12px",
+                    background: filterAssignee === "All" ? "rgba(200,169,106,0.12)" : "rgba(168,176,192,0.06)",
+                    color: filterAssignee === "All" ? "#C8A96A" : "#A8B0C0",
+                    border: `1px solid ${filterAssignee === "All" ? "rgba(200,169,106,0.3)" : "rgba(168,176,192,0.12)"}`,
+                  }}>All</button>
+                {allAssignees.map(({ id, name }) => (
+                  <button key={id} onClick={() => setFilterAssignee(filterAssignee === id ? "All" : id)}
+                    className="font-sans rounded-sm px-3 py-1.5 transition-colors cursor-pointer"
+                    style={{
+                      fontSize: "12px",
+                      background: filterAssignee === id ? "rgba(200,169,106,0.12)" : "rgba(168,176,192,0.06)",
+                      color: filterAssignee === id ? "#C8A96A" : "#A8B0C0",
+                      border: `1px solid ${filterAssignee === id ? "rgba(200,169,106,0.3)" : "rgba(168,176,192,0.12)"}`,
+                    }}>{name}</button>
+                ))}
               </div>
             </div>
           </div>

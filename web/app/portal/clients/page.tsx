@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { cn } from "@/lib/utils"
-import { Plus, Pencil, Trash2 } from "lucide-react"
+import { Plus, Pencil, Trash2, Search } from "lucide-react"
 import { Topbar } from "@/components/portal/Topbar"
 import { usePortal } from "@/contexts/PortalContext"
 import { Client, ClientStatus } from "@/types/portal"
@@ -413,9 +413,23 @@ export default function ClientsPage() {
   const [editing, setEditing] = useState<Client | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<Client | null>(null)
   const [filter, setFilter] = useState<"All" | ClientStatus>("All")
+  const [search, setSearch] = useState("")
   const [createOpen, setCreateOpen] = useState(false)
 
-  const filtered = clients.filter((c) => filter === "All" || c.status === filter)
+  const filtered = clients.filter((c) => {
+    if (filter !== "All" && c.status !== filter) return false
+    if (search.trim()) {
+      const q = search.toLowerCase()
+      return (
+        c.name.toLowerCase().includes(q) ||
+        c.industry?.toLowerCase().includes(q) ||
+        c.contactName?.toLowerCase().includes(q) ||
+        c.region?.toLowerCase().includes(q) ||
+        c.shortName?.toLowerCase().includes(q)
+      )
+    }
+    return true
+  })
 
   function handleCreate(client: Client) {
     addClient(client)
@@ -440,7 +454,27 @@ export default function ClientsPage() {
         <div className="max-w-5xl">
 
           {/* Controls row */}
-          <div className="flex items-center justify-between mb-6 gap-4 flex-wrap">
+          <div className="space-y-3 mb-6">
+            <div className="flex items-center gap-3">
+              <div className="relative flex-1 max-w-xs">
+                <Search size={13} strokeWidth={1.5} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#A8B0C0]/40 pointer-events-none" />
+                <input
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Search name, industry, contact, region…"
+                  className="w-full bg-[#0D1520] border border-[rgba(200,169,106,0.15)] rounded-sm pl-8 pr-3 py-2 font-sans text-[#F5F1E8] placeholder:text-[#A8B0C0]/35 outline-none focus:border-[#C8A96A]/40 transition-colors"
+                  style={{ fontSize: "13px" }}
+                />
+              </div>
+              <button
+                onClick={() => setCreateOpen(true)}
+                className="ml-auto flex items-center gap-1.5 rounded-sm px-3 py-1.5 font-sans font-medium transition-colors cursor-pointer shrink-0"
+                style={{ fontSize: "13px", background: "rgba(200,169,106,0.12)", color: "#C8A96A", border: "1px solid rgba(200,169,106,0.3)" }}
+              >
+                <Plus size={13} strokeWidth={2} /> New Client
+              </button>
+            </div>
+            <div className="flex items-center justify-between gap-4 flex-wrap">
             <div className="flex gap-2">
               {(["All", "Active", "Retainer", "Proposal", "Raising Capital", "Past"] as const).map((s) => (
                 <button
@@ -457,14 +491,7 @@ export default function ClientsPage() {
                 </button>
               ))}
             </div>
-
-            <button
-              onClick={() => setCreateOpen(true)}
-              className="flex items-center gap-1.5 rounded-sm px-3 py-1.5 font-sans font-medium transition-colors cursor-pointer shrink-0"
-              style={{ fontSize: "13px", background: "rgba(200,169,106,0.12)", color: "#C8A96A", border: "1px solid rgba(200,169,106,0.3)" }}
-            >
-              <Plus size={13} strokeWidth={2} /> New Client
-            </button>
+            </div>
           </div>
 
           {/* Client table */}
