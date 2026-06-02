@@ -37,9 +37,9 @@ export function TeamShowcase({ members = CJPA_TEAM }: TeamShowcaseProps) {
   const col3 = members.filter((_, i) => i % 3 === 2)
 
   return (
-    <div className="flex flex-col md:flex-row items-start gap-12 lg:gap-24 select-none w-full max-w-6xl mx-auto">
+    <div className="flex flex-col lg:flex-row items-start gap-12 lg:gap-24 select-none w-full max-w-6xl mx-auto">
       {/* Photo grid */}
-      <div className="flex gap-3 flex-shrink-0 overflow-x-auto pb-1 md:pb-0">
+      <div className="flex w-full max-w-full gap-3 overflow-x-auto pb-1 lg:w-auto lg:flex-shrink-0 lg:pb-0">
         <div className="flex flex-col gap-3">
           {col1.map((m) => (
             <PhotoCard
@@ -76,7 +76,7 @@ export function TeamShowcase({ members = CJPA_TEAM }: TeamShowcaseProps) {
       </div>
 
       {/* Name / info list */}
-      <div className="flex flex-col gap-8 pt-0 md:pt-6 flex-1 w-full">
+      <div className="flex flex-col gap-8 pt-0 lg:pt-6 flex-1 w-full">
         {members.map((m) => (
           <MemberRow
             key={m.id}

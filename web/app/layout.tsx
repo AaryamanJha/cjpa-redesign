@@ -1,5 +1,6 @@
 import type { Metadata } from "next"
 import { Cormorant_Garamond, Playfair_Display, Space_Grotesk } from "next/font/google"
+import { SessionProviderWrapper } from "@/components/SessionProviderWrapper"
 import "./globals.css"
 
 const cormorant = Cormorant_Garamond({
@@ -48,7 +49,7 @@ export default function RootLayout({
       data-theme="dark"
     >
       <body className="min-h-full bg-[#070B14] flex flex-col">
-        {children}
+        <SessionProviderWrapper>{children}</SessionProviderWrapper>
       </body>
     </html>
   )

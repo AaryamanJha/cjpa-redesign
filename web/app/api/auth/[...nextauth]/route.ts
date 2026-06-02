@@ -1,12 +1,5 @@
-import { NextResponse } from "next/server"
+// Microsoft Entra ID OAuth via NextAuth v5
+// Requires: AZURE_AD_CLIENT_ID, AZURE_AD_CLIENT_SECRET, AZURE_AD_TENANT_ID, AUTH_SECRET in .env.local
+import { handlers } from "@/auth"
 
-const message =
-  "Production authentication is disabled in this CJPA portal prototype. Use the CJPA ID login at /login."
-
-export async function GET() {
-  return NextResponse.json({ error: message }, { status: 501 })
-}
-
-export async function POST() {
-  return NextResponse.json({ error: message }, { status: 501 })
-}
+export const { GET, POST } = handlers

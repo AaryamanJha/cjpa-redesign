@@ -17,6 +17,7 @@ import {
   ChevronsRight,
   Database,
   Sparkles,
+  FileDown,
 } from "lucide-react"
 import { useState } from "react"
 import { usePortal } from "@/contexts/PortalContext"
@@ -37,6 +38,7 @@ const NAV_ITEMS: NavItem[] = [
   { label: "Clients",       href: "/portal/clients",       icon: Users },
   { label: "Databank",      href: "/portal/databank",      icon: Database },
   { label: "AI Service",    href: "/portal/ai",            icon: Sparkles },
+  { label: "File Resizer",  href: "/portal/file-resizer",  icon: FileDown },
   { label: "Email",         href: "/portal/email",         icon: Send },
   { label: "Announcements", href: "/portal/announcements", icon: Megaphone },
   { label: "Newsletter",    href: "/portal/newsletter",    icon: Mail },

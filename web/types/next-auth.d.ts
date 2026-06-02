@@ -13,7 +13,7 @@ declare module "next-auth" {
       title: string
       isPortalAdmin: boolean
     }
-    accessToken: string
+    accessToken?: string
     error?: string
   }
 }

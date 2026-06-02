@@ -1,7 +1,8 @@
 "use client"
 
 import { useState } from "react"
-import { Send, CheckCircle2, Info, ChevronDown, Sparkles, Loader2 } from "lucide-react"
+import { useSession } from "next-auth/react"
+import { Send, CheckCircle2, Info, ChevronDown, Sparkles, Loader2, Plug } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Topbar } from "@/components/portal/Topbar"
 import { usePortal } from "@/contexts/PortalContext"
@@ -124,6 +125,9 @@ const TONES = [
 
 function ComposeTab() {
   const { clients } = usePortal()
+  const { data: session } = useSession()
+  const outlookConnected = !!session?.accessToken
+
   const [to, setTo]             = useState("")
   const [cc, setCc]             = useState("")
   const [subject, setSubject]   = useState("")
@@ -131,6 +135,7 @@ function ComposeTab() {
   const [template, setTemplate] = useState("")
   const [sending, setSending]   = useState(false)
   const [sent, setSent]         = useState(false)
+  const [sendError, setSendError] = useState("")
 
   // AI compose
   const [aiPrompt, setAiPrompt]         = useState("")
@@ -150,10 +155,38 @@ function ComposeTab() {
   async function handleSend() {
     if (!subject.trim() || !body.trim()) return
     setSending(true)
-    await new Promise(r => setTimeout(r, 1000))
+    setSendError("")
+
+    if (outlookConnected && to) {
+      // Real send via Microsoft Graph
+      const selectedClient = clients.find(c => c.id === to)
+      const toEmail = selectedClient?.contactEmail
+      if (!toEmail) {
+        setSendError("Selected client has no email address.")
+        setSending(false)
+        return
+      }
+      try {
+        const res = await fetch("/api/email/graph-send", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ to: toEmail, cc: cc || undefined, subject, body }),
+        })
+        const data = await res.json()
+        if (!res.ok) throw new Error(data.error || "Send failed")
+        setSent(true)
+        setTimeout(() => setSent(false), 4000)
+      } catch (err) {
+        setSendError(err instanceof Error ? err.message : "Failed to send email.")
+      }
+    } else {
+      // Simulated send (no Outlook session)
+      await new Promise(r => setTimeout(r, 1000))
+      setSent(true)
+      setTimeout(() => setSent(false), 4000)
+    }
+
     setSending(false)
-    setSent(true)
-    setTimeout(() => setSent(false), 4000)
   }
 
   async function generateDraft() {
@@ -197,8 +230,26 @@ function ComposeTab() {
 
       {/* ── Left: Email form ── */}
       <div className="space-y-5">
-        {sent && <SentBanner label="Email sent successfully (simulated)." />}
-        <PlaceholderNote service="OUTLOOK_CLIENT_ID / SMTP_HOST" />
+        {sent && (
+          <SentBanner label={outlookConnected ? "Email sent via Outlook." : "Email sent (simulated)."} />
+        )}
+        {sendError && (
+          <div className="flex items-center gap-2.5 border border-red-700/30 bg-red-900/15 rounded-sm px-4 py-3">
+            <Info size={13} strokeWidth={1.5} className="text-red-400 shrink-0" />
+            <p className="font-sans text-red-300/80" style={{ fontSize: "13px" }}>{sendError}</p>
+          </div>
+        )}
+        {outlookConnected ? (
+          <div className="flex items-center gap-2.5 border border-emerald-700/20 bg-emerald-900/10 rounded-sm px-4 py-3">
+            <Plug size={13} strokeWidth={1.5} className="text-emerald-400 shrink-0" />
+            <p className="font-sans text-emerald-300/70" style={{ fontSize: "12px" }}>
+              <span className="text-emerald-400 font-medium">Outlook connected.</span>{" "}
+              Emails send directly from your Microsoft account via Graph API.
+            </p>
+          </div>
+        ) : (
+          <PlaceholderNote service="AZURE_AD_CLIENT_ID / AZURE_AD_CLIENT_SECRET" />
+        )}
 
         {/* Template selector */}
         <div className="space-y-1.5">

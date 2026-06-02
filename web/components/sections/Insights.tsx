@@ -39,6 +39,16 @@ const ARTICLES = [
 const PRESS = [
   {
     publication: "Press Release",
+    headline: "CJPA Global Advisors attends exclusive Paley Center luncheon featuring General David H. Petraeus",
+    date: "May 28, 2025",
+    image: "/press/paley-center-luncheon-2025.png",
+    href: "/press/cjpa-paley-center-luncheon-2025.pdf",
+    attachmentLabel: "Open release",
+    attachmentHref: "/press/cjpa-paley-center-luncheon-2025.pdf",
+    attachmentType: "document",
+  },
+  {
+    publication: "Press Release",
     headline: "CJPA Global Advisors attends BMO's 21st Annual Global Farm to Market | Chemicals Conference",
     date: "May 14, 2026",
     image: "/press/press-release-bank-montreal-1.png",
@@ -255,12 +265,18 @@ export function Insights() {
                   className="group grid grid-cols-[76px_1fr_auto] items-start gap-4 py-5 border-b border-[#C8A96A]/08 hover:border-[#C8A96A]/18 transition-colors cursor-pointer"
                 >
                   <div className="relative h-16 overflow-hidden border border-[#C8A96A]/10 bg-[#101827]">
-                    <img
-                      src={item.image}
-                      alt=""
-                      className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]"
-                      loading="lazy"
-                    />
+                    {item.image ? (
+                      <img
+                        src={item.image}
+                        alt=""
+                        className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]"
+                        loading="lazy"
+                      />
+                    ) : (
+                      <div className="h-full w-full bg-[linear-gradient(135deg,rgba(200,169,106,0.18),rgba(16,24,39,0.96)_55%,rgba(59,130,246,0.12))] flex items-center justify-center">
+                        <FileText size={22} strokeWidth={1.4} className="text-[#C8A96A]/70" />
+                      </div>
+                    )}
                   </div>
                   <div className="flex-1 min-w-0">
                     <p

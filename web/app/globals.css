@@ -86,6 +86,12 @@
   text-shadow: 0 1px 8px rgba(7, 11, 20, 0.9);
 }
 
+.cjpa-logo-carousel-clip {
+  max-width: 100%;
+  overflow-x: clip;
+  contain: paint;
+}
+
 
 html {
   scroll-behavior: smooth;

@@ -13,6 +13,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
 import { Client } from "@/types/portal"
+import { cn } from "@/lib/utils"
 
 // ─── config ──────────────────────────────────────────────────────────────────
 
@@ -557,8 +558,7 @@ function ProjectDetailPanel({ project, onClose, allTasks, onEdit }: {
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: 24 }}
       transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
-      className="w-[360px] shrink-0 bg-[#0A1120] border-l border-[#C8A96A]/10 flex flex-col sticky top-0 overflow-y-auto"
-      style={{ maxHeight: "calc(100vh - 61px)" }}
+      className="fixed bottom-0 right-0 top-[61px] z-40 w-full bg-[#0A1120] border-l border-[#C8A96A]/10 flex flex-col overflow-y-auto shadow-2xl sm:w-[390px] lg:w-[410px]"
     >
       <div className="px-6 py-5 border-b border-[#C8A96A]/10 flex items-start justify-between gap-3">
         <div className="flex-1 min-w-0">
@@ -767,7 +767,10 @@ export default function ProjectsPage() {
           </div>
 
           {/* Project cards */}
-          <div className="flex-1 overflow-y-auto px-7 py-6 grid grid-cols-1 xl:grid-cols-2 gap-4 content-start">
+          <div className={cn(
+            "flex-1 overflow-y-auto px-7 py-6 grid grid-cols-1 gap-4 content-start transition-[padding] duration-200 xl:grid-cols-2",
+            selectedProject && "lg:pr-[440px]"
+          )}>
             {visibleProjects.map((p, i) => {
               const color = STATUS_COLOR[p.status]
               const days = daysUntil(p.targetDeadline)

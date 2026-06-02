@@ -1,21 +1,40 @@
 "use client"
 
-// PROTOTYPE portal layout — no real auth
+// Portal auth: supports both CJPA ID (mock) and Microsoft OAuth (NextAuth).
+// Microsoft sign-in bridges to the mock user system by matching email.
 
 import { useEffect } from "react"
 import { useRouter } from "next/navigation"
+import { useSession } from "next-auth/react"
 import { PortalProvider, usePortal } from "@/contexts/PortalContext"
 import { Sidebar } from "@/components/portal/Sidebar"
+import { portalUsers } from "@/data/portalUsers"
 
 function PortalGuard({ children }: { children: React.ReactNode }) {
-  const { user, isLoading } = usePortal()
+  const { user, isLoading, login } = usePortal()
+  const { data: session, status } = useSession()
   const router = useRouter()
 
   useEffect(() => {
-    if (!isLoading && !user) {
+    if (isLoading || status === "loading") return
+
+    // Bridge: if signed in via Microsoft but no portal user yet, match by email
+    if (!user && session?.user?.email) {
+      const matched = portalUsers.find(
+        (u) => u.email?.toLowerCase() === session.user!.email!.toLowerCase()
+      )
+      if (matched) {
+        login(matched.id)
+      } else {
+        router.push("/login?error=email_not_found")
+      }
+      return
+    }
+
+    if (!user && status !== "authenticated") {
       router.push("/login")
     }
-  }, [user, isLoading, router])
+  }, [user, isLoading, session, status, login, router])
 
   if (isLoading) {
     return (

@@ -147,10 +147,10 @@ const Logos3 = ({
         </h2>
       </div>
 
-      <div className="pt-12 md:pt-16 lg:pt-20">
-        <div className="relative mx-auto flex max-w-[1500px] items-center justify-center">
+      <div className="cjpa-logo-carousel-clip pt-12 md:pt-16 lg:pt-20">
+        <div className="cjpa-logo-carousel-clip relative mx-auto flex max-w-[1500px] items-center justify-center">
           <Carousel
-            className="w-full"
+            className="w-full max-w-full overflow-hidden"
             opts={{ align: "start", loop: true }}
             plugins={[
               AutoScroll({

@@ -1,25 +1,42 @@
 "use client"
 
-// PROTOTYPE ONLY — mock login using localStorage. Not production-grade security.
+// PROTOTYPE: CJPA ID = mock localStorage auth. Microsoft = real OAuth via NextAuth + Azure AD.
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, Suspense } from "react"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { motion } from "framer-motion"
 import { ArrowRight, AlertCircle, Shield } from "lucide-react"
+import { signIn } from "next-auth/react"
 import { usePortal } from "@/contexts/PortalContext"
 import { portalUsers } from "@/data/portalUsers"
 
-export default function LoginPage() {
+function LoginContent() {
   const { user, login } = usePortal()
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [portalId, setPortalId] = useState("")
   const [error, setError] = useState("")
   const [isLoading, setIsLoading] = useState(false)
+  const [msLoading, setMsLoading] = useState(false)
 
   useEffect(() => {
     if (user) router.replace("/portal")
-  }, [user, router])
+    const err = searchParams.get("error")
+    if (err === "email_not_found") setError("Your Microsoft account is not registered in the portal. Contact your administrator.")
+    else if (err === "OAuthSignin" || err === "OAuthCallback") setError("Microsoft sign-in failed. Check your Azure configuration.")
+  }, [user, router, searchParams])
+
+  async function handleMicrosoftSignIn() {
+    setMsLoading(true)
+    setError("")
+    try {
+      await signIn("microsoft-entra-id", { callbackUrl: "/portal" })
+    } catch {
+      setError("Microsoft sign-in unavailable. Ensure Azure credentials are configured.")
+      setMsLoading(false)
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -151,8 +168,42 @@ export default function LoginPage() {
           </form>
         </div>
 
+        {/* Microsoft sign-in */}
+        <div className="mt-4 px-8 pb-7">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="flex-1 h-px bg-[#C8A96A]/10" />
+            <span className="text-[#A8B0C0]/40 font-sans" style={{ fontSize: "11px", letterSpacing: "0.12em" }}>OR</span>
+            <div className="flex-1 h-px bg-[#C8A96A]/10" />
+          </div>
+          <button
+            type="button"
+            onClick={handleMicrosoftSignIn}
+            disabled={msLoading}
+            className="w-full flex items-center justify-center gap-3 border border-[#C8A96A]/20 bg-[#0D1520] hover:bg-[#111d2e] text-[#F5F1E8] font-sans rounded-sm py-3 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+            style={{ fontSize: "13px" }}
+          >
+            {msLoading ? (
+              <span className="text-[#A8B0C0]">Connecting to Microsoft…</span>
+            ) : (
+              <>
+                {/* Microsoft logo mark */}
+                <svg width="16" height="16" viewBox="0 0 21 21" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <rect x="1" y="1" width="9" height="9" fill="#F25022"/>
+                  <rect x="11" y="1" width="9" height="9" fill="#7FBA00"/>
+                  <rect x="1" y="11" width="9" height="9" fill="#00A4EF"/>
+                  <rect x="11" y="11" width="9" height="9" fill="#FFB900"/>
+                </svg>
+                <span>Sign in with Microsoft</span>
+              </>
+            )}
+          </button>
+          <p className="mt-2 text-center text-[#A8B0C0]/30 font-sans" style={{ fontSize: "11px" }}>
+            Requires Outlook / Microsoft 365 account
+          </p>
+        </div>
+
         {/* Prototype notice */}
-        <div className="mt-5 flex items-start gap-2 text-[#A8B0C0]/60">
+        <div className="mt-4 flex items-start gap-2 text-[#A8B0C0]/60">
           <Shield size={12} className="shrink-0 mt-0.5" />
           <p className="font-sans" style={{ fontSize: "12px" }}>
             Prototype system. Mock authentication only — no passwords, no real credentials.
@@ -183,6 +234,14 @@ export default function LoginPage() {
         )}
       </motion.div>
     </div>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense>
+      <LoginContent />
+    </Suspense>
   )
 }
 
