@@ -2,7 +2,7 @@
 
 import { useState, useMemo, type DragEvent } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { X, Users, Calendar, Target, ChevronRight, Pencil, Plus, GripVertical } from "lucide-react"
+import { X, Users, Calendar, Target, ChevronRight, Pencil, Plus, GripVertical, Trash2 } from "lucide-react"
 import { Topbar } from "@/components/portal/Topbar"
 import { usePortal } from "@/contexts/PortalContext"
 import { Project, ProjectStatus, PortalUser, ClientStatus } from "@/types/portal"
@@ -545,8 +545,8 @@ function EditProjectDialog({ open, onClose, project, onSave, clients, teamMember
 
 // ─── project detail panel ─────────────────────────────────────────────────────
 
-function ProjectDetailPanel({ project, onClose, allTasks, onEdit }: {
-  project: Project; onClose: () => void; allTasks: ReturnType<typeof usePortal>["tasks"]; onEdit: () => void
+function ProjectDetailPanel({ project, onClose, allTasks, onEdit, onDelete }: {
+  project: Project; onClose: () => void; allTasks: ReturnType<typeof usePortal>["tasks"]; onEdit: () => void; onDelete: () => void
 }) {
   const color = STATUS_COLOR[project.status]
   const projectTasks = allTasks.filter((t) => t.project === project.projectName)
@@ -584,6 +584,13 @@ function ProjectDetailPanel({ project, onClose, allTasks, onEdit }: {
             style={{ fontSize: "12px", background: "rgba(200,169,106,0.10)", color: "#C8A96A", border: "1px solid rgba(200,169,106,0.25)" }}
           >
             <Pencil size={11} strokeWidth={1.5} /> Edit
+          </button>
+          <button
+            onClick={onDelete}
+            className="flex items-center gap-1 rounded-sm px-2.5 py-1.5 font-sans transition-colors cursor-pointer hover:opacity-80"
+            style={{ fontSize: "12px", background: "rgba(252,129,129,0.08)", color: "#FC8181", border: "1px solid rgba(252,129,129,0.20)" }}
+          >
+            <Trash2 size={11} strokeWidth={1.5} />
           </button>
           <button onClick={onClose} className="text-[#A8B0C0]/50 hover:text-[#A8B0C0] cursor-pointer transition-colors">
             <X size={16} strokeWidth={1.5} />
@@ -685,10 +692,11 @@ function ProjectDetailPanel({ project, onClose, allTasks, onEdit }: {
 // ─── main page ────────────────────────────────────────────────────────────────
 
 export default function ProjectsPage() {
-  const { tasks, projects, clients, teamMembers, addProject, updateProject, addClient } = usePortal()
+  const { tasks, projects, clients, teamMembers, addProject, updateProject, deleteProject, addClient } = usePortal()
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [isAdding, setIsAdding] = useState(false)
+  const [deleteTarget, setDeleteTarget] = useState<Project | null>(null)
   const [filterStatus, setFilterStatus] = useState<ProjectStatus | "All">("All")
   const [draggedProjectId, setDraggedProjectId] = useState<string | null>(null)
   const [dragOverProjectId, setDragOverProjectId] = useState<string | null>(null)
@@ -874,6 +882,7 @@ export default function ProjectsPage() {
               onClose={() => setSelectedId(null)}
               allTasks={tasks}
               onEdit={() => setEditingId(selectedProject.id)}
+              onDelete={() => setDeleteTarget(selectedProject)}
             />
           )}
         </AnimatePresence>
@@ -908,6 +917,24 @@ export default function ProjectsPage() {
           teamMembers={teamMembers}
         />
       )}
+
+      <Dialog open={!!deleteTarget} onOpenChange={(v) => { if (!v) setDeleteTarget(null) }}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader><DialogTitle>Delete Project?</DialogTitle></DialogHeader>
+          <p className="font-sans text-[#A8B0C0] mt-1" style={{ fontSize: "14px" }}>
+            <strong className="text-[#F5F1E8]">{deleteTarget?.projectName}</strong> will be permanently removed. This cannot be undone.
+          </p>
+          <div className="flex justify-end gap-2 mt-4 pt-4 border-t border-border">
+            <Button variant="ghost" onClick={() => setDeleteTarget(null)}>Cancel</Button>
+            <Button
+              onClick={() => { if (deleteTarget) { deleteProject(deleteTarget.id); setSelectedId(null) }; setDeleteTarget(null) }}
+              className="bg-red-500/20 text-red-400 border border-red-500/30 hover:bg-red-500/30"
+            >
+              Delete
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   )
 }

@@ -230,13 +230,18 @@ interface PortalContextValue {
   removeTeamMember:    (id: string) => void
   updateTeamMember:    (id: string, updates: Partial<PortalUser>) => void
   addTask:             (task: Task) => void
+  updateTask:          (id: string, updates: Partial<Task>) => void
   updateTaskStatus:    (id: string, status: TaskStatus) => void
+  deleteTask:          (id: string) => void
   addProject:          (project: Project) => void
   updateProject:       (id: string, updates: Partial<Project>) => void
+  deleteProject:       (id: string) => void
   addClient:           (client: Client) => void
   updateClient:        (id: string, updates: Partial<Client>) => void
+  deleteClient:        (id: string) => void
   addAnnouncement:     (announcement: Announcement) => void
   updateAnnouncement:  (id: string, updates: Partial<Announcement>) => void
+  deleteAnnouncement:  (id: string) => void
   addCalendarEvent:    (event: CalEvent) => void
   updateCalendarEvent: (id: string, updates: Partial<CalEvent>) => void
   deleteCalendarEvent: (id: string) => void
@@ -473,6 +478,17 @@ export function PortalProvider({ children }: { children: React.ReactNode }) {
     syncRecord(COLLECTIONS.tasks, task)
   }, [])
 
+  const updateTask = useCallback((id: string, updates: Partial<Task>) => {
+    const current = loadTasks()
+    const updated = current.map((t) =>
+      t.id === id ? { ...t, ...updates, lastUpdated: new Date().toISOString().split("T")[0] } : t
+    )
+    const updatedTask = updated.find((t) => t.id === id)
+    persistLocal(TASKS_KEY, updated)
+    setTasks(updated)
+    if (updatedTask) syncRecord(COLLECTIONS.tasks, updatedTask)
+  }, [])
+
   const updateTaskStatus = useCallback((id: string, status: TaskStatus) => {
     const current = loadTasks()
     const updated = current.map((t) =>
@@ -482,6 +498,13 @@ export function PortalProvider({ children }: { children: React.ReactNode }) {
     persistLocal(TASKS_KEY, updated)
     setTasks(updated)
     if (updatedTask) syncRecord(COLLECTIONS.tasks, updatedTask)
+  }, [])
+
+  const deleteTask = useCallback((id: string) => {
+    const updated = loadTasks().filter((t) => t.id !== id)
+    persistLocal(TASKS_KEY, updated)
+    setTasks(updated)
+    removeRemoteRecord(COLLECTIONS.tasks, id)
   }, [])
 
   // ── project management ──
@@ -503,6 +526,13 @@ export function PortalProvider({ children }: { children: React.ReactNode }) {
     if (updatedProject) syncRecord(COLLECTIONS.projects, updatedProject)
   }, [])
 
+  const deleteProject = useCallback((id: string) => {
+    const updated = loadProjects().filter((p) => p.id !== id)
+    persistLocal(PROJECTS_KEY, updated)
+    setProjects(updated)
+    removeRemoteRecord(COLLECTIONS.projects, id)
+  }, [])
+
   // ── client management ──
 
   const addClient = useCallback((client: Client) => {
@@ -522,6 +552,13 @@ export function PortalProvider({ children }: { children: React.ReactNode }) {
     if (updatedClient) syncRecord(COLLECTIONS.clients, updatedClient)
   }, [])
 
+  const deleteClient = useCallback((id: string) => {
+    const updated = loadClients().filter((c) => c.id !== id)
+    persistLocal(CLIENTS_KEY, updated)
+    setClients(updated)
+    removeRemoteRecord(COLLECTIONS.clients, id)
+  }, [])
+
   const addAnnouncement = useCallback((announcement: Announcement) => {
     const current = loadAnnouncements()
     const updated = [announcement, ...current]
@@ -537,6 +574,13 @@ export function PortalProvider({ children }: { children: React.ReactNode }) {
     persistLocal(ANN_KEY, updated)
     setAnnouncements(updated)
     if (updatedAnnouncement) syncRecord(COLLECTIONS.announcements, updatedAnnouncement)
+  }, [])
+
+  const deleteAnnouncement = useCallback((id: string) => {
+    const updated = loadAnnouncements().filter((a) => a.id !== id)
+    persistLocal(ANN_KEY, updated)
+    setAnnouncements(updated)
+    removeRemoteRecord(COLLECTIONS.announcements, id)
   }, [])
 
   // ── calendar management ──
@@ -572,10 +616,10 @@ export function PortalProvider({ children }: { children: React.ReactNode }) {
       user, isLoading, teamMembers, isAdmin, tasks, projects, clients, announcements, calendarEvents,
       login, logout, hasPermission,
       addTeamMember, removeTeamMember, updateTeamMember,
-      addTask, updateTaskStatus,
-      addProject, updateProject,
-      addClient, updateClient,
-      addAnnouncement, updateAnnouncement,
+      addTask, updateTask, updateTaskStatus, deleteTask,
+      addProject, updateProject, deleteProject,
+      addClient, updateClient, deleteClient,
+      addAnnouncement, updateAnnouncement, deleteAnnouncement,
       addCalendarEvent, updateCalendarEvent, deleteCalendarEvent,
     }}>
       {children}

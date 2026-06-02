@@ -1,8 +1,8 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { Filter, ChevronDown, X, Clock, CheckCircle2, Circle, Loader2, AlertCircle, LayoutList, Columns3, Plus } from "lucide-react"
+import { Filter, ChevronDown, X, Clock, CheckCircle2, Circle, Loader2, AlertCircle, LayoutList, Columns3, Plus, Pencil, Trash2 } from "lucide-react"
 import { Topbar } from "@/components/portal/Topbar"
 import { usePortal } from "@/contexts/PortalContext"
 import { Task, TaskStatus, TaskPriority } from "@/types/portal"
@@ -88,8 +88,9 @@ function StatusDropdown({ current, onChange }: { current: TaskStatus; onChange: 
 
 // ─── task detail panel ────────────────────────────────────────────────────────
 
-function TaskDetailPanel({ task, onClose, onStatusChange, getMemberName }: {
+function TaskDetailPanel({ task, onClose, onStatusChange, onEdit, onDelete, getMemberName }: {
   task: Task; onClose: () => void; onStatusChange: (id: string, s: TaskStatus) => void
+  onEdit: () => void; onDelete: () => void
   getMemberName: (id: string) => string
 }) {
   const days = daysUntil(task.deadline)
@@ -102,13 +103,29 @@ function TaskDetailPanel({ task, onClose, onStatusChange, getMemberName }: {
       style={{ maxHeight: "calc(100vh - 61px)" }}
     >
       <div className="px-6 py-5 border-b border-[#C8A96A]/10 flex items-start justify-between gap-3">
-        <div>
+        <div className="flex-1 min-w-0">
           <p className="font-sans text-[#A8B0C0] uppercase mb-1" style={{ fontSize: "10px", letterSpacing: "0.18em" }}>Task Detail</p>
           <h3 className="font-serif text-[#F5F1E8] font-light leading-snug" style={{ fontSize: "18px" }}>{task.title}</h3>
         </div>
-        <button onClick={onClose} className="text-[#A8B0C0]/50 hover:text-[#A8B0C0] mt-1 shrink-0 cursor-pointer transition-colors">
-          <X size={16} strokeWidth={1.5} />
-        </button>
+        <div className="flex items-center gap-1.5 mt-1 shrink-0">
+          <button
+            onClick={onEdit}
+            className="flex items-center gap-1 rounded-sm px-2.5 py-1.5 font-sans transition-colors cursor-pointer hover:opacity-80"
+            style={{ fontSize: "12px", background: "rgba(200,169,106,0.10)", color: "#C8A96A", border: "1px solid rgba(200,169,106,0.25)" }}
+          >
+            <Pencil size={11} strokeWidth={1.5} /> Edit
+          </button>
+          <button
+            onClick={onDelete}
+            className="flex items-center gap-1 rounded-sm px-2.5 py-1.5 font-sans transition-colors cursor-pointer hover:opacity-80"
+            style={{ fontSize: "12px", background: "rgba(252,129,129,0.08)", color: "#FC8181", border: "1px solid rgba(252,129,129,0.20)" }}
+          >
+            <Trash2 size={11} strokeWidth={1.5} />
+          </button>
+          <button onClick={onClose} className="text-[#A8B0C0]/50 hover:text-[#A8B0C0] cursor-pointer transition-colors ml-0.5">
+            <X size={16} strokeWidth={1.5} />
+          </button>
+        </div>
       </div>
 
       <div className="px-6 py-5 space-y-5 flex-1">
@@ -351,6 +368,134 @@ function CreateTaskDialog({ open, onClose, onSave, user }: {
   )
 }
 
+// ─── edit task dialog ─────────────────────────────────────────────────────────
+
+function EditTaskDialog({ open, onClose, task, onSave }: {
+  open: boolean; onClose: () => void; task: Task; onSave: (id: string, updates: Partial<Task>) => void
+}) {
+  const { teamMembers, projects } = usePortal()
+  const [form, setForm] = useState<NewTaskForm>({
+    title: task.title, project: task.project, assignedTo: task.assignedTo,
+    priority: task.priority, deadline: task.deadline, description: task.description, notes: task.notes,
+  })
+  const [errors, setErrors] = useState<Partial<NewTaskForm>>({})
+
+  useEffect(() => {
+    setForm({
+      title: task.title, project: task.project, assignedTo: task.assignedTo,
+      priority: task.priority, deadline: task.deadline, description: task.description, notes: task.notes,
+    })
+    setErrors({})
+  }, [task.id])
+
+  function set<K extends keyof NewTaskForm>(k: K, v: NewTaskForm[K]) {
+    setForm((f) => ({ ...f, [k]: v }))
+    setErrors((e) => ({ ...e, [k]: undefined }))
+  }
+
+  function validate() {
+    const e: Partial<NewTaskForm> = {}
+    if (!form.title.trim()) e.title = "Required"
+    if (!form.project.trim()) e.project = "Required"
+    if (!form.assignedTo.trim()) e.assignedTo = "Required"
+    if (!form.deadline) e.deadline = "Required"
+    return e
+  }
+
+  function handleSubmit() {
+    const e = validate()
+    if (Object.keys(e).length) { setErrors(e); return }
+    const assigneeMember = teamMembers.find((m) => m.id === form.assignedTo)
+    onSave(task.id, {
+      title: form.title.trim(), project: form.project.trim(), assignedTo: form.assignedTo,
+      roleOfAssignee: assigneeMember?.role ?? task.roleOfAssignee,
+      priority: form.priority, deadline: form.deadline,
+      description: form.description.trim(), notes: form.notes.trim(),
+    })
+    onClose()
+  }
+
+  const projectNames = [...new Set(projects.map((p) => p.projectName))]
+
+  return (
+    <Dialog open={open} onOpenChange={(v) => { if (!v) onClose() }}>
+      <DialogContent className="max-w-lg">
+        <DialogHeader><DialogTitle>Edit Task</DialogTitle></DialogHeader>
+        <div className="space-y-4 mt-2">
+          <Field label="Title" error={errors.title} required>
+            <Input value={form.title} onChange={(e) => set("title", e.target.value)} />
+          </Field>
+          <Field label="Project" error={errors.project} required>
+            <Select value={form.project} onValueChange={(v) => set("project", v)}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {projectNames.map((n) => <SelectItem key={n} value={n}>{n}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </Field>
+          <div className="grid grid-cols-2 gap-4">
+            <Field label="Assigned To" error={errors.assignedTo} required>
+              <Select value={form.assignedTo} onValueChange={(v) => set("assignedTo", v)}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {teamMembers.map((m) => <SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </Field>
+            <Field label="Priority">
+              <Select value={form.priority} onValueChange={(v) => set("priority", v as TaskPriority)}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {["Low","Medium","High","Urgent"].map((p) => <SelectItem key={p} value={p}>{p}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </Field>
+          </div>
+          <Field label="Deadline" error={errors.deadline} required>
+            <Input type="date" value={form.deadline} onChange={(e) => set("deadline", e.target.value)} />
+          </Field>
+          <Field label="Description">
+            <Textarea value={form.description} onChange={(e) => set("description", e.target.value)} rows={3} />
+          </Field>
+          <Field label="Notes">
+            <Textarea value={form.notes} onChange={(e) => set("notes", e.target.value)} rows={2} />
+          </Field>
+        </div>
+        <div className="flex justify-end gap-2 mt-2 pt-4 border-t border-border">
+          <Button variant="ghost" onClick={onClose}>Cancel</Button>
+          <Button onClick={handleSubmit}>Save Changes</Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+// ─── delete confirm dialog ────────────────────────────────────────────────────
+
+function DeleteConfirmDialog({ open, label, onClose, onConfirm }: {
+  open: boolean; label: string; onClose: () => void; onConfirm: () => void
+}) {
+  return (
+    <Dialog open={open} onOpenChange={(v) => { if (!v) onClose() }}>
+      <DialogContent className="max-w-sm">
+        <DialogHeader><DialogTitle>Delete {label}?</DialogTitle></DialogHeader>
+        <p className="font-sans text-[#A8B0C0] mt-1" style={{ fontSize: "14px" }}>
+          This cannot be undone.
+        </p>
+        <div className="flex justify-end gap-2 mt-4 pt-4 border-t border-border">
+          <Button variant="ghost" onClick={onClose}>Cancel</Button>
+          <Button
+            onClick={() => { onConfirm(); onClose() }}
+            className="bg-red-500/20 text-red-400 border border-red-500/30 hover:bg-red-500/30"
+          >
+            Delete
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
 function Field({ label, children, error, required }: {
   label: string; children: React.ReactNode; error?: string; required?: boolean
 }) {
@@ -369,7 +514,7 @@ function Field({ label, children, error, required }: {
 // ─── main page ────────────────────────────────────────────────────────────────
 
 export default function TasksPage() {
-  const { user, hasPermission, teamMembers, tasks, addTask, updateTaskStatus } = usePortal()
+  const { user, hasPermission, teamMembers, tasks, addTask, updateTask, updateTaskStatus, deleteTask } = usePortal()
 
   function getMemberName(id: string): string {
     return teamMembers.find((m) => m.id === id)?.name ?? id
@@ -380,11 +525,12 @@ export default function TasksPage() {
   const [filterPriority, setFilterPriority] = useState<TaskPriority | "All">("All")
   const [view, setView] = useState<"list" | "kanban">("list")
   const [createOpen, setCreateOpen] = useState(false)
+  const [editTask, setEditTask] = useState<Task | null>(null)
+  const [deleteTarget, setDeleteTarget] = useState<Task | null>(null)
 
   const visibleTasks = useMemo(() => {
     let list = tasks
     if (!hasPermission("all") && !hasPermission("assign_tasks")) {
-      // Show tasks assigned TO you OR tasks you created (so you can track what you assigned out)
       list = list.filter((t) => t.assignedTo === user?.id || t.assignedBy === user?.name)
     }
     if (filterStatus !== "All") list = list.filter((t) => t.status === filterStatus)
@@ -526,13 +672,42 @@ export default function TasksPage() {
         {view === "list" && (
           <AnimatePresence>
             {selectedTask && (
-              <TaskDetailPanel task={selectedTask} onClose={() => setSelectedId(null)} onStatusChange={updateTaskStatus} getMemberName={getMemberName} />
+              <TaskDetailPanel
+                task={selectedTask}
+                onClose={() => setSelectedId(null)}
+                onStatusChange={updateTaskStatus}
+                onEdit={() => setEditTask(selectedTask)}
+                onDelete={() => setDeleteTarget(selectedTask)}
+                getMemberName={getMemberName}
+              />
             )}
           </AnimatePresence>
         )}
       </div>
 
       <CreateTaskDialog open={createOpen} onClose={() => setCreateOpen(false)} onSave={addTask} user={user} />
+
+      {editTask && (
+        <EditTaskDialog
+          open={!!editTask}
+          onClose={() => setEditTask(null)}
+          task={editTask}
+          onSave={updateTask}
+        />
+      )}
+
+      <DeleteConfirmDialog
+        open={!!deleteTarget}
+        label={deleteTarget?.title ?? "Task"}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={() => {
+          if (deleteTarget) {
+            deleteTask(deleteTarget.id)
+            if (selectedId === deleteTarget.id) setSelectedId(null)
+          }
+          setDeleteTarget(null)
+        }}
+      />
     </>
   )
 }

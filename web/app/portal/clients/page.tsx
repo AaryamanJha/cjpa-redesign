@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { cn } from "@/lib/utils"
-import { Plus, Pencil } from "lucide-react"
+import { Plus, Pencil, Trash2 } from "lucide-react"
 import { Topbar } from "@/components/portal/Topbar"
 import { usePortal } from "@/contexts/PortalContext"
 import { Client, ClientStatus } from "@/types/portal"
@@ -283,10 +283,11 @@ function EditClientDialog({ open, onClose, client, onSave }: {
 
 // ─── client detail panel ─────────────────────────────────────────────────────
 
-function ClientPanel({ client, onClose, onEdit, linkedProjects }: {
+function ClientPanel({ client, onClose, onEdit, onDelete, linkedProjects }: {
   client: Client
   onClose: () => void
   onEdit: () => void
+  onDelete: () => void
   linkedProjects: { id: string; projectName: string; projectType: string; lead: string; targetDeadline: string }[]
 }) {
   return (
@@ -310,6 +311,13 @@ function ClientPanel({ client, onClose, onEdit, linkedProjects }: {
                 style={{ fontSize: "12px", background: "rgba(200,169,106,0.10)", color: "#C8A96A", border: "1px solid rgba(200,169,106,0.25)" }}
               >
                 <Pencil size={11} strokeWidth={1.5} /> Edit
+              </button>
+              <button
+                onClick={onDelete}
+                className="flex items-center gap-1 rounded-sm px-2.5 py-1.5 font-sans transition-colors cursor-pointer hover:opacity-80"
+                style={{ fontSize: "12px", background: "rgba(252,129,129,0.08)", color: "#FC8181", border: "1px solid rgba(252,129,129,0.20)" }}
+              >
+                <Trash2 size={11} strokeWidth={1.5} />
               </button>
               <button onClick={onClose} className="text-[#A8B0C0] hover:text-[#F5F1E8] transition-colors cursor-pointer">
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -400,9 +408,10 @@ function PanelSection({ label, children }: { label: string; children: React.Reac
 // ─── main page ────────────────────────────────────────────────────────────────
 
 export default function ClientsPage() {
-  const { clients, projects, addClient, updateClient } = usePortal()
+  const { clients, projects, addClient, updateClient, deleteClient } = usePortal()
   const [selected, setSelected] = useState<Client | null>(null)
   const [editing, setEditing] = useState<Client | null>(null)
+  const [deleteTarget, setDeleteTarget] = useState<Client | null>(null)
   const [filter, setFilter] = useState<"All" | ClientStatus>("All")
   const [createOpen, setCreateOpen] = useState(false)
 
@@ -512,6 +521,7 @@ export default function ClientsPage() {
           client={selected}
           onClose={() => setSelected(null)}
           onEdit={() => setEditing(selected)}
+          onDelete={() => setDeleteTarget(selected)}
           linkedProjects={getLinkedProjects(selected.id)}
         />
       )}
@@ -526,6 +536,24 @@ export default function ClientsPage() {
           onSave={handleEdit}
         />
       )}
+
+      <Dialog open={!!deleteTarget} onOpenChange={(v) => { if (!v) setDeleteTarget(null) }}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader><DialogTitle>Delete Client?</DialogTitle></DialogHeader>
+          <p className="font-sans text-[#A8B0C0] mt-1" style={{ fontSize: "14px" }}>
+            <strong className="text-[#F5F1E8]">{deleteTarget?.name}</strong> will be permanently removed. This cannot be undone.
+          </p>
+          <div className="flex justify-end gap-2 mt-4 pt-4 border-t border-border">
+            <Button variant="ghost" onClick={() => setDeleteTarget(null)}>Cancel</Button>
+            <Button
+              onClick={() => { if (deleteTarget) { deleteClient(deleteTarget.id); setSelected(null) }; setDeleteTarget(null) }}
+              className="bg-red-500/20 text-red-400 border border-red-500/30 hover:bg-red-500/30"
+            >
+              Delete
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   )
 }
