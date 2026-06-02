@@ -7,7 +7,6 @@ import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 import { motion } from "framer-motion"
 import { ArrowRight, AlertCircle, Shield } from "lucide-react"
-import { signIn } from "next-auth/react"
 import { usePortal } from "@/contexts/PortalContext"
 import { portalUsers } from "@/data/portalUsers"
 
@@ -18,7 +17,6 @@ function LoginContent() {
   const [portalId, setPortalId] = useState("")
   const [error, setError] = useState("")
   const [isLoading, setIsLoading] = useState(false)
-  const [msLoading, setMsLoading] = useState(false)
 
   useEffect(() => {
     if (user) router.replace("/portal")
@@ -26,17 +24,6 @@ function LoginContent() {
     if (err === "email_not_found") setError("Your Microsoft account is not registered in the portal. Contact your administrator.")
     else if (err === "OAuthSignin" || err === "OAuthCallback") setError("Microsoft sign-in failed. Check your Azure configuration.")
   }, [user, router, searchParams])
-
-  async function handleMicrosoftSignIn() {
-    setMsLoading(true)
-    setError("")
-    try {
-      await signIn("microsoft-entra-id", { callbackUrl: "/portal" })
-    } catch {
-      setError("Microsoft sign-in unavailable. Ensure Azure credentials are configured.")
-      setMsLoading(false)
-    }
-  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -175,28 +162,20 @@ function LoginContent() {
             <span className="text-[#A8B0C0]/40 font-sans" style={{ fontSize: "11px", letterSpacing: "0.12em" }}>OR</span>
             <div className="flex-1 h-px bg-[#C8A96A]/10" />
           </div>
-          <button
-            type="button"
-            onClick={handleMicrosoftSignIn}
-            disabled={msLoading}
-            className="w-full flex items-center justify-center gap-3 border border-[#C8A96A]/20 bg-[#0D1520] hover:bg-[#111d2e] text-[#F5F1E8] font-sans rounded-sm py-3 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+          <a
+            href="/api/auth/signin/microsoft-entra-id?callbackUrl=%2Fportal"
+            className="w-full flex items-center justify-center gap-3 border border-[#C8A96A]/20 bg-[#0D1520] hover:bg-[#111d2e] text-[#F5F1E8] font-sans rounded-sm py-3 transition-colors"
             style={{ fontSize: "13px" }}
           >
-            {msLoading ? (
-              <span className="text-[#A8B0C0]">Connecting to Microsoft…</span>
-            ) : (
-              <>
-                {/* Microsoft logo mark */}
-                <svg width="16" height="16" viewBox="0 0 21 21" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <rect x="1" y="1" width="9" height="9" fill="#F25022"/>
-                  <rect x="11" y="1" width="9" height="9" fill="#7FBA00"/>
-                  <rect x="1" y="11" width="9" height="9" fill="#00A4EF"/>
-                  <rect x="11" y="11" width="9" height="9" fill="#FFB900"/>
-                </svg>
-                <span>Sign in with Microsoft</span>
-              </>
-            )}
-          </button>
+            {/* Microsoft logo mark */}
+            <svg width="16" height="16" viewBox="0 0 21 21" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="1" y="1" width="9" height="9" fill="#F25022"/>
+              <rect x="11" y="1" width="9" height="9" fill="#7FBA00"/>
+              <rect x="1" y="11" width="9" height="9" fill="#00A4EF"/>
+              <rect x="11" y="11" width="9" height="9" fill="#FFB900"/>
+            </svg>
+            <span>Sign in with Microsoft</span>
+          </a>
           <p className="mt-2 text-center text-[#A8B0C0]/30 font-sans" style={{ fontSize: "11px" }}>
             Requires Outlook / Microsoft 365 account
           </p>
