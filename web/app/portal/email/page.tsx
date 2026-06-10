@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { useSession } from "next-auth/react"
+import { signIn, useSession } from "next-auth/react"
 import { Send, CheckCircle2, Info, ChevronDown, Sparkles, Loader2, Plug } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Topbar } from "@/components/portal/Topbar"
@@ -15,6 +15,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 // ─── templates ────────────────────────────────────────────────────────────────
 
 interface Template { label: string; subject: string; body: string }
+
+function connectOutlook() {
+  signIn("microsoft-entra-id", { callbackUrl: "/portal/email" })
+}
 
 const CLIENT_TEMPLATES: Record<string, Template> = {
   "meeting-followup": {
@@ -248,7 +252,18 @@ function ComposeTab() {
             </p>
           </div>
         ) : (
-          <PlaceholderNote service="AZURE_AD_CLIENT_ID / AZURE_AD_CLIENT_SECRET" />
+          <div>
+            <PlaceholderNote service="AZURE_AD_CLIENT_ID / AZURE_AD_CLIENT_SECRET / AUTH_SECRET" />
+            <button
+              type="button"
+              onClick={connectOutlook}
+              className="mt-3 inline-flex items-center gap-2 rounded-sm border border-[#C8A96A]/20 bg-[#101827] px-3 py-2 font-sans text-[#F5F1E8] transition-colors hover:border-[#C8A96A]/35 hover:bg-[#111d2e]"
+              style={{ fontSize: "12px" }}
+            >
+              <Plug size={13} strokeWidth={1.5} />
+              Connect Outlook
+            </button>
+          </div>
         )}
 
         {/* Template selector */}

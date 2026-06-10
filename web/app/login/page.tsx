@@ -2,9 +2,10 @@
 
 // PROTOTYPE: CJPA ID = mock localStorage auth. Microsoft = real OAuth via NextAuth + Azure AD.
 
-import { useState, useEffect, Suspense } from "react"
+import { useState, useEffect, Suspense, useMemo } from "react"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
+import { signIn } from "next-auth/react"
 import { motion } from "framer-motion"
 import { ArrowRight, AlertCircle, Shield } from "lucide-react"
 import { usePortal } from "@/contexts/PortalContext"
@@ -17,13 +18,20 @@ function LoginContent() {
   const [portalId, setPortalId] = useState("")
   const [error, setError] = useState("")
   const [isLoading, setIsLoading] = useState(false)
+  const queryError = searchParams.get("error")
+  const oauthError = useMemo(() => {
+    if (queryError === "email_not_found") {
+      return "Your Microsoft account is not registered in the portal. Contact your administrator."
+    }
+    if (queryError === "OAuthSignin" || queryError === "OAuthCallback" || queryError === "Configuration") {
+      return "Microsoft sign-in failed. Check your Azure configuration."
+    }
+    return ""
+  }, [queryError])
 
   useEffect(() => {
     if (user) router.replace("/portal")
-    const err = searchParams.get("error")
-    if (err === "email_not_found") setError("Your Microsoft account is not registered in the portal. Contact your administrator.")
-    else if (err === "OAuthSignin" || err === "OAuthCallback") setError("Microsoft sign-in failed. Check your Azure configuration.")
-  }, [user, router, searchParams])
+  }, [user, router])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -43,6 +51,11 @@ function LoginContent() {
       setError(result.error || "Login failed.")
       setIsLoading(false)
     }
+  }
+
+  const handleMicrosoftSignIn = () => {
+    setError("")
+    signIn("microsoft-entra-id", { callbackUrl: "/portal" })
   }
 
   return (
@@ -124,7 +137,7 @@ function LoginContent() {
               />
             </div>
 
-            {error && (
+            {(error || oauthError) && (
               <motion.div
                 initial={{ opacity: 0, y: -6 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -132,7 +145,7 @@ function LoginContent() {
               >
                 <AlertCircle size={14} className="shrink-0" />
                 <span className="font-sans" style={{ fontSize: "13px" }}>
-                  {error}
+                  {error || oauthError}
                 </span>
               </motion.div>
             )}
@@ -162,8 +175,9 @@ function LoginContent() {
             <span className="text-[#A8B0C0]/40 font-sans" style={{ fontSize: "11px", letterSpacing: "0.12em" }}>OR</span>
             <div className="flex-1 h-px bg-[#C8A96A]/10" />
           </div>
-          <a
-            href="/api/auth/signin/microsoft-entra-id?callbackUrl=%2Fportal"
+          <button
+            type="button"
+            onClick={handleMicrosoftSignIn}
             className="w-full flex items-center justify-center gap-3 border border-[#C8A96A]/20 bg-[#0D1520] hover:bg-[#111d2e] text-[#F5F1E8] font-sans rounded-sm py-3 transition-colors"
             style={{ fontSize: "13px" }}
           >
@@ -175,7 +189,7 @@ function LoginContent() {
               <rect x="11" y="11" width="9" height="9" fill="#FFB900"/>
             </svg>
             <span>Sign in with Microsoft</span>
-          </a>
+          </button>
           <p className="mt-2 text-center text-[#A8B0C0]/30 font-sans" style={{ fontSize: "11px" }}>
             Requires Outlook / Microsoft 365 account
           </p>
@@ -223,4 +237,3 @@ export default function LoginPage() {
     </Suspense>
   )
 }
-

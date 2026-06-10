@@ -27,11 +27,17 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Missing required fields: to, subject, body" }, { status: 400 })
   }
 
+  const ccRecipients = cc
+    ?.split(",")
+    .map((address) => address.trim())
+    .filter(Boolean)
+    .map((address) => ({ emailAddress: { address } }))
+
   const message = {
     subject,
     body: { contentType: bodyType, content: body },
     toRecipients: [{ emailAddress: { address: to } }],
-    ...(cc ? { ccRecipients: [{ emailAddress: { address: cc } }] } : {}),
+    ...(ccRecipients?.length ? { ccRecipients } : {}),
   }
 
   const res = await fetch("https://graph.microsoft.com/v1.0/me/sendMail", {
