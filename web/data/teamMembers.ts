@@ -308,6 +308,7 @@ export const teamMembers: TeamMemberProfile[] = [
     bio: "Computer science and finance student at Emory University working across finance, consulting, data science, climate visualization, and venture capital research.",
     email: "aaryaman@cjpa.us",
     portalEnabled: true,
+    isPortalAdmin: true,
   },
 ]
 
