@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { Plus, Trash2, ShieldCheck, AlertCircle, Shield } from "lucide-react"
 import { Topbar } from "@/components/portal/Topbar"
@@ -40,8 +40,8 @@ const ROLE_COLOR: Record<PortalRole, string> = {
 
 // ─── add member dialog ────────────────────────────────────────────────────────
 
-interface NewMemberForm { name: string; title: string; role: PortalRole; id: string }
-const EMPTY: NewMemberForm = { name: "", title: "", role: "Analyst", id: "" }
+interface NewMemberForm { name: string; title: string; role: PortalRole; id: string; email: string }
+const EMPTY: NewMemberForm = { name: "", title: "", role: "Analyst", id: "", email: "" }
 
 function Field({ label, children, error, required, hint }: {
   label: string; children: React.ReactNode; error?: string; required?: boolean; hint?: string
@@ -117,6 +117,9 @@ function AddMemberDialog({ open, onClose }: { open: boolean; onClose: () => void
           </Field>
           <Field label="Portal Login ID" error={errors.id} required hint="Auto-generated as firstnamelastname. Letters and numbers only.">
             <Input placeholder="e.g. sarahhutchinson" value={form.id} onChange={(e) => handleIdChange(e.target.value)} className="font-mono" />
+          </Field>
+          <Field label="Microsoft Email" hint="Allows sign-in with Microsoft. Leave blank to use Portal ID only.">
+            <Input placeholder="e.g. sarah@cjpa.us" value={form.email} onChange={(e) => set("email", e.target.value.toLowerCase())} />
           </Field>
           {serverError && (
             <div className="flex items-center gap-2 rounded-sm border border-red-700/30 bg-red-900/20 px-3 py-2.5">
@@ -228,6 +231,54 @@ function AdminToggle({ member, disabled }: { member: PortalUser; disabled: boole
   )
 }
 
+// ─── inline email cell ───────────────────────────────────────────────────────
+
+function EmailCell({ member }: { member: PortalUser }) {
+  const { updateTeamMember } = usePortal()
+  const [editing, setEditing] = useState(false)
+  const [value, setValue] = useState(member.email ?? "")
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  function startEdit() { setValue(member.email ?? ""); setEditing(true); setTimeout(() => inputRef.current?.focus(), 0) }
+  function save() { updateTeamMember(member.id, { email: value.trim().toLowerCase() || undefined }); setEditing(false) }
+  function cancel() { setEditing(false) }
+
+  if (editing) {
+    return (
+      <div className="pr-4 flex items-center gap-1">
+        <input
+          ref={inputRef}
+          value={value}
+          onChange={(e) => setValue(e.target.value.toLowerCase())}
+          onKeyDown={(e) => { if (e.key === "Enter") save(); if (e.key === "Escape") cancel() }}
+          onBlur={save}
+          placeholder="email@cjpa.us"
+          className="w-full bg-[#0D1520] border border-[#C8A96A]/30 text-[#F5F1E8] font-sans rounded-sm px-2 py-1 outline-none"
+          style={{ fontSize: "12px" }}
+        />
+      </div>
+    )
+  }
+
+  return (
+    <button
+      onClick={startEdit}
+      title="Click to set Microsoft email"
+      className="pr-4 text-left w-full group"
+    >
+      {member.email ? (
+        <span className="font-sans text-[#A8B0C0]/80 group-hover:text-[#C8A96A] transition-colors truncate block" style={{ fontSize: "12px" }}>
+          {member.email}
+        </span>
+      ) : (
+        <span className="font-sans text-[#A8B0C0]/25 group-hover:text-[#A8B0C0]/50 transition-colors" style={{ fontSize: "12px" }}>
+          + add email
+        </span>
+      )}
+    </button>
+  )
+}
+
 // ─── main page ────────────────────────────────────────────────────────────────
 
 export default function AdminPage() {
@@ -280,8 +331,8 @@ export default function AdminPage() {
             <div className="rounded-sm border border-[rgba(200,169,106,0.14)] overflow-hidden">
               {/* Header */}
               <div className="grid px-5 py-2.5 bg-[#0D1520] border-b border-[rgba(200,169,106,0.10)]"
-                style={{ gridTemplateColumns: "1fr 1fr 160px 140px 100px auto" }}>
-                {["Name", "Title", "Role", "Portal ID", "Admin Access", ""].map((h, i) => (
+                style={{ gridTemplateColumns: "1fr 1fr 160px 140px 180px 100px auto" }}>
+                {["Name", "Title", "Role", "Portal ID", "Microsoft Email", "Admin Access", ""].map((h, i) => (
                   <span key={i} className="font-sans text-[#A8B0C0] uppercase" style={{ fontSize: "10.5px", letterSpacing: "0.15em" }}>{h}</span>
                 ))}
               </div>
@@ -297,7 +348,7 @@ export default function AdminPage() {
                   <div
                     key={member.id}
                     className="grid px-5 py-3.5 border-b border-[rgba(200,169,106,0.06)] last:border-0 bg-[#070B14] items-center"
-                    style={{ gridTemplateColumns: "1fr 1fr 160px 140px 100px auto" }}
+                    style={{ gridTemplateColumns: "1fr 1fr 160px 140px 180px 100px auto" }}
                   >
                     <div className="min-w-0 pr-4">
                       <p className="font-sans font-medium text-[#F5F1E8] truncate" style={{ fontSize: "14px" }}>
@@ -320,6 +371,8 @@ export default function AdminPage() {
                     </div>
 
                     <p className="font-mono text-[#A8B0C0]/70 pr-4" style={{ fontSize: "12px" }}>{member.id}</p>
+
+                    <EmailCell member={member} />
 
                     <div>
                       <AdminToggle member={member} disabled={!isCEO || isSelf} />

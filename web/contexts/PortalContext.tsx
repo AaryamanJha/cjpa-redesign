@@ -226,7 +226,7 @@ interface PortalContextValue {
   login:               (userId: string) => { success: boolean; error?: string }
   logout:              () => void
   hasPermission:       (permission: string) => boolean
-  addTeamMember:       (data: { name: string; title: string; role: PortalRole; id: string }) => { success: boolean; error?: string }
+  addTeamMember:       (data: { name: string; title: string; role: PortalRole; id: string; email?: string }) => { success: boolean; error?: string }
   removeTeamMember:    (id: string) => void
   updateTeamMember:    (id: string, updates: Partial<PortalUser>) => void
   addTask:             (task: Task) => void
@@ -430,7 +430,7 @@ export function PortalProvider({ children }: { children: React.ReactNode }) {
   // ── team management ──
 
   const addTeamMember = useCallback(
-    (data: { name: string; title: string; role: PortalRole; id: string }): { success: boolean; error?: string } => {
+    (data: { name: string; title: string; role: PortalRole; id: string; email?: string }): { success: boolean; error?: string } => {
       const id = data.id.toLowerCase().trim().replace(/[^a-z0-9]/g, "")
       const current = loadTeam()
       if (current.some((u) => u.id === id)) {
@@ -439,6 +439,7 @@ export function PortalProvider({ children }: { children: React.ReactNode }) {
       const newMember: PortalUser = {
         id, name: data.name.trim(), title: data.title.trim(),
         role: data.role, permissions: ROLE_PERMISSIONS[data.role],
+        ...(data.email?.trim() ? { email: data.email.trim().toLowerCase() } : {}),
       }
       const updated = [...current, newMember]
       persistLocal(TEAM_KEY, updated)
