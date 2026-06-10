@@ -20,6 +20,7 @@ import {
   FileDown,
 } from "lucide-react"
 import { useState } from "react"
+import { signOut, useSession } from "next-auth/react"
 import { usePortal } from "@/contexts/PortalContext"
 import { RoleBadge } from "./RoleBadge"
 
@@ -49,7 +50,13 @@ const NAV_ITEMS: NavItem[] = [
 export function Sidebar() {
   const pathname = usePathname()
   const { user, logout, isAdmin } = usePortal()
+  const { data: session } = useSession()
   const [open, setOpen] = useState(true)
+
+  function handleLogout() {
+    logout()
+    if (session) signOut({ callbackUrl: "/login" })
+  }
 
   const visibleItems = NAV_ITEMS.filter(
     (item) => !item.adminOnly || isAdmin
@@ -133,7 +140,7 @@ export function Sidebar() {
           </div>
           <RoleBadge role={user.role} size="sm" />
           <button
-            onClick={logout}
+            onClick={handleLogout}
             className="flex items-center gap-2 text-[#A8B0C0]/60 hover:text-red-400 font-sans transition-colors pt-1"
             style={{ fontSize: "13px" }}
           >
@@ -146,7 +153,7 @@ export function Sidebar() {
       {/* Collapse icon when closed */}
       {!open && user && (
         <div className="py-4 border-t border-[#C8A96A]/10 flex justify-center">
-          <button onClick={logout} className="text-[#A8B0C0]/40 hover:text-red-400 transition-colors" title="Sign out">
+          <button onClick={handleLogout} className="text-[#A8B0C0]/40 hover:text-red-400 transition-colors" title="Sign out">
             <LogOut size={14} strokeWidth={1.5} />
           </button>
         </div>
