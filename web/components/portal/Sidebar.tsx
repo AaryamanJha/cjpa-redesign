@@ -54,8 +54,14 @@ export function Sidebar() {
   const [open, setOpen] = useState(true)
 
   function handleLogout() {
-    logout()
-    if (session) signOut({ callbackUrl: "/login" })
+    if (session) {
+      // Microsoft session: clear localStorage first, then let signOut do the full-page redirect.
+      // Calling logout() here causes a race — PortalGuard re-logs in before signOut clears the cookie.
+      localStorage.removeItem("cjpa_portal_user_id")
+      signOut({ callbackUrl: "/login" })
+    } else {
+      logout()
+    }
   }
 
   const visibleItems = NAV_ITEMS.filter(
