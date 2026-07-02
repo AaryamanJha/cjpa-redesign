@@ -236,6 +236,18 @@ export const teamMembers: TeamMemberProfile[] = [
     portalEnabled: true,
   },
   {
+    id: "amyngeno",
+    name: "Amy Ng'eno",
+    title: "Analyst",
+    publicRole: "Intern Analyst",
+    portalRole: "Intern Analyst",
+    region: "IE University, Madrid",
+    group: "Intern Analysts",
+    image: "/team/WhatsApp Image 2026-06-12 at 1.24.53 PM (1).jpeg",
+    bio: "Incoming senior at IE University, Madrid pursuing a Dual Bachelor's in Laws and International Relations. Her professional experience spans policy research, corporate responsibility, and legal compliance across Kenya, Spain, the United Kingdom, and Central Asia — including work with Aga Khan Foundation USA in collaboration with USAID and at Igeria & Ngugi Advocates in Nairobi. Her analytical work bridges corporate compliance with regional economic realities, covering trade dynamics, infrastructure corridors, and macroeconomic policy alignment.",
+    portalEnabled: true,
+  },
+  {
     id: "senjunlu",
     name: "SenJun Lu",
     title: "Analyst",
