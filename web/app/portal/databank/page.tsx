@@ -143,19 +143,53 @@ const SOURCE_STYLE: Record<SourceTag, { badge: string; label: string }> = {
   Contact: { badge: "bg-zinc-800/40 text-zinc-400 border border-zinc-700/25",    label: "Contact" },
 }
 
+function TeamMemberDialog({ open, onClose, member, onSave }: {
+  open: boolean; onClose: () => void
+  member: { id: string; name: string; title: string; email: string }
+  onSave: (email: string) => void
+}) {
+  const [email, setEmail] = useState(member.email)
+  return (
+    <Dialog open={open} onOpenChange={v => { if (!v) onClose() }}>
+      <DialogContent className="max-w-md">
+        <DialogHeader><DialogTitle>Edit Team Member Contact</DialogTitle></DialogHeader>
+        <div className="space-y-4 mt-2">
+          <div className="space-y-1.5">
+            <Label>Name</Label>
+            <p className="font-sans text-[#F5F1E8] px-3 py-2 bg-[#0D1520] rounded-sm border border-[rgba(200,169,106,0.10)]" style={{ fontSize: "14px" }}>{member.name}</p>
+          </div>
+          <div className="space-y-1.5">
+            <Label>Title</Label>
+            <p className="font-sans text-[#A8B0C0] px-3 py-2 bg-[#0D1520] rounded-sm border border-[rgba(200,169,106,0.10)]" style={{ fontSize: "14px" }}>{member.title}</p>
+          </div>
+          <div className="space-y-1.5">
+            <Label>Email / Microsoft Sign-in Address</Label>
+            <Input type="email" placeholder="their@microsoft-account.com" value={email} onChange={e => setEmail(e.target.value)} />
+            <p className="text-[11px] text-[#A8B0C0]/40">This is also the address they use to sign in via Microsoft.</p>
+          </div>
+        </div>
+        <div className="flex justify-end gap-2 mt-4 pt-4 border-t border-border">
+          <Button variant="ghost" onClick={onClose}>Cancel</Button>
+          <Button onClick={() => onSave(email.trim())}>Save</Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
 function ContactsTab() {
-  const { teamMembers, clients, contacts, addContact, updateContact, deleteContact, updateClient } = usePortal()
+  const { teamMembers, clients, contacts, addContact, updateContact, deleteContact, updateClient, updateTeamMember } = usePortal()
   const [search, setSearch] = useState("")
   const [addOpen, setAddOpen] = useState(false)
   const [editContact, setEditContact] = useState<ContactRow | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<ContactRow | null>(null)
   const [editClient, setEditClient] = useState<{ id: string; contactName: string; contactTitle: string; contactEmail: string } | null>(null)
+  const [editTeamMember, setEditTeamMember] = useState<{ id: string; name: string; title: string; email: string } | null>(null)
 
-  // Build unified rows
+  // All team members shown regardless of whether email is set
   const rows: ContactRow[] = [
     ...teamMembers
-      .filter(m => m.email)
-      .map(m => ({ id: m.id, name: m.name, email: m.email!, title: m.title, company: "CJPA", phone: "", source: "Team" as SourceTag })),
+      .map(m => ({ id: m.id, name: m.name, email: m.email || "", title: m.title, company: "CJPA", phone: "", source: "Team" as SourceTag })),
     ...clients
       .filter(c => c.contactName)
       .map(c => ({ id: c.id, name: c.contactName, email: c.contactEmail || "", title: c.contactTitle, company: c.name, phone: "", source: "Client" as SourceTag, sourceId: c.id })),
@@ -179,9 +213,7 @@ function ContactsTab() {
 
   function handleEditContact(data: ContactFormData) {
     if (!editContact) return
-    if (editContact.source === "Contact") {
-      updateContact(editContact.id, { name: data.name, email: data.email, title: data.title, company: data.company, phone: data.phone })
-    }
+    updateContact(editContact.id, { name: data.name, email: data.email, title: data.title, company: data.company, phone: data.phone })
     setEditContact(null)
   }
 
@@ -195,6 +227,12 @@ function ContactsTab() {
     if (!editClient) return
     updateClient(editClient.id, { contactName, contactTitle, contactEmail })
     setEditClient(null)
+  }
+
+  function handleSaveTeamMember(email: string) {
+    if (!editTeamMember) return
+    updateTeamMember(editTeamMember.id, { email })
+    setEditTeamMember(null)
   }
 
   return (
@@ -291,22 +329,23 @@ function ContactsTab() {
 
                 {/* Actions */}
                 <div className="px-4 py-3.5 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                  {row.source !== "Team" && (
-                    <button
-                      onClick={() => {
-                        if (row.source === "Client") {
-                          const client = clients.find(c => c.id === row.id)
-                          if (client) setEditClient({ id: client.id, contactName: client.contactName, contactTitle: client.contactTitle, contactEmail: client.contactEmail })
-                        } else {
-                          setEditContact(row)
-                        }
-                      }}
-                      className="p-1.5 text-[#A8B0C0]/50 hover:text-[#C8A96A] transition-colors cursor-pointer"
-                      title="Edit"
-                    >
-                      <Pencil size={13} strokeWidth={1.5} />
-                    </button>
-                  )}
+                  <button
+                    onClick={() => {
+                      if (row.source === "Team") {
+                        const m = teamMembers.find(m => m.id === row.id)
+                        if (m) setEditTeamMember({ id: m.id, name: m.name, title: m.title, email: m.email || "" })
+                      } else if (row.source === "Client") {
+                        const client = clients.find(c => c.id === row.id)
+                        if (client) setEditClient({ id: client.id, contactName: client.contactName, contactTitle: client.contactTitle, contactEmail: client.contactEmail })
+                      } else {
+                        setEditContact(row)
+                      }
+                    }}
+                    className="p-1.5 text-[#A8B0C0]/50 hover:text-[#C8A96A] transition-colors cursor-pointer"
+                    title="Edit"
+                  >
+                    <Pencil size={13} strokeWidth={1.5} />
+                  </button>
                   {row.source === "Contact" && (
                     <button
                       onClick={() => setDeleteTarget(row)}
@@ -354,6 +393,16 @@ function ContactsTab() {
           clientId={editClient.id}
           initial={{ contactName: editClient.contactName, contactTitle: editClient.contactTitle, contactEmail: editClient.contactEmail }}
           onSave={handleSaveClientContact}
+        />
+      )}
+
+      {editTeamMember && (
+        <TeamMemberDialog
+          key={editTeamMember.id}
+          open={!!editTeamMember}
+          onClose={() => setEditTeamMember(null)}
+          member={editTeamMember}
+          onSave={handleSaveTeamMember}
         />
       )}
 
