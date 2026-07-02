@@ -238,9 +238,10 @@ function ComposeTab() {
   const [subject, setSubject]   = useState("")
   const [body, setBody]         = useState("")
   const [template, setTemplate] = useState("")
-  const [sending, setSending]   = useState(false)
-  const [sent, setSent]         = useState(false)
+  const [sending, setSending]     = useState(false)
+  const [sent, setSent]           = useState(false)
   const [sendError, setSendError] = useState("")
+  const [needsReauth, setNeedsReauth] = useState(false)
 
   // AI compose
   const [aiPrompt, setAiPrompt]         = useState("")
@@ -261,6 +262,7 @@ function ComposeTab() {
     if (!subject.trim() || !body.trim()) return
     setSending(true)
     setSendError("")
+    setNeedsReauth(false)
 
     if (outlookConnected && to) {
       try {
@@ -270,7 +272,16 @@ function ComposeTab() {
           body: JSON.stringify({ to, cc: cc || undefined, subject, body }),
         })
         const data = await res.json()
-        if (!res.ok) throw new Error(data.error || "Send failed")
+        if (!res.ok) {
+          const msg: string = data.error || "Send failed"
+          if (res.status === 403 || msg.toLowerCase().includes("access is denied") || msg.toLowerCase().includes("accessdenied")) {
+            setNeedsReauth(true)
+          } else {
+            setSendError(msg)
+          }
+          setSending(false)
+          return
+        }
         setSent(true)
         setTimeout(() => setSent(false), 4000)
       } catch (err) {
@@ -330,6 +341,24 @@ function ComposeTab() {
       <div className="space-y-5">
         {sent && (
           <SentBanner label={outlookConnected ? "Email sent via Outlook." : "Email sent."} />
+        )}
+        {needsReauth && (
+          <div className="flex items-start gap-2.5 border border-amber-700/30 bg-amber-900/10 rounded-sm px-4 py-3">
+            <Info size={13} strokeWidth={1.5} className="text-amber-400 shrink-0 mt-0.5" />
+            <div className="flex-1 min-w-0">
+              <p className="font-sans text-amber-300/90 font-medium" style={{ fontSize: "13px" }}>Outlook session needs to be refreshed.</p>
+              <p className="font-sans text-amber-300/60 mt-0.5" style={{ fontSize: "12px" }}>
+                Your current session was issued before email-send permission was granted. Sign out and sign back in with Microsoft to authorize sending.
+              </p>
+              <button
+                onClick={() => signIn("microsoft-entra-id", { callbackUrl: "/portal/email" })}
+                className="mt-2 inline-flex items-center gap-1.5 rounded-sm px-3 py-1.5 font-sans font-medium transition-colors cursor-pointer"
+                style={{ fontSize: "12px", background: "rgba(200,169,106,0.12)", color: "#C8A96A", border: "1px solid rgba(200,169,106,0.3)" }}
+              >
+                <Plug size={12} strokeWidth={1.5} /> Re-authorize Outlook
+              </button>
+            </div>
+          </div>
         )}
         {sendError && (
           <div className="flex items-center gap-2.5 border border-red-700/30 bg-red-900/15 rounded-sm px-4 py-3">
