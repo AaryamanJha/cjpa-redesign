@@ -11,10 +11,32 @@ export function Newsletter() {
   const inView = useInView(ref, { once: true, margin: "-60px" })
   const [email, setEmail] = useState("")
   const [submitted, setSubmitted] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (email) setSubmitted(true)
+    if (!email) return
+    setLoading(true)
+    setError(null)
+    try {
+      const res = await fetch("/api/newsletter/subscribe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      })
+      const data = await res.json() as { result: string; msg: string }
+      if (data.result === "success" || data.msg?.includes("already subscribed")) {
+        setSubmitted(true)
+      } else {
+        // Strip Mailchimp HTML tags from error message
+        setError(data.msg?.replace(/<[^>]+>/g, "") || "Something went wrong. Please try again.")
+      }
+    } catch {
+      setError("Network error. Please check your connection and try again.")
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -108,13 +130,14 @@ export function Newsletter() {
                   </div>
                   <button
                     type="submit"
-                    className="group flex items-center justify-between border border-[#C8A96A]/30 hover:border-[#C8A96A]/60 hover:bg-[#C8A96A]/6 text-[#C8A96A] px-6 py-4 transition-all duration-300 cursor-pointer"
+                    disabled={loading}
+                    className="group flex items-center justify-between border border-[#C8A96A]/30 hover:border-[#C8A96A]/60 hover:bg-[#C8A96A]/6 text-[#C8A96A] px-6 py-4 transition-all duration-300 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <span
                       className="font-sans font-medium uppercase tracking-[0.2em]"
                       style={{ fontSize: "11px" }}
                     >
-                      Subscribe
+                      {loading ? "Subscribing…" : "Subscribe"}
                     </span>
                     <ArrowRight
                       size={15}
@@ -122,6 +145,11 @@ export function Newsletter() {
                       className="opacity-60 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300"
                     />
                   </button>
+                  {error && (
+                    <p className="text-red-400 font-sans font-light" style={{ fontSize: "12px" }}>
+                      {error}
+                    </p>
+                  )}
                   <p
                     className="text-[#A8B0C0]/40 font-sans font-light"
                     style={{ fontSize: "12px" }}

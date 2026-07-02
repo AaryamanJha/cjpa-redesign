@@ -4,14 +4,23 @@ import { NextRequest, NextResponse } from "next/server"
 interface GraphSendBody {
   to: string
   cc?: string
+  bcc?: string
   subject: string
   body: string
   bodyType?: "Text" | "HTML"
   accessToken?: string
 }
 
+function parseAddresses(list?: string) {
+  return list
+    ?.split(",")
+    .map((a) => a.trim())
+    .filter(Boolean)
+    .map((address) => ({ emailAddress: { address } }))
+}
+
 export async function POST(req: NextRequest) {
-  const { to, cc, subject, body, bodyType = "Text", accessToken }: GraphSendBody = await req.json()
+  const { to, cc, bcc, subject, body, bodyType = "Text", accessToken }: GraphSendBody = await req.json()
 
   if (!accessToken) {
     return NextResponse.json(
@@ -24,17 +33,15 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Missing required fields: to, subject, body" }, { status: 400 })
   }
 
-  const ccRecipients = cc
-    ?.split(",")
-    .map((address) => address.trim())
-    .filter(Boolean)
-    .map((address) => ({ emailAddress: { address } }))
+  const ccRecipients = parseAddresses(cc)
+  const bccRecipients = parseAddresses(bcc)
 
   const message = {
     subject,
     body: { contentType: bodyType, content: body },
     toRecipients: [{ emailAddress: { address: to } }],
     ...(ccRecipients?.length ? { ccRecipients } : {}),
+    ...(bccRecipients?.length ? { bccRecipients } : {}),
   }
 
   const res = await fetch("https://graph.microsoft.com/v1.0/me/sendMail", {

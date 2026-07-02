@@ -2,10 +2,10 @@
 
 import { useState, useMemo, type DragEvent } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { X, Users, Calendar, Target, ChevronRight, Pencil, Plus, GripVertical, Trash2, Search } from "lucide-react"
+import { X, Users, Calendar, Target, ChevronRight, Pencil, Plus, GripVertical, Trash2, Search, FileText, ChevronDown } from "lucide-react"
 import { Topbar } from "@/components/portal/Topbar"
 import { usePortal } from "@/contexts/PortalContext"
-import { Project, ProjectStatus, PortalUser, ClientStatus } from "@/types/portal"
+import { Project, ProjectStatus, PortalUser, ClientStatus, MeetingNote, NoteType } from "@/types/portal"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
@@ -14,6 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button"
 import { Client } from "@/types/portal"
 import { cn } from "@/lib/utils"
+import { useProjectNotes } from "@/hooks/useProjectNotes"
 
 // ─── config ──────────────────────────────────────────────────────────────────
 
@@ -543,11 +544,279 @@ function EditProjectDialog({ open, onClose, project, onSave, clients, teamMember
   )
 }
 
+// ─── note types ──────────────────────────────────────────────────────────────
+
+const NOTE_TYPES: NoteType[] = ["Meeting Note", "Transcript", "Call Summary", "Internal"]
+
+const NOTE_STYLE: Record<NoteType, { badge: string; dot: string }> = {
+  "Meeting Note":  { badge: "bg-blue-900/30 text-blue-300 border border-blue-700/25",   dot: "#63B3ED" },
+  "Transcript":    { badge: "bg-amber-900/30 text-amber-300 border border-amber-700/25", dot: "#C8A96A" },
+  "Call Summary":  { badge: "bg-green-900/30 text-green-300 border border-green-700/25", dot: "#68D391" },
+  "Internal":      { badge: "bg-zinc-800/40 text-zinc-400 border border-zinc-700/25",    dot: "#A8B0C0" },
+}
+
+interface NoteFormData {
+  title: string
+  date: string
+  type: NoteType
+  body: string
+}
+
+function todayIso() {
+  return new Date().toISOString().split("T")[0]
+}
+
+function NoteDialog({
+  open,
+  onClose,
+  initial,
+  onSave,
+  authorName,
+}: {
+  open: boolean
+  onClose: () => void
+  initial?: MeetingNote
+  onSave: (form: NoteFormData) => void
+  authorName: string
+}) {
+  const [form, setForm] = useState<NoteFormData>(() => initial ? {
+    title: initial.title,
+    date: initial.date,
+    type: initial.type,
+    body: initial.body,
+  } : { title: "", date: todayIso(), type: "Meeting Note", body: "" })
+  const [errors, setErrors] = useState<Partial<Record<keyof NoteFormData, string>>>({})
+
+  function set<K extends keyof NoteFormData>(k: K, v: NoteFormData[K]) {
+    setForm((f) => ({ ...f, [k]: v }))
+    setErrors((e) => ({ ...e, [k]: undefined }))
+  }
+
+  function handleSave() {
+    const e: Partial<Record<keyof NoteFormData, string>> = {}
+    if (!form.title.trim()) e.title = "Required"
+    if (!form.body.trim()) e.body = "Required"
+    if (Object.keys(e).length) { setErrors(e); return }
+    onSave(form)
+    onClose()
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={(v) => { if (!v) onClose() }}>
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>{initial ? "Edit Note" : "New Note"}</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4 mt-2">
+          <div className="space-y-1.5">
+            <Label>Title<span className="text-red-400 ml-0.5">*</span></Label>
+            <Input
+              value={form.title}
+              onChange={(e) => set("title", e.target.value)}
+              placeholder="e.g. Kickoff call with Earl and David"
+            />
+            {errors.title && <p className="text-[12px] text-red-400">{errors.title}</p>}
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <Label>Type</Label>
+              <Select value={form.type} onValueChange={(v) => set("type", v as NoteType)}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {NOTE_TYPES.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1.5">
+              <Label>Date</Label>
+              <Input type="date" value={form.date} onChange={(e) => set("date", e.target.value)} className="cursor-pointer" />
+            </div>
+          </div>
+          <div className="space-y-1.5">
+            <Label>Notes / Transcript<span className="text-red-400 ml-0.5">*</span></Label>
+            <Textarea
+              value={form.body}
+              onChange={(e) => set("body", e.target.value)}
+              rows={14}
+              placeholder="Paste meeting transcript, key discussion points, action items, or raw notes here…"
+              className="font-mono resize-y"
+              style={{ fontSize: "13px", lineHeight: "1.7" }}
+            />
+            {errors.body && <p className="text-[12px] text-red-400">{errors.body}</p>}
+          </div>
+          <p className="text-[11px] text-[#A8B0C0]/40">
+            Author: {initial?.author ?? authorName}
+          </p>
+        </div>
+        <div className="flex justify-end gap-2 pt-4 border-t border-border">
+          <Button variant="ghost" onClick={onClose}>Cancel</Button>
+          <Button onClick={handleSave}>{initial ? "Save Changes" : "Save Note"}</Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+function NotesTab({ projectId, authorName }: { projectId: string; authorName: string }) {
+  const { notes, addNote, updateNote, deleteNote } = useProjectNotes(projectId)
+  const [addOpen, setAddOpen] = useState(false)
+  const [editingNote, setEditingNote] = useState<MeetingNote | null>(null)
+  const [expandedId, setExpandedId] = useState<string | null>(null)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
+
+  function handleAdd(form: NoteFormData) {
+    const note = addNote({ ...form, author: authorName })
+    setExpandedId(note.id)
+  }
+
+  function handleEdit(form: NoteFormData) {
+    if (!editingNote) return
+    updateNote(editingNote.id, form)
+    setEditingNote(null)
+  }
+
+  return (
+    <div className="px-6 py-5 flex-1">
+      <div className="flex items-center justify-between mb-4">
+        <p className="text-[#A8B0C0] font-sans uppercase" style={{ fontSize: "10px", letterSpacing: "0.15em" }}>
+          {notes.length} {notes.length === 1 ? "note" : "notes"}
+        </p>
+        <button
+          onClick={() => setAddOpen(true)}
+          className="flex items-center gap-1.5 rounded-sm px-2.5 py-1 font-sans font-medium transition-colors cursor-pointer hover:opacity-85"
+          style={{ fontSize: "12px", background: "rgba(200,169,106,0.10)", color: "#C8A96A", border: "1px solid rgba(200,169,106,0.25)" }}
+        >
+          <Plus size={12} strokeWidth={2} /> New Note
+        </button>
+      </div>
+
+      {notes.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-16 gap-3 text-center">
+          <FileText size={28} className="text-[#A8B0C0]/20" strokeWidth={1} />
+          <p className="font-sans text-[#A8B0C0]/40" style={{ fontSize: "13px" }}>
+            No notes yet. Add meeting notes, transcripts, or call summaries.
+          </p>
+        </div>
+      ) : (
+        <div className="space-y-2">
+          {notes.map((note) => {
+            const style = NOTE_STYLE[note.type]
+            const isExpanded = expandedId === note.id
+
+            return (
+              <div
+                key={note.id}
+                className="rounded-sm border border-[rgba(200,169,106,0.10)] bg-[#070B14] overflow-hidden"
+              >
+                <button
+                  onClick={() => setExpandedId(isExpanded ? null : note.id)}
+                  className="w-full flex items-start gap-3 p-4 text-left hover:bg-[#101827] transition-colors group"
+                >
+                  <div className="w-0.5 self-stretch rounded-full shrink-0" style={{ backgroundColor: style.dot }} />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+                      <span className={cn("rounded-sm px-1.5 py-0.5 text-[10px] font-medium tracking-wide uppercase shrink-0", style.badge)}>
+                        {note.type}
+                      </span>
+                      <span className="text-[10px] text-[#A8B0C0]/50 font-sans">{note.date}</span>
+                    </div>
+                    <p className="font-sans text-[#F5F1E8] font-medium leading-snug" style={{ fontSize: "14px" }}>
+                      {note.title}
+                    </p>
+                    {!isExpanded && (
+                      <p className="font-sans text-[#A8B0C0] mt-1 line-clamp-2 leading-relaxed" style={{ fontSize: "12.5px" }}>
+                        {note.body.slice(0, 160)}{note.body.length > 160 ? "…" : ""}
+                      </p>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0 mt-0.5">
+                    <span
+                      onClick={(e) => { e.stopPropagation(); setEditingNote(note) }}
+                      className="text-[#A8B0C0]/40 hover:text-[#C8A96A] transition-colors opacity-0 group-hover:opacity-100"
+                      role="button"
+                      aria-label="Edit note"
+                    >
+                      <Pencil size={12} strokeWidth={1.5} />
+                    </span>
+                    <span
+                      onClick={(e) => { e.stopPropagation(); setDeletingId(note.id) }}
+                      className="text-[#A8B0C0]/40 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100"
+                      role="button"
+                      aria-label="Delete note"
+                    >
+                      <Trash2 size={12} strokeWidth={1.5} />
+                    </span>
+                    <ChevronDown
+                      size={14}
+                      strokeWidth={1.5}
+                      className={cn("text-[#A8B0C0]/40 transition-transform duration-200", isExpanded && "rotate-180")}
+                    />
+                  </div>
+                </button>
+
+                {isExpanded && (
+                  <div className="px-4 pb-4 border-t border-[rgba(200,169,106,0.08)]">
+                    <div className="pl-[13px] pt-3">
+                      <p className="font-mono text-[#F5F1E8]/80 leading-relaxed whitespace-pre-wrap" style={{ fontSize: "12.5px" }}>
+                        {note.body}
+                      </p>
+                      <p className="font-sans text-[#A8B0C0]/40 mt-3" style={{ fontSize: "11px" }}>
+                        Added by {note.author}
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )
+          })}
+        </div>
+      )}
+
+      <NoteDialog
+        open={addOpen}
+        onClose={() => setAddOpen(false)}
+        onSave={handleAdd}
+        authorName={authorName}
+      />
+
+      {editingNote && (
+        <NoteDialog
+          key={editingNote.id}
+          open={!!editingNote}
+          onClose={() => setEditingNote(null)}
+          initial={editingNote}
+          onSave={handleEdit}
+          authorName={authorName}
+        />
+      )}
+
+      <Dialog open={!!deletingId} onOpenChange={(v) => { if (!v) setDeletingId(null) }}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader><DialogTitle>Delete Note?</DialogTitle></DialogHeader>
+          <p className="font-sans text-[#A8B0C0] mt-1" style={{ fontSize: "14px" }}>
+            This note will be permanently removed.
+          </p>
+          <div className="flex justify-end gap-2 pt-4 border-t border-border mt-2">
+            <Button variant="ghost" onClick={() => setDeletingId(null)}>Cancel</Button>
+            <Button
+              className="bg-red-500/20 text-red-400 border border-red-500/30 hover:bg-red-500/30"
+              onClick={() => { if (deletingId) deleteNote(deletingId); setDeletingId(null) }}
+            >
+              Delete
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </div>
+  )
+}
+
 // ─── project detail panel ─────────────────────────────────────────────────────
 
-function ProjectDetailPanel({ project, onClose, allTasks, onEdit, onDelete }: {
-  project: Project; onClose: () => void; allTasks: ReturnType<typeof usePortal>["tasks"]; onEdit: () => void; onDelete: () => void
+function ProjectDetailPanel({ project, onClose, allTasks, onEdit, onDelete, currentUserName }: {
+  project: Project; onClose: () => void; allTasks: ReturnType<typeof usePortal>["tasks"]; onEdit: () => void; onDelete: () => void; currentUserName: string
 }) {
+  const [activeTab, setActiveTab] = useState<"overview" | "notes">("overview")
   const color = STATUS_COLOR[project.status]
   const projectTasks = allTasks.filter((t) => t.project === project.projectName)
   const days = daysUntil(project.targetDeadline)
@@ -598,6 +867,28 @@ function ProjectDetailPanel({ project, onClose, allTasks, onEdit, onDelete }: {
         </div>
       </div>
 
+      {/* Tab bar */}
+      <div className="flex border-b border-[#C8A96A]/10 px-6">
+        {(["overview", "notes"] as const).map((tab) => (
+          <button
+            key={tab}
+            onClick={() => setActiveTab(tab)}
+            className={cn(
+              "font-sans font-medium py-3 pr-5 transition-colors cursor-pointer border-b-2 -mb-px capitalize",
+              activeTab === tab
+                ? "text-[#C8A96A] border-[#C8A96A]"
+                : "text-[#A8B0C0]/50 border-transparent hover:text-[#A8B0C0]"
+            )}
+            style={{ fontSize: "12px", letterSpacing: "0.08em" }}
+          >
+            {tab}
+          </button>
+        ))}
+      </div>
+
+      {activeTab === "notes" ? (
+        <NotesTab projectId={project.id} authorName={currentUserName} />
+      ) : (
       <div className="px-6 py-5 space-y-5 flex-1">
         <div>
           <p className="text-[#A8B0C0] font-sans uppercase mb-2" style={{ fontSize: "10px", letterSpacing: "0.15em" }}>Summary</p>
@@ -685,6 +976,7 @@ function ProjectDetailPanel({ project, onClose, allTasks, onEdit, onDelete }: {
           </div>
         )}
       </div>
+      )}
     </motion.div>
   )
 }
@@ -692,7 +984,7 @@ function ProjectDetailPanel({ project, onClose, allTasks, onEdit, onDelete }: {
 // ─── main page ────────────────────────────────────────────────────────────────
 
 export default function ProjectsPage() {
-  const { tasks, projects, clients, teamMembers, addProject, updateProject, deleteProject, addClient } = usePortal()
+  const { tasks, projects, clients, teamMembers, user, addProject, updateProject, deleteProject, addClient } = usePortal()
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [isAdding, setIsAdding] = useState(false)
@@ -903,6 +1195,7 @@ export default function ProjectsPage() {
               allTasks={tasks}
               onEdit={() => setEditingId(selectedProject.id)}
               onDelete={() => setDeleteTarget(selectedProject)}
+              currentUserName={user?.name ?? "Team Member"}
             />
           )}
         </AnimatePresence>

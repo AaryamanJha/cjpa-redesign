@@ -5,13 +5,15 @@ import { cn } from "@/lib/utils"
 import { Topbar } from "@/components/portal/Topbar"
 import { usePortal } from "@/contexts/PortalContext"
 import { Announcement, AnnouncementPriority, AnnouncementAudience } from "@/types/portal"
-import { Plus, Pencil } from "lucide-react"
+import { Plus, Pencil, Trash2 } from "lucide-react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
+import { useSession } from "next-auth/react"
+import { teamMembers } from "@/data/teamMembers"
 
 const PRIORITY_STYLE: Record<AnnouncementPriority, { badge: string; bar: string; label: string }> = {
   Urgent:    { badge: "bg-red-900/30 text-red-300 border border-red-700/25",       bar: "#FC8181", label: "Urgent"    },
@@ -49,12 +51,14 @@ function AnnouncementDialog({
   initial,
   currentUser,
   onSave,
+  canNotify,
 }: {
   open: boolean
   onClose: () => void
   initial?: Announcement
   currentUser: string
-  onSave: (announcement: Announcement) => void
+  onSave: (announcement: Announcement, notify: boolean) => void
+  canNotify: boolean
 }) {
   const [form, setForm] = useState<AnnouncementFormData>(() => initial ? {
     title: initial.title,
@@ -63,6 +67,7 @@ function AnnouncementDialog({
     audience: initial.audience,
   } : EMPTY_FORM)
   const [errors, setErrors] = useState<Partial<Record<keyof AnnouncementFormData, string>>>({})
+  const [notify, setNotify] = useState(false)
 
   function set<K extends keyof AnnouncementFormData>(key: K, value: AnnouncementFormData[K]) {
     setForm((prev) => ({ ...prev, [key]: value }))
@@ -87,9 +92,10 @@ function AnnouncementDialog({
       audience: form.audience,
       postedBy: initial?.postedBy ?? currentUser,
       date: initial?.date ?? today,
-    })
+    }, notify)
     setForm(EMPTY_FORM)
     setErrors({})
+    setNotify(false)
     onClose()
   }
 
@@ -133,6 +139,20 @@ function AnnouncementDialog({
             <Textarea id="announcement-message" rows={6} value={form.message} onChange={(event) => set("message", event.target.value)} />
             {errors.message && <p className="text-[12px] text-red-400">{errors.message}</p>}
           </div>
+
+          {!initial && canNotify && (
+            <label className="flex items-center gap-2.5 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={notify}
+                onChange={(e) => setNotify(e.target.checked)}
+                className="rounded border-[#A8B0C0]/40 accent-[#C8A96A] w-3.5 h-3.5"
+              />
+              <span className="text-[13px] text-[#A8B0C0]">
+                Notify team by email
+              </span>
+            </label>
+          )}
         </div>
 
         <div className="flex justify-end gap-2 pt-4 border-t border-border">
@@ -144,19 +164,90 @@ function AnnouncementDialog({
   )
 }
 
+function DeleteConfirmDialog({
+  announcement,
+  onConfirm,
+  onCancel,
+}: {
+  announcement: Announcement
+  onConfirm: () => void
+  onCancel: () => void
+}) {
+  return (
+    <Dialog open onOpenChange={(open) => { if (!open) onCancel() }}>
+      <DialogContent className="max-w-sm">
+        <DialogHeader>
+          <DialogTitle>Delete Announcement</DialogTitle>
+        </DialogHeader>
+        <p className="text-[14px] text-[#A8B0C0] mt-1">
+          Are you sure you want to delete <span className="text-[#F5F1E8]">&ldquo;{announcement.title}&rdquo;</span>? This cannot be undone.
+        </p>
+        <div className="flex justify-end gap-2 pt-4 border-t border-border mt-2">
+          <Button variant="ghost" onClick={onCancel}>Cancel</Button>
+          <Button variant="destructive" onClick={onConfirm}>Delete</Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+async function sendTeamNotification(
+  announcement: Announcement,
+  accessToken: string,
+  senderEmail: string
+) {
+  const audienceRoles = AUDIENCE_ROLES[announcement.audience] ?? []
+  const recipientEmails = teamMembers
+    .filter((m) => m.email && audienceRoles.includes(m.portalRole))
+    .map((m) => m.email as string)
+    .filter((e) => e !== senderEmail)
+
+  if (recipientEmails.length === 0) return
+
+  const priorityLabel = announcement.priority === "Urgent" ? "🔴 URGENT" :
+    announcement.priority === "Important" ? "🟡 Important" : "📋"
+
+  const subject = `${priorityLabel} CJPA Announcement: ${announcement.title}`
+  const body = `<div style="font-family:sans-serif;color:#1a1a1a;max-width:600px">
+<p style="color:#888;font-size:12px;margin-bottom:16px">
+  CJPA Internal — ${announcement.audience} · ${announcement.date}
+</p>
+<h2 style="font-size:20px;margin:0 0 16px">${announcement.title}</h2>
+<p style="font-size:15px;line-height:1.7;white-space:pre-wrap">${announcement.message}</p>
+<hr style="margin:24px 0;border:none;border-top:1px solid #eee"/>
+<p style="font-size:12px;color:#aaa">Posted by ${announcement.postedBy} via the CJPA Portal</p>
+</div>`
+
+  await fetch("/api/email/graph-send", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      to: senderEmail,
+      bcc: recipientEmails.join(","),
+      subject,
+      body,
+      bodyType: "HTML",
+      accessToken,
+    }),
+  })
+}
+
 export default function AnnouncementsPage() {
-  const { user, announcements, isAdmin, hasPermission, addAnnouncement, updateAnnouncement } = usePortal()
+  const { user, announcements, isAdmin, hasPermission, addAnnouncement, updateAnnouncement, deleteAnnouncement } = usePortal()
+  const { data: session } = useSession()
   const [expanded, setExpanded] = useState<string | null>(announcements[0]?.id ?? null)
   const [createOpen, setCreateOpen] = useState(false)
   const [editing, setEditing] = useState<Announcement | null>(null)
+  const [deleting, setDeleting] = useState<Announcement | null>(null)
   const canManage = isAdmin || hasPermission("manage_team")
+  const hasOutlook = !!(session as { accessToken?: string } | null)?.accessToken
 
   const visible = announcements.filter((a) => {
     if (!user) return false
     return AUDIENCE_ROLES[a.audience]?.includes(user.role)
   })
 
-  function handleSave(announcement: Announcement) {
+  async function handleSave(announcement: Announcement, notify: boolean) {
     if (editing) {
       updateAnnouncement(editing.id, announcement)
       setEditing(null)
@@ -164,6 +255,19 @@ export default function AnnouncementsPage() {
     }
     addAnnouncement(announcement)
     setExpanded(announcement.id)
+
+    if (notify && hasOutlook && session?.user?.email) {
+      const token = (session as { accessToken?: string }).accessToken
+      if (token) {
+        sendTeamNotification(announcement, token, session.user.email).catch(console.error)
+      }
+    }
+  }
+
+  function handleDelete(announcement: Announcement) {
+    deleteAnnouncement(announcement.id)
+    setDeleting(null)
+    if (expanded === announcement.id) setExpanded(null)
   }
 
   return (
@@ -210,17 +314,30 @@ export default function AnnouncementsPage() {
                     </div>
                     <div className="flex items-center gap-2 shrink-0 mt-0.5">
                       {canManage && (
-                        <span
-                          onClick={(event) => {
-                            event.stopPropagation()
-                            setEditing(ann)
-                          }}
-                          className="text-[#A8B0C0]/60 hover:text-[#C8A96A] transition-colors"
-                          role="button"
-                          aria-label={`Edit ${ann.title}`}
-                        >
-                          <Pencil size={14} strokeWidth={1.5} />
-                        </span>
+                        <>
+                          <span
+                            onClick={(event) => {
+                              event.stopPropagation()
+                              setEditing(ann)
+                            }}
+                            className="text-[#A8B0C0]/60 hover:text-[#C8A96A] transition-colors"
+                            role="button"
+                            aria-label={`Edit ${ann.title}`}
+                          >
+                            <Pencil size={14} strokeWidth={1.5} />
+                          </span>
+                          <span
+                            onClick={(event) => {
+                              event.stopPropagation()
+                              setDeleting(ann)
+                            }}
+                            className="text-[#A8B0C0]/60 hover:text-red-400 transition-colors"
+                            role="button"
+                            aria-label={`Delete ${ann.title}`}
+                          >
+                            <Trash2 size={14} strokeWidth={1.5} />
+                          </span>
+                        </>
                       )}
                       <div className={cn("text-[#A8B0C0] transition-transform duration-200", isOpen && "rotate-180")}>
                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -254,6 +371,7 @@ export default function AnnouncementsPage() {
           onClose={() => setCreateOpen(false)}
           currentUser={user.name}
           onSave={handleSave}
+          canNotify={hasOutlook}
         />
       )}
 
@@ -265,6 +383,15 @@ export default function AnnouncementsPage() {
           initial={editing}
           currentUser={user.name}
           onSave={handleSave}
+          canNotify={false}
+        />
+      )}
+
+      {deleting && (
+        <DeleteConfirmDialog
+          announcement={deleting}
+          onConfirm={() => handleDelete(deleting)}
+          onCancel={() => setDeleting(null)}
         />
       )}
     </>

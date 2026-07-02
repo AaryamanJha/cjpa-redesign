@@ -122,6 +122,19 @@ export interface Contact {
   phone?: string
 }
 
+export type NoteType = "Meeting Note" | "Transcript" | "Call Summary" | "Internal"
+
+export interface MeetingNote {
+  id: string
+  projectId: string
+  title: string
+  date: string
+  type: NoteType
+  body: string
+  author: string
+  createdAt: string
+}
+
 export interface NewsletterDraft {
   id: string
   title: string
