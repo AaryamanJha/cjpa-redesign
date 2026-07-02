@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { signIn, useSession } from "next-auth/react"
 import { Send, CheckCircle2, Info, ChevronDown, Sparkles, Loader2, Plug } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -118,6 +118,112 @@ function PlaceholderNote({ service }: { service: string }) {
   )
 }
 
+// ─── To combobox ─────────────────────────────────────────────────────────────
+
+interface Contact { label: string; sublabel: string; email: string; group: "Team" | "Clients" }
+
+function ToCombobox({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const { teamMembers, clients } = usePortal()
+  const [open, setOpen] = useState(false)
+  const [query, setQuery] = useState(value)
+  const ref = useRef<HTMLDivElement>(null)
+
+  const all: Contact[] = [
+    ...teamMembers
+      .filter((m) => m.email)
+      .map((m) => ({ label: m.name, sublabel: m.title, email: m.email!, group: "Team" as const })),
+    ...clients
+      .filter((c) => c.contactEmail)
+      .map((c) => ({ label: c.contactName || c.name, sublabel: c.name, email: c.contactEmail!, group: "Clients" as const })),
+  ]
+
+  const filtered = query.trim()
+    ? all.filter(
+        (c) =>
+          c.label.toLowerCase().includes(query.toLowerCase()) ||
+          c.email.toLowerCase().includes(query.toLowerCase()) ||
+          c.sublabel.toLowerCase().includes(query.toLowerCase())
+      )
+    : all
+
+  const byGroup = {
+    Team: filtered.filter((c) => c.group === "Team"),
+    Clients: filtered.filter((c) => c.group === "Clients"),
+  }
+
+  useEffect(() => {
+    if (!open) return
+    function handle(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
+    }
+    document.addEventListener("mousedown", handle)
+    return () => document.removeEventListener("mousedown", handle)
+  }, [open])
+
+  function select(email: string) {
+    onChange(email)
+    setQuery(email)
+    setOpen(false)
+  }
+
+  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
+    setQuery(e.target.value)
+    onChange(e.target.value)
+    setOpen(true)
+  }
+
+  return (
+    <div className="relative" ref={ref}>
+      <input
+        type="text"
+        value={query}
+        onChange={handleChange}
+        onFocus={() => setOpen(true)}
+        placeholder="Type an email address or search team / clients…"
+        className="w-full rounded-sm border border-input bg-background px-3 py-2 font-sans text-[#F5F1E8] placeholder:text-[#A8B0C0]/35 focus:outline-none focus:ring-1 focus:ring-[#C8A96A]/30 focus:border-[#C8A96A]/40 transition-colors"
+        style={{ fontSize: "14px" }}
+        autoComplete="off"
+      />
+
+      {open && filtered.length > 0 && (
+        <div className="absolute left-0 right-0 top-full mt-1 rounded-sm border border-[#C8A96A]/15 bg-[#0D1526] shadow-2xl z-50 max-h-60 overflow-y-auto">
+          {(["Team", "Clients"] as const).map((group) => {
+            const items = byGroup[group]
+            if (!items.length) return null
+            return (
+              <div key={group}>
+                <div className="px-3 py-1.5 font-sans uppercase tracking-widest text-[#A8B0C0]/40 border-b border-[rgba(200,169,106,0.06)]" style={{ fontSize: "10px" }}>
+                  {group}
+                </div>
+                {items.map((c) => (
+                  <button
+                    key={c.email}
+                    type="button"
+                    onClick={() => select(c.email)}
+                    className="w-full flex items-center gap-3 px-3 py-2.5 text-left hover:bg-[#101827] transition-colors"
+                  >
+                    <div className="w-6 h-6 rounded-sm bg-[#C8A96A]/08 border border-[#C8A96A]/15 flex items-center justify-center shrink-0">
+                      <span className="font-sans text-[#C8A96A]/60 font-medium" style={{ fontSize: "10px" }}>
+                        {c.label.charAt(0)}
+                      </span>
+                    </div>
+                    <div className="min-w-0">
+                      <p className="font-sans text-[#F5F1E8] truncate" style={{ fontSize: "13px" }}>{c.label}</p>
+                      <p className="font-sans text-[#A8B0C0]/50 truncate" style={{ fontSize: "11px" }}>
+                        {c.email} · {c.sublabel}
+                      </p>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )
+          })}
+        </div>
+      )}
+    </div>
+  )
+}
+
 // ─── compose tab ──────────────────────────────────────────────────────────────
 
 const TONES = [
@@ -128,7 +234,7 @@ const TONES = [
 ]
 
 function ComposeTab() {
-  const { clients } = usePortal()
+  const { clients, teamMembers } = usePortal()
   const { data: session } = useSession()
   const outlookConnected = !!session?.accessToken
 
@@ -162,19 +268,11 @@ function ComposeTab() {
     setSendError("")
 
     if (outlookConnected && to) {
-      // Real send via Microsoft Graph
-      const selectedClient = clients.find(c => c.id === to)
-      const toEmail = selectedClient?.contactEmail
-      if (!toEmail) {
-        setSendError("Selected client has no email address.")
-        setSending(false)
-        return
-      }
       try {
         const res = await fetch("/api/email/graph-send", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ to: toEmail, cc: cc || undefined, subject, body }),
+          body: JSON.stringify({ to, cc: cc || undefined, subject, body }),
         })
         const data = await res.json()
         if (!res.ok) throw new Error(data.error || "Send failed")
@@ -184,7 +282,6 @@ function ComposeTab() {
         setSendError(err instanceof Error ? err.message : "Failed to send email.")
       }
     } else {
-      // Simulated send (no Outlook session)
       await new Promise(r => setTimeout(r, 1000))
       setSent(true)
       setTimeout(() => setSent(false), 4000)
@@ -193,18 +290,22 @@ function ComposeTab() {
     setSending(false)
   }
 
+  function recipientCtx() {
+    const allContacts = [
+      ...teamMembers.filter((m) => m.email).map((m) => ({ email: m.email!, name: m.name, org: "CJPA" })),
+      ...clients.filter((c) => c.contactEmail).map((c) => ({ email: c.contactEmail!, name: c.contactName || c.name, org: c.name })),
+    ]
+    const match = allContacts.find((c) => c.email.toLowerCase() === to.toLowerCase())
+    return match ? `${match.name} at ${match.org}` : to || "the recipient"
+  }
+
   async function generateDraft() {
     if (!aiPrompt.trim() || isGenerating) return
     setAiDraft("")
     setAiError("")
     setIsGenerating(true)
 
-    const selectedClient = clients.find(c => c.id === to)
-    const recipientCtx = selectedClient
-      ? `${selectedClient.contactName || selectedClient.name} at ${selectedClient.name}`
-      : "the client"
-
-    const userMsg = `Draft a professional client email for CJPA Global Advisors.\nTone: ${aiTone}\nRecipient: ${recipientCtx}\n\nInstructions: ${aiPrompt}\n\nFormat your response exactly as:\nSUBJECT: [subject line here]\n\n---\n\n[email body here]\n\nSign off with "[Your Name]\\nCJPA Global Advisors"`
+    const userMsg = `Draft a professional client email for CJPA Global Advisors.\nTone: ${aiTone}\nRecipient: ${recipientCtx()}\n\nInstructions: ${aiPrompt}\n\nFormat your response exactly as:\nSUBJECT: [subject line here]\n\n---\n\n[email body here]\n\nSign off with "[Your Name]\\nCJPA Global Advisors"`
 
     try {
       const res = await fetch("/api/ai/chat", {
@@ -226,8 +327,6 @@ function ComposeTab() {
     if (s) setSubject(s)
     if (b) setBody(b)
   }
-
-  const selectedClient = clients.find(c => c.id === to)
 
   return (
     <div className="grid lg:grid-cols-[1fr_360px] gap-7 items-start max-w-5xl">
@@ -292,21 +391,7 @@ function ComposeTab() {
         {/* To */}
         <div className="space-y-1.5">
           <Label>To</Label>
-          <Select value={to} onValueChange={setTo}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select a client contact…" />
-            </SelectTrigger>
-            <SelectContent>
-              {clients.filter(c => c.contactEmail).map(c => (
-                <SelectItem key={c.id} value={c.id}>
-                  {c.contactName} — {c.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          {selectedClient?.contactEmail && (
-            <p className="text-[12px] text-[#A8B0C0]/50 ml-0.5">{selectedClient.contactEmail}</p>
-          )}
+          <ToCombobox value={to} onChange={setTo} />
         </div>
 
         {/* CC */}
@@ -339,7 +424,7 @@ function ComposeTab() {
             {sending ? <>Sending…</> : <><Send size={13} strokeWidth={1.5} /> Send Email</>}
           </Button>
           <button
-            onClick={() => { setTo(""); setCc(""); setSubject(""); setBody(""); setTemplate("") }}
+            onClick={() => { setTo(""); setCc(""); setSubject(""); setBody(""); setTemplate(""); }}
             className="text-[#A8B0C0]/40 hover:text-[#A8B0C0] font-sans transition-colors cursor-pointer"
             style={{ fontSize: "12px" }}
           >
