@@ -1,7 +1,5 @@
-// Sends email via Microsoft Graph API using the signed-in user's Outlook account.
-// Requires: AZURE_AD_CLIENT_ID, AZURE_AD_CLIENT_SECRET, AUTH_SECRET in environment.
+// Sends email via Microsoft Graph API using the signed-in user's access token.
 import { NextRequest, NextResponse } from "next/server"
-import { auth } from "@/auth"
 
 interface GraphSendBody {
   to: string
@@ -9,19 +7,18 @@ interface GraphSendBody {
   subject: string
   body: string
   bodyType?: "Text" | "HTML"
+  accessToken?: string
 }
 
 export async function POST(req: NextRequest) {
-  const session = await auth()
+  const { to, cc, subject, body, bodyType = "Text", accessToken }: GraphSendBody = await req.json()
 
-  if (!session?.accessToken) {
+  if (!accessToken) {
     return NextResponse.json(
       { error: "No Outlook session. Sign in with Microsoft to send real emails." },
       { status: 401 }
     )
   }
-
-  const { to, cc, subject, body, bodyType = "Text" }: GraphSendBody = await req.json()
 
   if (!to || !subject || !body) {
     return NextResponse.json({ error: "Missing required fields: to, subject, body" }, { status: 400 })
@@ -43,7 +40,7 @@ export async function POST(req: NextRequest) {
   const res = await fetch("https://graph.microsoft.com/v1.0/me/sendMail", {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${session.accessToken}`,
+      Authorization: `Bearer ${accessToken}`,
       "Content-Type": "application/json",
     },
     body: JSON.stringify({ message, saveToSentItems: true }),

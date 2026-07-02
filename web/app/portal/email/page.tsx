@@ -269,7 +269,7 @@ function ComposeTab() {
         const res = await fetch("/api/email/graph-send", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ to, cc: cc || undefined, subject, body }),
+          body: JSON.stringify({ to, cc: cc || undefined, subject, body, accessToken: session?.accessToken }),
         })
         const data = await res.json()
         if (!res.ok) {
