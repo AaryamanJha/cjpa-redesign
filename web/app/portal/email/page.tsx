@@ -351,7 +351,7 @@ function ComposeTab() {
                 Your current session was issued before email-send permission was granted. Sign out and sign back in with Microsoft to authorize sending.
               </p>
               <button
-                onClick={() => signIn("microsoft-entra-id", { callbackUrl: "/portal/email" })}
+                onClick={() => signIn("microsoft-entra-id", { callbackUrl: "/portal/email", prompt: "consent" } as Parameters<typeof signIn>[1])}
                 className="mt-2 inline-flex items-center gap-1.5 rounded-sm px-3 py-1.5 font-sans font-medium transition-colors cursor-pointer"
                 style={{ fontSize: "12px", background: "rgba(200,169,106,0.12)", color: "#C8A96A", border: "1px solid rgba(200,169,106,0.3)" }}
               >

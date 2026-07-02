@@ -27,7 +27,7 @@ export const teamMembers: TeamMemberProfile[] = [
     group: "Leadership",
     image: "/team/earl-carr.jpg",
     bio: "Founder and CEO of CJPA Global Advisors, managing the global research team, thought leadership, and cross-border business development mandate. Earl is also an adjunct instructor at NYU's Center for Global Affairs.",
-    email: "info@cjpa.us",
+    email: "earl@cjpa.us",
     portalEnabled: true,
     isPortalAdmin: true,
   },

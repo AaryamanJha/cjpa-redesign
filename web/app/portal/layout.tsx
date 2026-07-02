@@ -8,21 +8,40 @@ import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
 import { PortalProvider, usePortal } from "@/contexts/PortalContext"
 import { Sidebar } from "@/components/portal/Sidebar"
-import { portalUsers } from "@/data/portalUsers"
+
+const CJPA_DOMAIN = "@cjpa.us"
 
 function PortalGuard({ children }: { children: React.ReactNode }) {
-  const { user, isLoading, login } = usePortal()
+  const { user, isLoading, login, teamMembers } = usePortal()
   const { data: session, status } = useSession()
   const router = useRouter()
 
   useEffect(() => {
     if (isLoading || status === "loading") return
 
-    // Bridge: if signed in via Microsoft but no portal user yet, match by email
     if (!user && session?.user?.email) {
-      const matched = portalUsers.find(
-        (u) => u.email?.toLowerCase() === session.user!.email!.toLowerCase()
-      )
+      const email = session.user.email.toLowerCase()
+
+      // 1. Exact email match against live team data (includes edits from Databank)
+      let matched = teamMembers.find((m) => m.email?.toLowerCase() === email)
+
+      // 2. @cjpa.us domain — try matching by Microsoft display name
+      if (!matched && email.endsWith(CJPA_DOMAIN)) {
+        const displayName = (session.user.name ?? "").toLowerCase().trim()
+        if (displayName) {
+          matched = teamMembers.find((m) => m.name.toLowerCase() === displayName)
+        }
+        // 3. Try matching by email prefix: earl@cjpa.us → find user whose id or first name starts with "earl"
+        if (!matched) {
+          const prefix = email.split("@")[0].toLowerCase()
+          matched = teamMembers.find(
+            (m) =>
+              m.id.toLowerCase().startsWith(prefix) ||
+              m.name.toLowerCase().startsWith(prefix)
+          )
+        }
+      }
+
       if (matched) {
         login(matched.id)
       } else {
@@ -34,7 +53,7 @@ function PortalGuard({ children }: { children: React.ReactNode }) {
     if (!user && status !== "authenticated") {
       router.push("/login")
     }
-  }, [user, isLoading, session, status, login, router])
+  }, [user, isLoading, session, status, login, router, teamMembers])
 
   if (isLoading) {
     return (
