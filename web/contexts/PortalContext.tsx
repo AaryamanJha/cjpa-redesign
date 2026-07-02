@@ -5,7 +5,7 @@
 
 import React, { createContext, useContext, useEffect, useState, useCallback } from "react"
 import { useRouter } from "next/navigation"
-import { PortalUser, PortalRole, Task, TaskStatus, Project, Client, CalendarEvent, Announcement } from "@/types/portal"
+import { PortalUser, PortalRole, Task, TaskStatus, Project, Client, CalendarEvent, Announcement, Contact } from "@/types/portal"
 import { portalUsers } from "@/data/portalUsers"
 import { mockTasks } from "@/data/mockTasks"
 import { mockProjects } from "@/data/mockProjects"
@@ -22,7 +22,8 @@ import {
 } from "@/lib/portalSync"
 import { isSupabaseConfigured } from "@/lib/supabaseClient"
 
-const AUTH_KEY     = "cjpa_portal_user_id"
+const AUTH_KEY      = "cjpa_portal_user_id"
+const CONTACTS_KEY  = "cjpa_contacts_v1"
 const TEAM_KEY     = "cjpa_team_members_v4"
 const TASKS_KEY    = "cjpa_tasks_v2"
 const PROJECTS_KEY = "cjpa_projects_v5"
@@ -137,6 +138,14 @@ function loadClients(): Client[] {
   return seed
 }
 
+function loadContacts(): Contact[] {
+  try {
+    const raw = localStorage.getItem(CONTACTS_KEY)
+    if (raw) return JSON.parse(raw) as Contact[]
+  } catch {}
+  return []
+}
+
 function loadAnnouncements(): Announcement[] {
   try {
     const raw = localStorage.getItem(ANN_KEY)
@@ -222,6 +231,7 @@ interface PortalContextValue {
   projects:      Project[]
   clients:       Client[]
   announcements: Announcement[]
+  contacts:      Contact[]
   calendarEvents: CalEvent[]
   login:               (userId: string) => { success: boolean; error?: string }
   logout:              () => void
@@ -242,6 +252,9 @@ interface PortalContextValue {
   addAnnouncement:     (announcement: Announcement) => void
   updateAnnouncement:  (id: string, updates: Partial<Announcement>) => void
   deleteAnnouncement:  (id: string) => void
+  addContact:          (contact: Contact) => void
+  updateContact:       (id: string, updates: Partial<Contact>) => void
+  deleteContact:       (id: string) => void
   addCalendarEvent:    (event: CalEvent) => void
   updateCalendarEvent: (id: string, updates: Partial<CalEvent>) => void
   deleteCalendarEvent: (id: string) => void
@@ -260,6 +273,7 @@ export function PortalProvider({ children }: { children: React.ReactNode }) {
   const [projects,       setProjects]      = useState<Project[]>([])
   const [clients,        setClients]       = useState<Client[]>([])
   const [announcements,  setAnnouncements] = useState<Announcement[]>([])
+  const [contacts,       setContacts]      = useState<Contact[]>([])
   const [calendarEvents, setCalendarEvents] = useState<CalEvent[]>([])
 
   useEffect(() => {
@@ -406,6 +420,7 @@ export function PortalProvider({ children }: { children: React.ReactNode }) {
     setProjects(loadProjects())
     setClients(loadClients())
     setAnnouncements(loadAnnouncements())
+    setContacts(loadContacts())
     setCalendarEvents(loadCalEvents())
     return { success: true }
   }, [])
@@ -584,6 +599,28 @@ export function PortalProvider({ children }: { children: React.ReactNode }) {
     removeRemoteRecord(COLLECTIONS.announcements, id)
   }, [])
 
+  // ── contact management ──
+
+  const addContact = useCallback((contact: Contact) => {
+    const current = loadContacts()
+    const updated = [...current, contact]
+    persistLocal(CONTACTS_KEY, updated)
+    setContacts(updated)
+  }, [])
+
+  const updateContact = useCallback((id: string, updates: Partial<Contact>) => {
+    const current = loadContacts()
+    const updated = current.map((c) => c.id === id ? { ...c, ...updates } : c)
+    persistLocal(CONTACTS_KEY, updated)
+    setContacts(updated)
+  }, [])
+
+  const deleteContact = useCallback((id: string) => {
+    const updated = loadContacts().filter((c) => c.id !== id)
+    persistLocal(CONTACTS_KEY, updated)
+    setContacts(updated)
+  }, [])
+
   // ── calendar management ──
 
   const addCalendarEvent = useCallback((event: CalEvent) => {
@@ -614,13 +651,14 @@ export function PortalProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <PortalContext.Provider value={{
-      user, isLoading, teamMembers, isAdmin, tasks, projects, clients, announcements, calendarEvents,
+      user, isLoading, teamMembers, isAdmin, tasks, projects, clients, announcements, contacts, calendarEvents,
       login, logout, hasPermission,
       addTeamMember, removeTeamMember, updateTeamMember,
       addTask, updateTask, updateTaskStatus, deleteTask,
       addProject, updateProject, deleteProject,
       addClient, updateClient, deleteClient,
       addAnnouncement, updateAnnouncement, deleteAnnouncement,
+      addContact, updateContact, deleteContact,
       addCalendarEvent, updateCalendarEvent, deleteCalendarEvent,
     }}>
       {children}

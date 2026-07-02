@@ -445,16 +445,6 @@ export default function PortalOverview() {
             </SectionCard>
           </motion.div>
 
-          {/* Prototype notice */}
-          <motion.div custom={6} initial="hidden" animate="visible" variants={FADE_UP}
-            className="flex items-center gap-3 border border-[#A8B0C0]/8 rounded-sm px-4 py-3"
-          >
-            <AlertCircle size={13} className="text-[#A8B0C0]/30 shrink-0" strokeWidth={1.5} />
-            <p className="font-sans text-[#A8B0C0]/30" style={{ fontSize: "12px" }}>
-              Prototype Portal — mock data only. Not production-grade.
-            </p>
-          </motion.div>
-
         </div>
       </div>
     </>

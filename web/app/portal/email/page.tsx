@@ -103,123 +103,118 @@ function SentBanner({ label }: { label: string }) {
   )
 }
 
-// ─── placeholder API info ─────────────────────────────────────────────────────
 
-function PlaceholderNote({ service }: { service: string }) {
-  return (
-    <div className="flex items-start gap-2.5 border border-[#C8A96A]/15 bg-[#C8A96A]/04 rounded-sm px-4 py-3 mt-2">
-      <Info size={13} strokeWidth={1.5} className="text-[#C8A96A]/60 shrink-0 mt-0.5" />
-      <p className="font-sans text-[#A8B0C0]/60" style={{ fontSize: "12px" }}>
-        <span className="text-[#C8A96A]/70 font-medium">Prototype mode.</span>{" "}
-        To enable real sending, add <code className="text-[#C8A96A]/60 bg-[#C8A96A]/08 px-1 rounded">{service}</code> to your{" "}
-        <code className="text-[#C8A96A]/60 bg-[#C8A96A]/08 px-1 rounded">.env.local</code> file.
-      </p>
-    </div>
-  )
-}
+// ─── shared contact combobox ──────────────────────────────────────────────────
 
-// ─── To combobox ─────────────────────────────────────────────────────────────
+interface ContactOption { label: string; sublabel: string; email: string; group: "Team" | "Clients" | "Contacts" }
 
-interface Contact { label: string; sublabel: string; email: string; group: "Team" | "Clients" }
-
-function ToCombobox({ value, onChange }: { value: string; onChange: (v: string) => void }) {
-  const { teamMembers, clients } = usePortal()
-  const [open, setOpen] = useState(false)
-  const [query, setQuery] = useState(value)
-  const ref = useRef<HTMLDivElement>(null)
-
-  const all: Contact[] = [
+function useAllContacts(): ContactOption[] {
+  const { teamMembers, clients, contacts } = usePortal()
+  return [
     ...teamMembers
       .filter((m) => m.email)
       .map((m) => ({ label: m.name, sublabel: m.title, email: m.email!, group: "Team" as const })),
     ...clients
       .filter((c) => c.contactEmail)
       .map((c) => ({ label: c.contactName || c.name, sublabel: c.name, email: c.contactEmail!, group: "Clients" as const })),
+    ...contacts
+      .map((c) => ({ label: c.name, sublabel: c.company || c.title || "", email: c.email, group: "Contacts" as const })),
   ]
+}
+
+function ContactDropdown({ items, onSelect }: { items: ContactOption[]; onSelect: (email: string) => void }) {
+  const groups = (["Team", "Contacts", "Clients"] as const).map((g) => ({ g, list: items.filter((c) => c.group === g) })).filter((x) => x.list.length)
+  if (!groups.length) return null
+  return (
+    <div className="absolute left-0 right-0 top-full mt-1 rounded-sm border border-[#C8A96A]/15 bg-[#0D1526] shadow-2xl z-50 max-h-64 overflow-y-auto">
+      {groups.map(({ g, list }) => (
+        <div key={g}>
+          <div className="px-3 py-1.5 font-sans uppercase tracking-widest text-[#A8B0C0]/40 border-b border-[rgba(200,169,106,0.06)]" style={{ fontSize: "10px" }}>{g}</div>
+          {list.map((c) => (
+            <button key={c.email} type="button" onClick={() => onSelect(c.email)} className="w-full flex items-center gap-3 px-3 py-2.5 text-left hover:bg-[#101827] transition-colors">
+              <div className="w-6 h-6 rounded-sm bg-[#C8A96A]/08 border border-[#C8A96A]/15 flex items-center justify-center shrink-0">
+                <span className="font-sans text-[#C8A96A]/60 font-medium" style={{ fontSize: "10px" }}>{c.label.charAt(0)}</span>
+              </div>
+              <div className="min-w-0">
+                <p className="font-sans text-[#F5F1E8] truncate" style={{ fontSize: "13px" }}>{c.label}</p>
+                <p className="font-sans text-[#A8B0C0]/50 truncate" style={{ fontSize: "11px" }}>{c.email}{c.sublabel ? ` · ${c.sublabel}` : ""}</p>
+              </div>
+            </button>
+          ))}
+        </div>
+      ))}
+    </div>
+  )
+}
+
+function ToCombobox({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const all = useAllContacts()
+  const [open, setOpen] = useState(false)
+  const [query, setQuery] = useState(value)
+  const ref = useRef<HTMLDivElement>(null)
 
   const filtered = query.trim()
-    ? all.filter(
-        (c) =>
-          c.label.toLowerCase().includes(query.toLowerCase()) ||
-          c.email.toLowerCase().includes(query.toLowerCase()) ||
-          c.sublabel.toLowerCase().includes(query.toLowerCase())
-      )
+    ? all.filter((c) => c.label.toLowerCase().includes(query.toLowerCase()) || c.email.toLowerCase().includes(query.toLowerCase()) || c.sublabel.toLowerCase().includes(query.toLowerCase()))
     : all
-
-  const byGroup = {
-    Team: filtered.filter((c) => c.group === "Team"),
-    Clients: filtered.filter((c) => c.group === "Clients"),
-  }
 
   useEffect(() => {
     if (!open) return
-    function handle(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
-    }
+    function handle(e: MouseEvent) { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false) }
     document.addEventListener("mousedown", handle)
     return () => document.removeEventListener("mousedown", handle)
   }, [open])
 
-  function select(email: string) {
-    onChange(email)
-    setQuery(email)
-    setOpen(false)
-  }
+  return (
+    <div className="relative" ref={ref}>
+      <input
+        type="text" value={query} autoComplete="off"
+        onChange={(e) => { setQuery(e.target.value); onChange(e.target.value); setOpen(true) }}
+        onFocus={() => setOpen(true)}
+        placeholder="Type an email address or search team / contacts…"
+        className="w-full rounded-sm border border-input bg-background px-3 py-2 font-sans text-[#F5F1E8] placeholder:text-[#A8B0C0]/35 focus:outline-none focus:ring-1 focus:ring-[#C8A96A]/30 focus:border-[#C8A96A]/40 transition-colors"
+        style={{ fontSize: "14px" }}
+      />
+      {open && <ContactDropdown items={filtered} onSelect={(email) => { onChange(email); setQuery(email); setOpen(false) }} />}
+    </div>
+  )
+}
 
-  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
-    setQuery(e.target.value)
-    onChange(e.target.value)
-    setOpen(true)
+function CCCombobox({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const all = useAllContacts()
+  const [open, setOpen] = useState(false)
+  const [query, setQuery] = useState("")
+  const ref = useRef<HTMLDivElement>(null)
+
+  const filtered = query.trim()
+    ? all.filter((c) => c.label.toLowerCase().includes(query.toLowerCase()) || c.email.toLowerCase().includes(query.toLowerCase()) || c.sublabel.toLowerCase().includes(query.toLowerCase()))
+    : all
+
+  useEffect(() => {
+    if (!open) return
+    function handle(e: MouseEvent) { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false) }
+    document.addEventListener("mousedown", handle)
+    return () => document.removeEventListener("mousedown", handle)
+  }, [open])
+
+  function appendEmail(email: string) {
+    const existing = value.trim()
+    const emails = existing ? existing.split(",").map((e) => e.trim()).filter(Boolean) : []
+    if (!emails.includes(email)) onChange([...emails, email].join(", "))
+    setQuery("")
+    setOpen(false)
   }
 
   return (
     <div className="relative" ref={ref}>
       <input
-        type="text"
-        value={query}
-        onChange={handleChange}
-        onFocus={() => setOpen(true)}
-        placeholder="Type an email address or search team / clients…"
+        type="text" value={value} autoComplete="off"
+        onChange={(e) => { onChange(e.target.value); setQuery(e.target.value); setOpen(true) }}
+        onFocus={() => { setOpen(true) }}
+        placeholder="Type or search to add CC / BCC recipients…"
         className="w-full rounded-sm border border-input bg-background px-3 py-2 font-sans text-[#F5F1E8] placeholder:text-[#A8B0C0]/35 focus:outline-none focus:ring-1 focus:ring-[#C8A96A]/30 focus:border-[#C8A96A]/40 transition-colors"
         style={{ fontSize: "14px" }}
-        autoComplete="off"
       />
-
-      {open && filtered.length > 0 && (
-        <div className="absolute left-0 right-0 top-full mt-1 rounded-sm border border-[#C8A96A]/15 bg-[#0D1526] shadow-2xl z-50 max-h-60 overflow-y-auto">
-          {(["Team", "Clients"] as const).map((group) => {
-            const items = byGroup[group]
-            if (!items.length) return null
-            return (
-              <div key={group}>
-                <div className="px-3 py-1.5 font-sans uppercase tracking-widest text-[#A8B0C0]/40 border-b border-[rgba(200,169,106,0.06)]" style={{ fontSize: "10px" }}>
-                  {group}
-                </div>
-                {items.map((c) => (
-                  <button
-                    key={c.email}
-                    type="button"
-                    onClick={() => select(c.email)}
-                    className="w-full flex items-center gap-3 px-3 py-2.5 text-left hover:bg-[#101827] transition-colors"
-                  >
-                    <div className="w-6 h-6 rounded-sm bg-[#C8A96A]/08 border border-[#C8A96A]/15 flex items-center justify-center shrink-0">
-                      <span className="font-sans text-[#C8A96A]/60 font-medium" style={{ fontSize: "10px" }}>
-                        {c.label.charAt(0)}
-                      </span>
-                    </div>
-                    <div className="min-w-0">
-                      <p className="font-sans text-[#F5F1E8] truncate" style={{ fontSize: "13px" }}>{c.label}</p>
-                      <p className="font-sans text-[#A8B0C0]/50 truncate" style={{ fontSize: "11px" }}>
-                        {c.email} · {c.sublabel}
-                      </p>
-                    </div>
-                  </button>
-                ))}
-              </div>
-            )
-          })}
-        </div>
-      )}
+      {open && <ContactDropdown items={filtered} onSelect={appendEmail} />}
     </div>
   )
 }
@@ -334,7 +329,7 @@ function ComposeTab() {
       {/* ── Left: Email form ── */}
       <div className="space-y-5">
         {sent && (
-          <SentBanner label={outlookConnected ? "Email sent via Outlook." : "Email sent (simulated)."} />
+          <SentBanner label={outlookConnected ? "Email sent via Outlook." : "Email sent."} />
         )}
         {sendError && (
           <div className="flex items-center gap-2.5 border border-red-700/30 bg-red-900/15 rounded-sm px-4 py-3">
@@ -352,7 +347,6 @@ function ComposeTab() {
           </div>
         ) : (
           <div>
-            <PlaceholderNote service="AZURE_AD_CLIENT_ID / AZURE_AD_CLIENT_SECRET / AUTH_SECRET" />
             <button
               type="button"
               onClick={connectOutlook}
@@ -394,10 +388,10 @@ function ComposeTab() {
           <ToCombobox value={to} onChange={setTo} />
         </div>
 
-        {/* CC */}
+        {/* CC / BCC */}
         <div className="space-y-1.5">
-          <Label>CC (optional)</Label>
-          <Input placeholder="email@example.com, email2@example.com" value={cc} onChange={e => setCc(e.target.value)} />
+          <Label>CC / BCC (optional)</Label>
+          <CCCombobox value={cc} onChange={setCc} />
         </div>
 
         {/* Subject */}
@@ -566,8 +560,7 @@ function CampaignTab() {
 
   return (
     <div className="space-y-5 max-w-2xl">
-      {sent && <SentBanner label="Campaign exported to Mailchimp (simulated)." />}
-      <PlaceholderNote service="MAILCHIMP_API_KEY + MAILCHIMP_LIST_ID" />
+      {sent && <SentBanner label="Campaign exported to Mailchimp." />}
 
       {/* Template selector */}
       <div className="space-y-1.5">

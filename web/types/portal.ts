@@ -113,6 +113,15 @@ export interface CalendarEvent {
   isAllDay?: boolean
 }
 
+export interface Contact {
+  id: string
+  name: string
+  email: string
+  title?: string
+  company?: string
+  phone?: string
+}
+
 export interface NewsletterDraft {
   id: string
   title: string

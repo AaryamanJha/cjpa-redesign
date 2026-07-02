@@ -297,20 +297,10 @@ export default function AdminPage() {
 
   return (
     <>
-      <Topbar title="Admin" subtitle="Team access management — prototype portal only" />
+      <Topbar title="Admin" subtitle="Team access management" />
 
       <div className="flex-1 overflow-y-auto p-7">
         <div className="max-w-4xl space-y-6">
-
-          {/* Prototype notice */}
-          <div className="flex items-start gap-3 rounded-sm border border-[#C8A96A]/15 bg-[#C8A96A]/06 px-4 py-3.5">
-            <ShieldCheck size={14} className="text-[#C8A96A] shrink-0 mt-0.5" strokeWidth={1.5} />
-            <p className="font-sans text-[#A8B0C0]" style={{ fontSize: "13px", lineHeight: 1.6 }}>
-              <span className="text-[#C8A96A] font-medium">Prototype admin panel.</span>{" "}
-              Changes sync through Supabase when configured, with localStorage fallback on this device.
-              In production, this connects to a real user directory.
-            </p>
-          </div>
 
           {/* Team members table */}
           <div>

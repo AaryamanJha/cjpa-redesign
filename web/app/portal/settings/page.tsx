@@ -132,9 +132,6 @@ export default function SettingsPage() {
               onToggle={() => setNotifToggles((prev) => ({ ...prev, [toggle.id]: !prev[toggle.id] }))}
             />
           ))}
-          <div className="py-3 text-[12px] text-[#A8B0C0]/40 italic">
-            Notifications are simulated — this is a prototype portal.
-          </div>
         </Section>
 
         {/* Display */}
