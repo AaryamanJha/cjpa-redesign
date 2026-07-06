@@ -7,6 +7,7 @@ export type PortalCollection =
   | "clients"
   | "announcements"
   | "calendar_events"
+  | "project_notes"
 
 interface PortalRecordRow<T> {
   collection: PortalCollection

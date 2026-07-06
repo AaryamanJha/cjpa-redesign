@@ -1,11 +1,46 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { EventManager } from "@/components/ui/event-manager"
 import { Topbar } from "@/components/portal/Topbar"
 import { usePortal, useRequireAuth, CalEvent } from "@/contexts/PortalContext"
 import { cn } from "@/lib/utils"
 import { Task } from "@/types/portal"
+
+interface GlobalCalState {
+  events: CalEvent[]
+  loading: boolean
+  error: string | null
+}
+
+function useGlobalCalendar(): GlobalCalState {
+  const [state, setState] = useState<GlobalCalState>({ events: [], loading: true, error: null })
+
+  useEffect(() => {
+    let cancelled = false
+    fetch("/api/calendar/global")
+      .then(async (res) => {
+        const data = await res.json()
+        if (cancelled) return
+        if (!res.ok) {
+          setState({ events: [], loading: false, error: data.error || "Failed to load global calendar" })
+          return
+        }
+        const events: CalEvent[] = data.events.map((e: CalEvent) => ({
+          ...e,
+          startTime: new Date(e.startTime),
+          endTime: new Date(e.endTime),
+        }))
+        setState({ events, loading: false, error: null })
+      })
+      .catch((err) => {
+        if (!cancelled) setState({ events: [], loading: false, error: err.message })
+      })
+    return () => { cancelled = true }
+  }, [])
+
+  return state
+}
 
 function taskToCalEvent(t: Task, getMemberName: (id: string) => string): CalEvent {
   const [y, m, d] = t.deadline.split("-").map(Number)
@@ -32,6 +67,7 @@ export default function CalendarPage() {
     teamMembers.find((m) => m.id === id)?.name ?? id
 
   const [myTasksOnly, setMyTasksOnly] = useState(false)
+  const globalCal = useGlobalCalendar()
 
   // Task deadline events derived from the tasks list (not persisted separately)
   const taskDeadlineEvents = useMemo((): CalEvent[] =>
@@ -40,10 +76,10 @@ export default function CalendarPage() {
     [tasks, teamMembers]
   )
 
-  // All events: shared calendar + task deadlines merged
+  // All events: shared calendar + task deadlines + Earl Carr's Outlook calendar (firm-wide, read-only)
   const allEvents = useMemo(
-    () => [...calendarEvents, ...taskDeadlineEvents],
-    [calendarEvents, taskDeadlineEvents]
+    () => [...calendarEvents, ...taskDeadlineEvents, ...globalCal.events],
+    [calendarEvents, taskDeadlineEvents, globalCal.events]
   )
 
   // "My Tasks" mode: only task deadline events for current user
@@ -63,12 +99,12 @@ export default function CalendarPage() {
   }
 
   function handleUpdate(id: string, updates: Partial<CalEvent>) {
-    if (id.startsWith("task-deadline-")) return  // read-only derived events
+    if (id.startsWith("task-deadline-") || id.startsWith("global-cal-")) return  // read-only derived events
     updateCalendarEvent(id, updates)
   }
 
   function handleDelete(id: string) {
-    if (id.startsWith("task-deadline-")) return  // can't delete task deadlines from calendar
+    if (id.startsWith("task-deadline-") || id.startsWith("global-cal-")) return  // read-only derived events
     deleteCalendarEvent(id)
   }
 
@@ -108,11 +144,23 @@ export default function CalendarPage() {
               Showing task deadlines assigned to you
             </span>
           )}
+          <span className="text-[13px] text-[#A8B0C0]/60 ml-auto">
+            {globalCal.loading && "Syncing global calendar…"}
+            {globalCal.error && (
+              <span className="text-red-400/80">Global calendar unavailable: {globalCal.error}</span>
+            )}
+            {!globalCal.loading && !globalCal.error && (
+              <span>
+                <span className="inline-block h-2 w-2 rounded-full bg-[#9A89FF] mr-1.5 align-[1px]" />
+                Global Calendar (Earl Carr) synced &middot; read-only
+              </span>
+            )}
+          </span>
         </div>
 
         <EventManager
           events={displayEvents}
-          categories={["Client Call", "Meeting", "Deadline", "Internal", "Travel"]}
+          categories={["Client Call", "Meeting", "Deadline", "Internal", "Travel", "Global Calendar"]}
           defaultView="month"
           onEventCreate={handleCreate}
           onEventUpdate={handleUpdate}
