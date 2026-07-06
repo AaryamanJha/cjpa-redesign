@@ -91,23 +91,38 @@ export async function seedPortalCollection<T extends { id: string }>(
   return existing
 }
 
-export function subscribePortalRecords(onChange: (collection: PortalCollection) => void) {
+// A Supabase realtime channel can only have .on() callbacks attached before its
+// single .subscribe() call. Multiple callers (PortalContext, useProjectNotes, ...)
+// need to listen on the same "cjpa-portal-records" channel, so it's created and
+// subscribed exactly once here and fanned out to all registered listeners.
+type PortalRecordsListener = (collection: PortalCollection) => void
+let sharedChannel: ReturnType<NonNullable<typeof supabaseBrowser>["channel"]> | null = null
+const listeners = new Set<PortalRecordsListener>()
+
+export function subscribePortalRecords(onChange: PortalRecordsListener) {
   if (!supabaseBrowser) return () => {}
 
-  const client = supabaseBrowser
-  const channel = client
-    .channel("cjpa-portal-records")
-    .on(
-      "postgres_changes",
-      { event: "*", schema: "public", table: "portal_records" },
-      (payload) => {
-        const row = (payload.new ?? payload.old) as Partial<PortalRecordRow<unknown>>
-        if (row.collection) onChange(row.collection)
-      }
-    )
-    .subscribe()
+  listeners.add(onChange)
+
+  if (!sharedChannel) {
+    sharedChannel = supabaseBrowser
+      .channel("cjpa-portal-records")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "portal_records" },
+        (payload) => {
+          const row = (payload.new ?? payload.old) as Partial<PortalRecordRow<unknown>>
+          if (row.collection) listeners.forEach((listener) => listener(row.collection!))
+        }
+      )
+      .subscribe()
+  }
 
   return () => {
-    void client.removeChannel(channel)
+    listeners.delete(onChange)
+    if (listeners.size === 0 && sharedChannel) {
+      void supabaseBrowser?.removeChannel(sharedChannel)
+      sharedChannel = null
+    }
   }
 }
