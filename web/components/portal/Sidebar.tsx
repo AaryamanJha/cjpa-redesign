@@ -18,6 +18,7 @@ import {
   Database,
   Sparkles,
   FileDown,
+  BookUser,
 } from "lucide-react"
 import { useState } from "react"
 import { signOut, useSession } from "next-auth/react"
@@ -37,6 +38,7 @@ const NAV_ITEMS: NavItem[] = [
   { label: "Tasks",         href: "/portal/tasks",         icon: CheckSquare },
   { label: "Calendar",      href: "/portal/calendar",      icon: CalendarDays },
   { label: "Clients",       href: "/portal/clients",       icon: Users },
+  { label: "Contact Book",  href: "/portal/contacts",      icon: BookUser },
   { label: "Databank",      href: "/portal/databank",      icon: Database },
   { label: "AI Service",    href: "/portal/ai",            icon: Sparkles },
   { label: "File Resizer",  href: "/portal/file-resizer",  icon: FileDown },

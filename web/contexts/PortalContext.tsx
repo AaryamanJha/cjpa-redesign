@@ -38,6 +38,7 @@ const COLLECTIONS = {
   clients: "clients",
   announcements: "announcements",
   calendar: "calendar_events",
+  contacts: "contacts",
 } as const satisfies Record<string, PortalCollection>
 
 // ─── shared CalEvent type (used by context + calendar page) ───────────────────
@@ -286,6 +287,7 @@ export function PortalProvider({ children }: { children: React.ReactNode }) {
     setClients(loadClients())
     setAnnouncements(loadAnnouncements())
     setCalendarEvents(loadCalEvents())
+    setContacts(loadContacts())
 
     const storedId = localStorage.getItem(AUTH_KEY)
     if (storedId) {
@@ -341,6 +343,13 @@ export function PortalProvider({ children }: { children: React.ReactNode }) {
         persistLocal(CAL_KEY, normalized)
         setCalendarEvents(normalized)
       }
+
+      if (collection === COLLECTIONS.contacts) {
+        const remote = await fetchPortalCollection<Contact>(collection)
+        if (!remote || !mounted) return
+        persistLocal(CONTACTS_KEY, remote)
+        setContacts(remote)
+      }
     }
 
     async function hydrateFromSupabase() {
@@ -353,6 +362,7 @@ export function PortalProvider({ children }: { children: React.ReactNode }) {
         remoteClients,
         remoteAnnouncements,
         remoteCalendar,
+        remoteContacts,
       ] = await Promise.all([
         seedPortalCollection(COLLECTIONS.team, loadTeam(), { mergeMissing: true }),
         seedPortalCollection(COLLECTIONS.tasks, loadTasks()),
@@ -360,6 +370,7 @@ export function PortalProvider({ children }: { children: React.ReactNode }) {
         seedPortalCollection(COLLECTIONS.clients, loadClients()),
         seedPortalCollection(COLLECTIONS.announcements, loadAnnouncements()),
         seedPortalCollection(COLLECTIONS.calendar, loadCalEvents()),
+        seedPortalCollection(COLLECTIONS.contacts, loadContacts(), { mergeMissing: true }),
       ])
 
       if (!mounted) return
@@ -390,6 +401,10 @@ export function PortalProvider({ children }: { children: React.ReactNode }) {
         const normalized = normalizeCalEvents(remoteCalendar)
         persistLocal(CAL_KEY, normalized)
         setCalendarEvents(normalized)
+      }
+      if (remoteContacts) {
+        persistLocal(CONTACTS_KEY, remoteContacts)
+        setContacts(remoteContacts)
       }
     }
 
@@ -606,6 +621,7 @@ export function PortalProvider({ children }: { children: React.ReactNode }) {
     const updated = [...current, contact]
     persistLocal(CONTACTS_KEY, updated)
     setContacts(updated)
+    syncRecord(COLLECTIONS.contacts, contact)
   }, [])
 
   const updateContact = useCallback((id: string, updates: Partial<Contact>) => {
@@ -613,12 +629,15 @@ export function PortalProvider({ children }: { children: React.ReactNode }) {
     const updated = current.map((c) => c.id === id ? { ...c, ...updates } : c)
     persistLocal(CONTACTS_KEY, updated)
     setContacts(updated)
+    const updatedContact = updated.find((c) => c.id === id)
+    if (updatedContact) syncRecord(COLLECTIONS.contacts, updatedContact)
   }, [])
 
   const deleteContact = useCallback((id: string) => {
     const updated = loadContacts().filter((c) => c.id !== id)
     persistLocal(CONTACTS_KEY, updated)
     setContacts(updated)
+    removeRemoteRecord(COLLECTIONS.contacts, id)
   }, [])
 
   // ── calendar management ──
