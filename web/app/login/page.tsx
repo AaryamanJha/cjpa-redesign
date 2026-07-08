@@ -7,7 +7,7 @@ import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 import { signIn } from "next-auth/react"
 import { motion } from "framer-motion"
-import { ArrowRight, AlertCircle, Shield } from "lucide-react"
+import { ArrowRight, AlertCircle } from "lucide-react"
 import { usePortal } from "@/contexts/PortalContext"
 import { portalUsers } from "@/data/portalUsers"
 
@@ -192,15 +192,6 @@ function LoginContent() {
           </button>
           <p className="mt-2 text-center text-[#A8B0C0]/30 font-sans" style={{ fontSize: "11px" }}>
             Requires Outlook / Microsoft 365 account
-          </p>
-        </div>
-
-        {/* Prototype notice */}
-        <div className="mt-4 flex items-start gap-2 text-[#A8B0C0]/60">
-          <Shield size={12} className="shrink-0 mt-0.5" />
-          <p className="font-sans" style={{ fontSize: "12px" }}>
-            Prototype system. Mock authentication only — no passwords, no real credentials.
-            Contact your administrator for your Portal ID.
           </p>
         </div>
 

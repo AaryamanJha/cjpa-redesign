@@ -1,13 +1,14 @@
 "use client"
 
 import { useEffect, useMemo, useRef, useState } from "react"
-import { Plus, Search, Trash2 } from "lucide-react"
+import { FileUp, Plus, Search, Trash2 } from "lucide-react"
 import { Topbar } from "@/components/portal/Topbar"
 import { usePortal, useRequireAuth } from "@/contexts/PortalContext"
 import { Contact } from "@/types/portal"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
+import { parseContactsSheet } from "@/lib/parseContactsSheet"
 
 const COLUMNS: { key: keyof Contact; label: string; placeholder: string }[] = [
   { key: "name",    label: "Name",    placeholder: "Full name" },
@@ -23,7 +24,11 @@ export default function ContactBookPage() {
   const [search, setSearch] = useState("")
   const [deleteTarget, setDeleteTarget] = useState<Contact | null>(null)
   const [rows, setRows] = useState<Contact[]>(contacts)
+  const [importResult, setImportResult] = useState<{ count: number; skipped: number } | null>(null)
+  const [importError, setImportError] = useState<string | null>(null)
+  const [importing, setImporting] = useState(false)
   const activeCellRef = useRef<string | null>(null) // `${contactId}:${field}`
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   // Sync from shared context whenever the team's contacts change (another user
   // edited/added/deleted), but don't clobber the cell this user is mid-typing in.
@@ -62,6 +67,34 @@ export default function ContactBookPage() {
     addContact(newContact)
   }
 
+  async function handleImportFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    e.target.value = "" // allow re-selecting the same file later
+    if (!file) return
+
+    setImportError(null)
+    setImportResult(null)
+    setImporting(true)
+    try {
+      const { contacts: parsed, skippedRows } = await parseContactsSheet(file)
+      if (parsed.length === 0) {
+        setImportError("No contacts found in that file. Make sure it has a Name or Email column.")
+        return
+      }
+      const newContacts: Contact[] = parsed.map((c, i) => ({
+        id: `contact-${Date.now()}-${i}`,
+        ...c,
+      }))
+      setRows((prev) => [...prev, ...newContacts])
+      newContacts.forEach((c) => addContact(c))
+      setImportResult({ count: newContacts.length, skipped: skippedRows })
+    } catch {
+      setImportError("Couldn't read that file. Make sure it's a valid .xlsx, .xls, or .csv file.")
+    } finally {
+      setImporting(false)
+    }
+  }
+
   function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>, rowIndex: number, colIndex: number) {
     if (e.key !== "Enter") return
     e.preventDefault()
@@ -93,10 +126,50 @@ export default function ContactBookPage() {
           >
             <Plus size={14} strokeWidth={2} /> Add Row
           </button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".xlsx,.xls,.csv"
+            onChange={handleImportFile}
+            className="hidden"
+          />
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            disabled={importing}
+            className="flex items-center gap-1.5 rounded-sm px-3.5 py-2 font-sans font-medium transition-colors cursor-pointer hover:text-[#F5F1E8] disabled:opacity-50 disabled:cursor-not-allowed"
+            style={{ fontSize: "13px", color: "#A8B0C0", border: "1px solid rgba(168,176,192,0.25)" }}
+          >
+            <FileUp size={14} strokeWidth={1.5} /> {importing ? "Importing…" : "Import Excel"}
+          </button>
           <span className="ml-auto font-sans text-[#A8B0C0]/50" style={{ fontSize: "12px" }}>
             {rows.length} {rows.length === 1 ? "contact" : "contacts"}
           </span>
         </div>
+
+        {(importResult || importError) && (
+          <div
+            className="mb-4 flex items-center justify-between rounded-sm px-3.5 py-2.5 font-sans"
+            style={{
+              fontSize: "12.5px",
+              background: importError ? "rgba(252,129,129,0.08)" : "rgba(200,169,106,0.08)",
+              border: `1px solid ${importError ? "rgba(252,129,129,0.25)" : "rgba(200,169,106,0.25)"}`,
+              color: importError ? "#FC8181" : "#C8A96A",
+            }}
+          >
+            <span>
+              {importError
+                ? importError
+                : `Imported ${importResult!.count} contact${importResult!.count === 1 ? "" : "s"}.` +
+                  (importResult!.skipped > 0 ? ` Skipped ${importResult!.skipped} empty row${importResult!.skipped === 1 ? "" : "s"}.` : "")}
+            </span>
+            <button
+              onClick={() => { setImportResult(null); setImportError(null) }}
+              className="text-[#A8B0C0]/50 hover:text-[#F5F1E8] cursor-pointer ml-3"
+            >
+              ✕
+            </button>
+          </div>
+        )}
 
         <div className="flex-1 min-h-0 overflow-auto rounded-sm border border-[#C8A96A]/10">
           <table className="w-full border-collapse" style={{ fontSize: "13px" }}>
