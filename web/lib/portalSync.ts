@@ -53,6 +53,32 @@ export async function upsertPortalRecord<T extends { id: string }>(
   if (error) console.warn(`Supabase upsert failed for ${collection}:`, error.message)
 }
 
+// Upserts many records in chunked batches instead of one request per record,
+// so bulk operations (e.g. importing a few thousand contacts from a CSV) don't
+// fire thousands of individual network calls.
+const UPSERT_BATCH_SIZE = 200
+
+export async function upsertPortalRecords<T extends { id: string }>(
+  collection: PortalCollection,
+  records: T[]
+) {
+  if (!supabaseBrowser || records.length === 0) return
+
+  const rows: PortalRecordRow<T>[] = records.map((record) => ({
+    collection,
+    record_id: record.id,
+    data: record,
+  }))
+
+  for (let i = 0; i < rows.length; i += UPSERT_BATCH_SIZE) {
+    const batch = rows.slice(i, i + UPSERT_BATCH_SIZE)
+    const { error } = await supabaseBrowser
+      .from("portal_records")
+      .upsert(batch, { onConflict: "collection,record_id" })
+    if (error) console.warn(`Supabase batch upsert failed for ${collection}:`, error.message)
+  }
+}
+
 export async function deletePortalRecord(collection: PortalCollection, id: string) {
   if (!supabaseBrowser) return
 
@@ -76,7 +102,7 @@ export async function seedPortalCollection<T extends { id: string }>(
   if (existing === null) return null
 
   if (existing.length === 0) {
-    await Promise.all(records.map((record) => upsertPortalRecord(collection, record)))
+    await upsertPortalRecords(collection, records)
     return records
   }
 
@@ -84,7 +110,7 @@ export async function seedPortalCollection<T extends { id: string }>(
     const existingIds = new Set(existing.map((record) => record.id))
     const missing = records.filter((record) => !existingIds.has(record.id))
     if (missing.length > 0) {
-      await Promise.all(missing.map((record) => upsertPortalRecord(collection, record)))
+      await upsertPortalRecords(collection, missing)
       return [...existing, ...missing]
     }
   }

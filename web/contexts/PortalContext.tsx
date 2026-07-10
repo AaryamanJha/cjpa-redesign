@@ -19,6 +19,7 @@ import {
   seedPortalCollection,
   subscribePortalRecords,
   upsertPortalRecord,
+  upsertPortalRecords,
 } from "@/lib/portalSync"
 import { isSupabaseConfigured } from "@/lib/supabaseClient"
 
@@ -216,6 +217,11 @@ function syncRecord<T extends { id: string }>(collection: PortalCollection, reco
   void upsertPortalRecord(collection, record)
 }
 
+function syncRecords<T extends { id: string }>(collection: PortalCollection, records: T[]) {
+  if (!isSupabaseConfigured || records.length === 0) return
+  void upsertPortalRecords(collection, records)
+}
+
 function removeRemoteRecord(collection: PortalCollection, id: string) {
   if (!isSupabaseConfigured) return
   void deletePortalRecord(collection, id)
@@ -254,6 +260,7 @@ interface PortalContextValue {
   updateAnnouncement:  (id: string, updates: Partial<Announcement>) => void
   deleteAnnouncement:  (id: string) => void
   addContact:          (contact: Contact) => void
+  addContacts:         (contacts: Contact[]) => void
   updateContact:       (id: string, updates: Partial<Contact>) => void
   deleteContact:       (id: string) => void
   addCalendarEvent:    (event: CalEvent) => void
@@ -624,6 +631,18 @@ export function PortalProvider({ children }: { children: React.ReactNode }) {
     syncRecord(COLLECTIONS.contacts, contact)
   }, [])
 
+  // Bulk variant for imports (e.g. a CSV/Excel with thousands of rows): does a
+  // single localStorage read/write and one batched Supabase upsert, instead of
+  // one of each per contact.
+  const addContacts = useCallback((newContacts: Contact[]) => {
+    if (newContacts.length === 0) return
+    const current = loadContacts()
+    const updated = [...current, ...newContacts]
+    persistLocal(CONTACTS_KEY, updated)
+    setContacts(updated)
+    syncRecords(COLLECTIONS.contacts, newContacts)
+  }, [])
+
   const updateContact = useCallback((id: string, updates: Partial<Contact>) => {
     const current = loadContacts()
     const updated = current.map((c) => c.id === id ? { ...c, ...updates } : c)
@@ -677,7 +696,7 @@ export function PortalProvider({ children }: { children: React.ReactNode }) {
       addProject, updateProject, deleteProject,
       addClient, updateClient, deleteClient,
       addAnnouncement, updateAnnouncement, deleteAnnouncement,
-      addContact, updateContact, deleteContact,
+      addContact, addContacts, updateContact, deleteContact,
       addCalendarEvent, updateCalendarEvent, deleteCalendarEvent,
     }}>
       {children}

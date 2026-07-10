@@ -20,7 +20,7 @@ const COLUMNS: { key: keyof Contact; label: string; placeholder: string }[] = [
 
 export default function ContactBookPage() {
   const { isLoading } = useRequireAuth()
-  const { contacts, addContact, updateContact, deleteContact } = usePortal()
+  const { contacts, addContact, addContacts, updateContact, deleteContact } = usePortal()
   const [search, setSearch] = useState("")
   const [deleteTarget, setDeleteTarget] = useState<Contact | null>(null)
   const [rows, setRows] = useState<Contact[]>(contacts)
@@ -86,7 +86,7 @@ export default function ContactBookPage() {
         ...c,
       }))
       setRows((prev) => [...prev, ...newContacts])
-      newContacts.forEach((c) => addContact(c))
+      addContacts(newContacts)
       setImportResult({ count: newContacts.length, skipped: skippedRows })
     } catch {
       setImportError("Couldn't read that file. Make sure it's a valid .xlsx, .xls, or .csv file.")
