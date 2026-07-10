@@ -1,15 +1,16 @@
 "use client"
 
 import { useState, useRef, useCallback, useEffect } from "react"
-import { Upload, FileText, X, Loader2, Send, RotateCcw, ChevronDown, ChevronUp, MessageSquare } from "lucide-react"
+import { Upload, FileText, X, Loader2, Send, RotateCcw, ChevronDown, ChevronUp, MessageSquare, Users } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Topbar } from "@/components/portal/Topbar"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
+import { usePortal } from "@/contexts/PortalContext"
 
 // ─── types ────────────────────────────────────────────────────────────────────
 
-type Mode = "swot" | "summary" | "qa" | "chat"
+type Mode = "swot" | "summary" | "qa" | "chat" | "contacts"
 
 interface ChatMessage {
   role: "user" | "assistant"
@@ -22,6 +23,7 @@ const MODES: { id: Mode; label: string; description: string }[] = [
   { id: "summary", label: "Executive Summary", description: "Key findings and strategic implications" },
   { id: "qa",      label: "Document Q&A",      description: "Ask questions about the document" },
   { id: "chat",    label: "GROQ Chat",         description: "Talk to the AI directly — no document needed" },
+  { id: "contacts", label: "Contact Finder",   description: "Who should I reach out to, and why" },
 ]
 
 // ─── stream reader ────────────────────────────────────────────────────────────
@@ -177,6 +179,7 @@ function UploadZone({ onFile }: { onFile: (file: File) => void }) {
 // ─── main page ────────────────────────────────────────────────────────────────
 
 export default function AIServicePage() {
+  const { contacts } = usePortal()
   const [mode, setMode] = useState<Mode>("swot")
 
   // Document modes state
@@ -196,11 +199,18 @@ export default function AIServicePage() {
   const [chatInput, setChatInput]       = useState("")
   const [isChatting, setIsChatting]     = useState(false)
 
+  // Contact Finder mode state
+  const [contactMessages, setContactMessages] = useState<ChatMessage[]>([])
+  const [contactInput, setContactInput]       = useState("")
+  const [isFindingContacts, setIsFindingContacts] = useState(false)
+
   const docChatEndRef  = useRef<HTMLDivElement>(null)
   const chatEndRef     = useRef<HTMLDivElement>(null)
+  const contactChatEndRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => { docChatEndRef.current?.scrollIntoView({ behavior: "smooth" }) }, [docMessages])
   useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: "smooth" }) }, [chatMessages])
+  useEffect(() => { contactChatEndRef.current?.scrollIntoView({ behavior: "smooth" }) }, [contactMessages])
 
   // ── PDF extraction ──
 
@@ -302,6 +312,35 @@ export default function AIServicePage() {
     }
   }
 
+  // ── Contact Finder ──
+
+  async function sendContactQuery() {
+    const q = contactInput.trim()
+    if (!q || isFindingContacts) return
+    setContactInput("")
+    const newMsgs: ChatMessage[] = [...contactMessages, { role: "user", content: q }]
+    setContactMessages([...newMsgs, { role: "assistant", content: "", streaming: true }])
+    setIsFindingContacts(true)
+    let acc = ""
+    try {
+      const res = await fetch("/api/ai/contacts", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query: q, contacts, messages: newMsgs }),
+      })
+      if (!res.ok) {
+        setContactMessages(prev => prev.map((m, i) => i === prev.length - 1 ? { ...m, content: "Error calling AI service.", streaming: false } : m))
+        return
+      }
+      await readStream(res, chunk => {
+        acc += chunk
+        setContactMessages(prev => prev.map((m, i) => i === prev.length - 1 ? { ...m, content: acc } : m))
+      })
+    } finally {
+      setContactMessages(prev => prev.map((m, i) => i === prev.length - 1 ? { ...m, streaming: false } : m))
+      setIsFindingContacts(false)
+    }
+  }
+
   const docReady = !!documentText && !isExtracting
 
   return (
@@ -381,8 +420,64 @@ export default function AIServicePage() {
             </div>
           )}
 
+          {/* ── Contact Finder ── */}
+          {mode === "contacts" && (
+            <div className="space-y-4">
+              <div className="border border-[rgba(200,169,106,0.10)] bg-[#0A1018] rounded-sm overflow-hidden">
+                {contactMessages.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center gap-3 py-16 px-6 text-center">
+                    <div className="w-12 h-12 rounded-full bg-[#C8A96A]/08 border border-[#C8A96A]/15 flex items-center justify-center">
+                      <Users size={18} strokeWidth={1.5} className="text-[#C8A96A]/60" />
+                    </div>
+                    <p className="font-sans text-[#A8B0C0]/50" style={{ fontSize: "13px" }}>
+                      Describe what you're trying to do — e.g. "I want to raise capital for a<br />
+                      robotics company, find me a few contacts I can reach out to."
+                    </p>
+                    <p className="font-sans text-[#A8B0C0]/30" style={{ fontSize: "11px" }}>
+                      Searches the firm-wide Contact Book ({contacts.length} contact{contacts.length === 1 ? "" : "s"})
+                    </p>
+                  </div>
+                ) : (
+                  <div className="divide-y divide-[rgba(200,169,106,0.06)] max-h-[520px] overflow-y-auto">
+                    {contactMessages.map((msg, i) => (
+                      <MessageBubble key={i} msg={msg} isUser={msg.role === "user"} />
+                    ))}
+                    <div ref={contactChatEndRef} />
+                  </div>
+                )}
+              </div>
+
+              <div className="flex gap-2 items-end">
+                <Textarea
+                  value={contactInput}
+                  onChange={e => setContactInput(e.target.value)}
+                  onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendContactQuery() } }}
+                  placeholder="Who should I talk to about…? (Enter to send, Shift+Enter for new line)"
+                  rows={2}
+                  className="flex-1 resize-none"
+                  disabled={isFindingContacts}
+                />
+                <div className="flex flex-col gap-1.5 shrink-0 self-end">
+                  <Button onClick={sendContactQuery} disabled={!contactInput.trim() || isFindingContacts}>
+                    {isFindingContacts ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}
+                  </Button>
+                  {contactMessages.length > 0 && (
+                    <button
+                      onClick={() => setContactMessages([])}
+                      className="flex items-center justify-center gap-1 text-[#A8B0C0]/30 hover:text-[#A8B0C0]/60 transition-colors cursor-pointer font-sans px-2 py-1.5"
+                      title="Clear chat"
+                      style={{ fontSize: "11px" }}
+                    >
+                      <RotateCcw size={11} strokeWidth={1.5} />
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* ── Document modes (swot, summary, qa) ── */}
-          {mode !== "chat" && (
+          {mode !== "chat" && mode !== "contacts" && (
             <>
               {/* Document input */}
               {!file ? (
