@@ -2,6 +2,7 @@
 
 import { useRef } from "react"
 import { motion, useInView } from "framer-motion"
+import { useLanguage } from "@/contexts/LanguageContext"
 
 const EASE = [0.25, 0.1, 0.25, 1] as const
 
@@ -29,14 +30,8 @@ function Reveal({
   )
 }
 
-const STATS = [
-  { value: "25+", label: "Years of founder experience\nacross finance and global affairs" },
-  { value: "16+", label: "Years of senior China, Southeast Asia\nand U.S. operating experience" },
-  { value: "30+", label: "Years of legal and capital markets\nexperience on the advisory bench" },
-  { value: "6", label: "Core specializations across risk,\ntrade, ESG, and financial literacy" },
-]
-
 export function About() {
+  const { t } = useLanguage()
   const lineRef = useRef(null)
   const lineInView = useInView(lineRef, { once: true, margin: "-60px" })
 
@@ -65,7 +60,7 @@ export function About() {
                   className="text-[#C8A96A] font-sans font-medium uppercase tracking-[0.3em]"
                   style={{ fontSize: "11px" }}
                 >
-                  About
+                  {t.about.eyebrow}
                 </span>
               </div>
             </Reveal>
@@ -76,10 +71,10 @@ export function About() {
                 className="font-serif text-[#F5F1E8] font-light leading-[1.06]"
                 style={{ fontSize: "clamp(38px, 5vw, 64px)" }}
               >
-                Data-Driven Counsel for
+                {t.about.headlineLine1}
                 <br />
                 <em className="not-italic text-[#F5F1E8]/85">
-                  Global Market Complexity
+                  {t.about.headlineLine2}
                 </em>
               </h2>
             </Reveal>
@@ -91,10 +86,7 @@ export function About() {
                   className="text-[#A8B0C0] font-sans font-light leading-[1.85]"
                   style={{ fontSize: "16px" }}
                 >
-                  CJPA Global Advisors is an international consulting and advisory
-                  company dedicated to data-driven scenario planning, strategic
-                  advisory, and geopolitical analysis for clients navigating the
-                  dynamics of globalization.
+                  {t.about.body1}
                 </p>
               </Reveal>
               <Reveal delay={0.28}>
@@ -102,11 +94,7 @@ export function About() {
                   className="text-[#A8B0C0] font-sans font-light leading-[1.85]"
                   style={{ fontSize: "16px" }}
                 >
-                  The firm began as a global research unit and grew into a
-                  multidisciplinary consultancy informed by global finance, policy,
-                  and research best practices. CJPA helps clients understand major
-                  geopolitical events, cultural dynamics, and supply chain
-                  disruption risks.
+                  {t.about.body2}
                 </p>
               </Reveal>
             </div>
@@ -118,7 +106,7 @@ export function About() {
                   className="font-display text-[#F5F1E8]/80 font-normal italic leading-[1.5]"
                   style={{ fontSize: "clamp(20px, 2.4vw, 28px)" }}
                 >
-                  &ldquo;Connecting global insight, people, capital, and resources.&rdquo;
+                  &ldquo;{t.about.quote}&rdquo;
                 </p>
               </blockquote>
             </Reveal>
@@ -126,7 +114,7 @@ export function About() {
 
           {/* Right — Stats grid */}
           <div className="grid grid-cols-2 gap-px bg-[#C8A96A]/8 border border-[#C8A96A]/8 self-start mt-4 lg:mt-16">
-            {STATS.map((stat, i) => (
+            {t.about.stats.map((stat, i) => (
               <Reveal key={stat.value} delay={0.15 + i * 0.08}>
                 <div className="bg-[#070B14] p-8 lg:p-10 flex flex-col gap-3">
                   <span

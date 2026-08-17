@@ -3,10 +3,12 @@
 import { useRef } from "react"
 import { motion, useInView } from "framer-motion"
 import { TeamShowcase } from "@/components/ui/team-showcase"
+import { useLanguage } from "@/contexts/LanguageContext"
 
 const EASE = [0.25, 0.1, 0.25, 1] as const
 
 export function Team() {
+  const { t } = useLanguage()
   const lineRef = useRef(null)
   const lineInView = useInView(lineRef, { once: true, margin: "-60px" })
   const headerRef = useRef(null)
@@ -44,7 +46,7 @@ export function Team() {
                 className="text-[#C8A96A] font-sans font-medium uppercase tracking-[0.3em]"
                 style={{ fontSize: "11px" }}
               >
-                Meet the Team
+                {t.team.eyebrow}
               </span>
             </motion.div>
 
@@ -55,9 +57,9 @@ export function Team() {
               className="font-serif text-[#F5F1E8] font-light leading-[1.06]"
               style={{ fontSize: "clamp(38px, 5vw, 64px)" }}
             >
-              Advisors, Analysts,
+              {t.team.headlineLine1}
               <br />
-              <em className="not-italic text-[#F5F1E8]/80">and Global Specialists</em>
+              <em className="not-italic text-[#F5F1E8]/80">{t.team.headlineLine2}</em>
             </motion.h2>
           </div>
 
@@ -68,9 +70,7 @@ export function Team() {
             className="text-[#A8B0C0] font-sans font-light leading-[1.8] max-w-sm lg:text-right"
             style={{ fontSize: "15px" }}
           >
-            CJPA brings together senior consultants, advisors, analysts, legal
-            counsel, technology specialists, and regional experts across Asia,
-            Africa, the Caribbean, Europe, and the United States.
+            {t.team.intro}
           </motion.p>
         </div>
 

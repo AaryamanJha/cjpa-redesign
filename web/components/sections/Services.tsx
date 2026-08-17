@@ -10,58 +10,24 @@ import {
   Shield,
   BookOpen,
 } from "lucide-react"
+import { useLanguage } from "@/contexts/LanguageContext"
+import type { Translations } from "@/lib/translations"
 
 const EASE = [0.25, 0.1, 0.25, 1] as const
 
-const SERVICES = [
-  {
-    icon: Globe2,
-    title: "Research & Risk Analysis",
-    description:
-      "Customized research reports for multinational clients exploring new markets, with emphasis on trade policy, geopolitical risk, macro trends, tariffs, domestic policy impact, ESG, and values-based investing.",
-  },
-  {
-    icon: BarChart2,
-    title: "Venture Capital & Project Finance",
-    description:
-      "Connecting high-quality infrastructure projects with venture capitalists, individual investors, family offices, RIAs, and development finance institutions.",
-  },
-  {
-    icon: Landmark,
-    title: "Infrastructure & Renewable Energy",
-    description:
-      "Capital and advisory support for infrastructure opportunities across renewable energy, solar, battery projects, 5G, green hydrogen, lithium iron phosphate, and construction robotics.",
-  },
-  {
-    icon: ArrowLeftRight,
-    title: "Market Entry Strategy",
-    description:
-      "Guidance for foreign companies entering the U.S. market, including market dynamics, regulatory requirements, competitive landscapes, and integration strategy.",
-  },
-  {
-    icon: Shield,
-    title: "Consulting for Multinationals & Governments",
-    description:
-      "Strategic intelligence for organizations investing in China or the Indo-Pacific, along with grant support, fundraising, board development, and ESG policy guidance.",
-  },
-  {
-    icon: BookOpen,
-    title: "Training & Financial Literacy",
-    description:
-      "Workshops for nonprofits, government agencies, student organizations, and businesses on asset allocation, risk tolerance, retirement saving, crypto due diligence, and values-based investing.",
-  },
-]
+const ICONS = [Globe2, BarChart2, Landmark, ArrowLeftRight, Shield, BookOpen]
 
 function ServiceCard({
   service,
+  Icon,
   delay,
 }: {
-  service: (typeof SERVICES)[number]
+  service: Translations["services"]["items"][number]
+  Icon: (typeof ICONS)[number]
   delay: number
 }) {
   const ref = useRef(null)
   const inView = useInView(ref, { once: true, margin: "-60px" })
-  const Icon = service.icon
 
   return (
     <motion.div
@@ -100,6 +66,7 @@ function ServiceCard({
 }
 
 export function Services() {
+  const { t } = useLanguage()
   const headerRef = useRef(null)
   const headerInView = useInView(headerRef, { once: true, margin: "-60px" })
   const lineRef = useRef(null)
@@ -131,7 +98,7 @@ export function Services() {
               className="text-[#C8A96A] font-sans font-medium uppercase tracking-[0.3em]"
               style={{ fontSize: "11px" }}
             >
-              Services
+              {t.services.eyebrow}
             </span>
           </motion.div>
 
@@ -142,14 +109,14 @@ export function Services() {
             className="font-serif text-[#F5F1E8] font-light leading-[1.06]"
             style={{ fontSize: "clamp(38px, 5vw, 64px)" }}
           >
-            Our Services
+            {t.services.heading}
           </motion.h2>
         </div>
 
         {/* Services grid */}
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-px bg-[#C8A96A]/6">
-          {SERVICES.map((service, i) => (
-            <ServiceCard key={service.title} service={service} delay={i * 0.07} />
+          {t.services.items.map((service, i) => (
+            <ServiceCard key={service.title} service={service} Icon={ICONS[i]} delay={i * 0.07} />
           ))}
         </div>
       </div>

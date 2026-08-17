@@ -3,10 +3,12 @@
 import { useRef, useState } from "react"
 import { motion, useInView } from "framer-motion"
 import { ArrowRight } from "lucide-react"
+import { useLanguage } from "@/contexts/LanguageContext"
 
 const EASE = [0.25, 0.1, 0.25, 1] as const
 
 export function Newsletter() {
+  const { t } = useLanguage()
   const ref = useRef(null)
   const inView = useInView(ref, { once: true, margin: "-60px" })
   const [email, setEmail] = useState("")
@@ -30,10 +32,10 @@ export function Newsletter() {
         setSubmitted(true)
       } else {
         // Strip Mailchimp HTML tags from error message
-        setError(data.msg?.replace(/<[^>]+>/g, "") || "Something went wrong. Please try again.")
+        setError(data.msg?.replace(/<[^>]+>/g, "") || t.newsletter.genericError)
       }
     } catch {
-      setError("Network error. Please check your connection and try again.")
+      setError(t.newsletter.networkError)
     } finally {
       setLoading(false)
     }
@@ -63,7 +65,7 @@ export function Newsletter() {
                   className="text-[#C8A96A] font-sans font-medium uppercase tracking-[0.3em]"
                   style={{ fontSize: "11px" }}
                 >
-                  Intelligence Briefing
+                  {t.newsletter.eyebrow}
                 </span>
               </div>
               {/* Playfair Display for this heading */}
@@ -71,17 +73,15 @@ export function Newsletter() {
                 className="font-display text-[#F5F1E8] font-normal leading-[1.1] mb-5"
                 style={{ fontSize: "clamp(28px, 3.2vw, 44px)" }}
               >
-                Geopolitical Intelligence,
+                {t.newsletter.headlineLine1}
                 <br />
-                <em className="text-[#F5F1E8]/75">Delivered Quarterly</em>
+                <em className="text-[#F5F1E8]/75">{t.newsletter.headlineLine2}</em>
               </h2>
               <p
                 className="text-[#A8B0C0] font-sans font-light leading-[1.85]"
                 style={{ fontSize: "15px" }}
               >
-                A concise assessment of geopolitical developments, capital flow
-                shifts, and regulatory changes that matter to international investors
-                and institutions. No noise. No filler.
+                {t.newsletter.body}
               </p>
             </div>
 
@@ -98,13 +98,13 @@ export function Newsletter() {
                     className="font-display text-[#F5F1E8] font-normal"
                     style={{ fontSize: "clamp(20px, 2vw, 26px)" }}
                   >
-                    You&rsquo;re on the list.
+                    {t.newsletter.successTitle}
                   </p>
                   <p
                     className="text-[#A8B0C0] font-sans font-light"
                     style={{ fontSize: "14px" }}
                   >
-                    We&rsquo;ll be in touch with the next briefing.
+                    {t.newsletter.successBody}
                   </p>
                 </motion.div>
               ) : (
@@ -115,7 +115,7 @@ export function Newsletter() {
                       className="text-[#A8B0C0]/60 font-sans font-medium uppercase"
                       style={{ fontSize: "10px", letterSpacing: "0.2em" }}
                     >
-                      Work Email
+                      {t.newsletter.emailLabel}
                     </label>
                     <input
                       id="newsletter-email"
@@ -123,7 +123,7 @@ export function Newsletter() {
                       required
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      placeholder="name@organization.com"
+                      placeholder={t.newsletter.emailPlaceholder}
                       className="bg-transparent border-b border-[#C8A96A]/25 focus:border-[#C8A96A]/60 text-[#F5F1E8] placeholder:text-[#A8B0C0]/30 font-sans font-light py-3 outline-none transition-colors duration-300"
                       style={{ fontSize: "15px" }}
                     />
@@ -137,7 +137,7 @@ export function Newsletter() {
                       className="font-sans font-medium uppercase tracking-[0.2em]"
                       style={{ fontSize: "11px" }}
                     >
-                      {loading ? "Subscribing…" : "Subscribe"}
+                      {loading ? t.newsletter.subscribing : t.newsletter.subscribe}
                     </span>
                     <ArrowRight
                       size={15}
@@ -154,7 +154,7 @@ export function Newsletter() {
                     className="text-[#A8B0C0]/40 font-sans font-light"
                     style={{ fontSize: "12px" }}
                   >
-                    Quarterly only. Unsubscribe at any time.
+                    {t.newsletter.disclaimer}
                   </p>
                 </form>
               )}

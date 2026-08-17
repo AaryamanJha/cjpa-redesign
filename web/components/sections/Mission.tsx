@@ -2,10 +2,12 @@
 
 import { useRef } from "react"
 import { motion, useInView } from "framer-motion"
+import { useLanguage } from "@/contexts/LanguageContext"
 
 const EASE = [0.25, 0.1, 0.25, 1] as const
 
 export function Mission() {
+  const { t } = useLanguage()
   const ref = useRef(null)
   const inView = useInView(ref, { once: true, margin: "-100px" })
 
@@ -38,7 +40,7 @@ export function Mission() {
           className="text-[#C8A96A] font-sans font-medium uppercase tracking-[0.3em]"
           style={{ fontSize: "11px" }}
         >
-          Mission
+          {t.mission.eyebrow}
         </motion.span>
 
         <motion.p
@@ -48,8 +50,7 @@ export function Mission() {
           className="mt-8 font-display text-[#F5F1E8] font-normal italic leading-[1.25]"
           style={{ fontSize: "clamp(26px, 3.6vw, 40px)" }}
         >
-          &ldquo;Bridging cultures and diversity through integrity, respect,
-          and an unwavering commitment to our clients.&rdquo;
+          &ldquo;{t.mission.statement}&rdquo;
         </motion.p>
 
         <motion.div

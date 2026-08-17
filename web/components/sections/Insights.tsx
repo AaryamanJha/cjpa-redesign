@@ -3,106 +3,107 @@
 import { useRef } from "react"
 import { motion, useInView } from "framer-motion"
 import { ArrowUpRight, FileText, Image as ImageIcon } from "lucide-react"
+import { useLanguage } from "@/contexts/LanguageContext"
 
 const EASE = [0.25, 0.1, 0.25, 1] as const
 
-const ARTICLES = [
+const ARTICLE_META = [
   {
     tag: "Forbes",
     date: "Feb 18, 2025",
-    title: "How U.S. And Chinese Influence In Central America Affects The Panama Canal",
-    excerpt:
-      "A Forbes article by Earl Carr examining how U.S. and Chinese influence in Central America affects the Panama Canal and the wider strategic environment.",
     image: "/insights/panama-canal.png",
     href: "https://www.forbes.com/sites/earlcarr/2025/02/18/reimagining-us--chinese-influence-in-central-america-critical-implications-for-the-panama-canal/",
   },
   {
     tag: "Forbes",
     date: "May 15, 2025",
-    title: "Speed And Safety: What Circle's IPO Means For Stablecoins Geopolitical Risk",
-    excerpt:
-      "A Forbes article by Earl Carr and intern analyst Jonah Kim on stablecoins, Circle's IPO, and the geopolitical risk dimensions of digital finance.",
     image: "/insights/circle-ipo-stablecoin.png",
     href: "https://www.forbes.com/sites/earlcarr/2025/05/15/speed-and-safety-what-circles-ipo-means-for-stablecoins/",
   },
   {
     tag: "Forbes",
     date: "Mar 24, 2025",
-    title: "Geopolitical Risk And Market Volatility: What Are Advisors Telling Clients?",
-    excerpt:
-      "A Forbes article by Earl Carr on market volatility, geopolitical risk, and the counsel advisors are providing clients.",
     image: "/insights/market-volatility.png",
     href: "https://www.forbes.com/sites/earlcarr/2025/03/24/geopolitical-risk-and-volatility-what-are-advisors-telling-clients/",
   },
 ]
 
-const PRESS = [
+const PRESS_META = [
   {
     publication: "Press Release",
-    headline: "CJPA Global Advisors attends exclusive Paley Center luncheon featuring General David H. Petraeus",
     date: "May 28, 2025",
     image: "/press/paley-center-luncheon-2025.png",
     href: "/press/cjpa-paley-center-luncheon-2025.pdf",
-    attachmentLabel: "Open release",
     attachmentHref: "/press/cjpa-paley-center-luncheon-2025.pdf",
     attachmentType: "document",
   },
   {
     publication: "Press Release",
-    headline: "CJPA Global Advisors attends BMO's 21st Annual Global Farm to Market | Chemicals Conference",
     date: "May 14, 2026",
     image: "/press/press-release-bank-montreal-1.png",
     href: "/press/cjpa-bmo-2026-press-release.docx",
-    attachmentLabel: "Open release",
     attachmentHref: "/press/cjpa-bmo-2026-press-release.docx",
     attachmentType: "document",
   },
   {
     publication: "Hinrich Foundation",
-    headline: "China's rising influence in the Caribbean through infrastructure and soft power",
     date: "June 2024",
     image: "/press/hinrich-caribbean.jpg",
     href: "https://www.cjpa.us/new-page",
-    attachmentLabel: "Source image",
     attachmentHref: "/press/hinrich-caribbean.jpg",
     attachmentType: "image",
   },
   {
     publication: "Penn State",
-    headline: "Earl Carr speaks with graduate students on international relations careers",
     date: "Feb 23, 2024",
     image: "/press/penn-state-careers.jpeg",
     href: "https://www.cjpa.us/new-page",
-    attachmentLabel: "Event photo",
     attachmentHref: "/press/penn-state-careers.jpeg",
     attachmentType: "image",
   },
   {
     publication: "Press Release",
-    headline: "Scage partnership press release",
     date: "July 2025",
     image: "/press/press-release-scage-1.png",
     href: "/press/press-release-scage-1.png",
-    attachmentLabel: "Open release",
     attachmentHref: "/press/press-release-scage-1.png",
     attachmentType: "image",
   },
   {
     publication: "Taiwan Engagement",
-    headline: "CJPA meetings with Taiwan policy leaders and American Institute in Taiwan contacts",
     date: "July 2023",
     image: "/press/taiwan-meetings.jpeg",
     href: "https://www.cjpa.us/new-page",
-    attachmentLabel: "Meeting photo",
     attachmentHref: "/press/taiwan-meetings.jpeg",
     attachmentType: "image",
   },
 ]
+
+interface Article {
+  tag: string
+  date: string
+  image: string
+  href: string
+  title: string
+  excerpt: string
+}
+
+interface PressItem {
+  publication: string
+  date: string
+  image: string
+  href: string
+  attachmentHref: string
+  attachmentType: string
+  headline: string
+  attachmentLabel: string
+}
+
 function ArticleCard({
   article,
   delay,
 }: {
-  article: (typeof ARTICLES)[number]
+  article: Article
   delay: number
 }) {
   const ref = useRef(null)
@@ -170,12 +171,24 @@ function ArticleCard({
 }
 
 export function Insights() {
+  const { t } = useLanguage()
   const lineRef = useRef(null)
   const lineInView = useInView(lineRef, { once: true, margin: "-60px" })
   const headerRef = useRef(null)
   const headerInView = useInView(headerRef, { once: true, margin: "-60px" })
   const pressRef = useRef(null)
   const pressInView = useInView(pressRef, { once: true, margin: "-60px" })
+
+  const articles: Article[] = ARTICLE_META.map((meta, i) => ({
+    ...meta,
+    title: t.insights.articles[i].title,
+    excerpt: t.insights.articles[i].excerpt,
+  }))
+  const press: PressItem[] = PRESS_META.map((meta, i) => ({
+    ...meta,
+    headline: t.insights.press[i].headline,
+    attachmentLabel: t.insights.press[i].attachmentLabel,
+  }))
 
   return (
     <section id="insights" className="relative bg-[#070B14] py-28 lg:py-36">
@@ -202,7 +215,7 @@ export function Insights() {
               className="text-[#C8A96A] font-sans font-medium uppercase tracking-[0.3em]"
               style={{ fontSize: "11px" }}
             >
-              Insights
+              {t.insights.eyebrow}
             </span>
           </motion.div>
 
@@ -213,9 +226,9 @@ export function Insights() {
             className="font-serif text-[#F5F1E8] font-light leading-[1.06]"
             style={{ fontSize: "clamp(38px, 5vw, 64px)" }}
           >
-            Perspectives on
+            {t.insights.headlineLine1}
             <br />
-            <em className="not-italic text-[#F5F1E8]/80">the Global Order</em>
+            <em className="not-italic text-[#F5F1E8]/80">{t.insights.headlineLine2}</em>
           </motion.h2>
         </div>
 
@@ -228,10 +241,10 @@ export function Insights() {
               className="text-[#A8B0C0]/40 font-sans uppercase mb-2"
               style={{ fontSize: "10px", letterSpacing: "0.25em" }}
             >
-              Recent Perspectives
+              {t.insights.recentPerspectives}
             </p>
             <div>
-              {ARTICLES.map((article, i) => (
+              {articles.map((article, i) => (
                 <ArticleCard key={article.title} article={article} delay={i * 0.1} />
               ))}
             </div>
@@ -246,11 +259,11 @@ export function Insights() {
               className="text-[#A8B0C0]/40 font-sans uppercase mb-8"
               style={{ fontSize: "10px", letterSpacing: "0.25em" }}
             >
-              In the Press
+              {t.insights.inThePress}
             </motion.p>
 
             <div className="space-y-0">
-              {PRESS.map((item, i) => {
+              {press.map((item, i) => {
                 const AttachmentIcon = item.attachmentType === "image" ? ImageIcon : FileText
 
                 return (

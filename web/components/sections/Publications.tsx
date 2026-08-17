@@ -3,10 +3,11 @@
 import { useRef } from "react"
 import { motion, useInView } from "framer-motion"
 import { ArrowUpRight, BookOpen, Clock } from "lucide-react"
+import { useLanguage } from "@/contexts/LanguageContext"
 
 const EASE = [0.25, 0.1, 0.25, 1] as const
 
-const BOOK = {
+const BOOK_META = {
   title: "From Trump to Biden and Beyond",
   subtitle: "Reimagining US-China Relations",
   editor: "Earl A. Carr Jr.",
@@ -17,11 +18,11 @@ const BOOK = {
   amazon:
     "https://www.amazon.com/Trump-Biden-Beyond-Reimagining-Relations/dp/9811642966",
   springer: "https://link.springer.com/book/10.1007/978-981-16-4297-5",
-  description:
-    "An edited volume on the future of U.S.-China relations, with policy analysis and multidisciplinary perspectives on technology, trade, cross-Strait relations, security, climate, geopolitics, and global competition.",
 }
 
 export function Publications() {
+  const { t } = useLanguage()
+  const BOOK = { ...BOOK_META, description: t.publications.bookDescription }
   const lineRef = useRef(null)
   const lineInView = useInView(lineRef, { once: true, margin: "-60px" })
   const headerRef = useRef(null)
@@ -53,7 +54,7 @@ export function Publications() {
               className="text-[#C8A96A] font-sans font-medium uppercase tracking-[0.3em]"
               style={{ fontSize: "11px" }}
             >
-              Publications
+              {t.publications.eyebrow}
             </span>
           </motion.div>
 
@@ -64,9 +65,9 @@ export function Publications() {
             className="font-serif text-[#F5F1E8] font-light leading-[1.06]"
             style={{ fontSize: "clamp(38px, 5vw, 64px)" }}
           >
-            Books
+            {t.publications.headlineLine1}
             <br />
-            <em className="not-italic text-[#F5F1E8]/80">and Research</em>
+            <em className="not-italic text-[#F5F1E8]/80">{t.publications.headlineLine2}</em>
           </motion.h2>
         </div>
 
@@ -97,7 +98,7 @@ export function Publications() {
                     className="text-[#C8A96A]/60 font-sans uppercase"
                     style={{ fontSize: "10px", letterSpacing: "0.15em" }}
                   >
-                    Published Book
+                    {t.publications.publishedBookLabel}
                   </span>
                 </div>
                 <ArrowUpRight
@@ -127,19 +128,19 @@ export function Publications() {
               </p>
 
               <div className="grid sm:grid-cols-2 gap-x-6 gap-y-2 border-t border-[#C8A96A]/10 pt-5">
-                <Meta label="Editor" value={BOOK.editor} />
-                <Meta label="Year" value={BOOK.year} />
-                <Meta label="Publisher" value={BOOK.publisher} />
-                <Meta label="ISBN" value={BOOK.isbn} />
+                <Meta label={t.publications.editorLabel} value={BOOK.editor} />
+                <Meta label={t.publications.yearLabel} value={BOOK.year} />
+                <Meta label={t.publications.publisherLabel} value={BOOK.publisher} />
+                <Meta label={t.publications.isbnLabel} value={BOOK.isbn} />
               </div>
 
               <div className="flex flex-wrap gap-3 pt-1">
                 <span className="text-[#C8A96A] font-sans uppercase tracking-[0.16em]" style={{ fontSize: "10px" }}>
-                  View on Amazon
+                  {t.publications.viewOnAmazon}
                 </span>
                 <span className="text-[#A8B0C0]/35" style={{ fontSize: "12px" }}>|</span>
                 <span className="text-[#A8B0C0]/65 font-sans uppercase tracking-[0.16em]" style={{ fontSize: "10px" }}>
-                  Springer details
+                  {t.publications.springerDetails}
                 </span>
               </div>
             </div>
@@ -158,7 +159,7 @@ export function Publications() {
                   className="text-[#C8A96A]/60 font-sans uppercase"
                   style={{ fontSize: "10px", letterSpacing: "0.15em" }}
                 >
-                  Next Publication
+                  {t.publications.nextPublicationLabel}
                 </span>
               </div>
 
@@ -166,18 +167,18 @@ export function Publications() {
                 className="font-serif text-[#F5F1E8] font-light leading-[1.1]"
                 style={{ fontSize: "clamp(26px, 3vw, 42px)" }}
               >
-                Second Book
+                {t.publications.secondBook}
               </h3>
               <p
                 className="font-display text-[#C8A96A]/75 mt-3"
                 style={{ fontSize: "clamp(18px, 2vw, 26px)" }}
               >
-                Coming Soon
+                {t.publications.comingSoon}
               </p>
             </div>
 
             <p className="text-[#A8B0C0]/65 font-sans font-light leading-[1.8] mt-10" style={{ fontSize: "14px" }}>
-              Details will be announced once the title, cover, and publication timeline are finalized.
+              {t.publications.comingSoonDetail}
             </p>
           </motion.div>
         </div>

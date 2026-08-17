@@ -2,46 +2,18 @@
 
 import { useRef } from "react"
 import { motion, useInView } from "framer-motion"
+import { useLanguage } from "@/contexts/LanguageContext"
+import type { Translations } from "@/lib/translations"
 
 const EASE = [0.25, 0.1, 0.25, 1] as const
 
-const TRACKS = [
-  {
-    number: "01",
-    title: "USITC",
-    description:
-      "Engagements and research connected to trade, competitiveness, market intelligence, and the policy questions shaping international commerce.",
-  },
-  {
-    number: "02",
-    title: "International Career Advancement Program",
-    description:
-      "A values-aligned network focused on representation, leadership, and widening access to international affairs careers.",
-  },
-  {
-    number: "03",
-    title: "Augustus Global Investment",
-    description:
-      "Investment partnership context for cross-border growth, infrastructure, and capital advisory opportunities.",
-  },
-]
-
-const CLIENT_TYPES = [
-  "Sovereign Governments",
-  "Multilateral Institutions",
-  "Development Finance Institutions",
-  "Infrastructure Sponsors",
-  "Renewable Energy Developers",
-  "Multinational Corporations",
-  "Nonprofits & Foundations",
-  "Family Offices & RIAs",
-]
-
 function TrackCard({
   track,
+  number,
   delay,
 }: {
-  track: (typeof TRACKS)[number]
+  track: Translations["partners"]["tracks"][number]
+  number: string
   delay: number
 }) {
   const ref = useRef(null)
@@ -59,7 +31,7 @@ function TrackCard({
         className="text-[#C8A96A]/50 font-sans font-medium"
         style={{ fontSize: "12px", letterSpacing: "0.12em" }}
       >
-        {track.number}
+        {number}
       </span>
       {/* Track title — Playfair Display */}
       <h3
@@ -79,6 +51,7 @@ function TrackCard({
 }
 
 export function Partners() {
+  const { t } = useLanguage()
   const lineRef = useRef(null)
   const lineInView = useInView(lineRef, { once: true, margin: "-60px" })
   const headerRef = useRef(null)
@@ -113,7 +86,7 @@ export function Partners() {
                 className="text-[#C8A96A] font-sans font-medium uppercase tracking-[0.3em]"
                 style={{ fontSize: "11px" }}
               >
-                Engagement
+                {t.partners.eyebrow}
               </span>
             </motion.div>
 
@@ -124,9 +97,9 @@ export function Partners() {
               className="font-serif text-[#F5F1E8] font-light leading-[1.06]"
               style={{ fontSize: "clamp(38px, 5vw, 64px)" }}
             >
-              How Can We
+              {t.partners.headlineLine1}
               <br />
-              <em className="not-italic text-[#F5F1E8]/80">Help You</em>
+              <em className="not-italic text-[#F5F1E8]/80">{t.partners.headlineLine2}</em>
             </motion.h2>
           </div>
 
@@ -137,16 +110,14 @@ export function Partners() {
             className="text-[#A8B0C0] font-sans font-light leading-[1.85]"
             style={{ fontSize: "15px" }}
           >
-            Every engagement begins with a confidential conversation. We work exclusively
-            with organizations where the quality of geopolitical and financial judgment
-            is consequential — not advisory as a formality, but as a competitive necessity.
+            {t.partners.intro}
           </motion.p>
         </div>
 
         {/* Three tracks */}
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-12 mb-20 lg:mb-24">
-          {TRACKS.map((track, i) => (
-            <TrackCard key={track.number} track={track} delay={i * 0.1} />
+          {t.partners.tracks.map((track, i) => (
+            <TrackCard key={track.title} track={track} number={`0${i + 1}`} delay={i * 0.1} />
           ))}
         </div>
 
@@ -162,10 +133,10 @@ export function Partners() {
             className="text-[#A8B0C0]/50 font-sans font-medium uppercase mb-6"
             style={{ fontSize: "10px", letterSpacing: "0.3em" }}
           >
-            Organizations We Serve
+            {t.partners.organizationsWeServe}
           </p>
           <div className="flex flex-wrap gap-3">
-            {CLIENT_TYPES.map((type) => (
+            {t.partners.clientTypes.map((type) => (
               <span
                 key={type}
                 className="text-[#A8B0C0]/70 font-sans font-light border border-[#C8A96A]/12 px-4 py-2"

@@ -3,6 +3,7 @@
 import { useRef } from "react"
 import Image from "next/image"
 import { motion, useInView } from "framer-motion"
+import { useLanguage } from "@/contexts/LanguageContext"
 
 const EASE = [0.25, 0.1, 0.25, 1] as const
 
@@ -31,6 +32,7 @@ function Reveal({
 }
 
 export function Founder() {
+  const { t } = useLanguage()
   const lineRef = useRef(null)
   const lineInView = useInView(lineRef, { once: true, margin: "-60px" })
 
@@ -53,7 +55,7 @@ export function Founder() {
             className="text-[#C8A96A] font-sans font-medium uppercase tracking-[0.3em]"
             style={{ fontSize: "11px" }}
           >
-            Leadership
+            {t.founder.eyebrow}
           </span>
         </Reveal>
 
@@ -76,7 +78,7 @@ export function Founder() {
                 className="font-serif text-[#F5F1E8] font-light leading-[1.06]"
                 style={{ fontSize: "clamp(34px, 4.4vw, 52px)" }}
               >
-                About the Founder
+                {t.founder.heading}
               </h2>
             </Reveal>
 
@@ -86,14 +88,7 @@ export function Founder() {
                   className="text-[#A8B0C0] font-sans font-light leading-[1.85]"
                   style={{ fontSize: "16px" }}
                 >
-                  Earl Carr is Founder and Chief Executive Officer at CJPA Global
-                  Advisors, based in New York. With 25+ years of experience, he
-                  manages a multidisciplinary team of global research analysts,
-                  software engineers, marketing specialists, geopolitical
-                  analysts, and media specialists to guide the firm&rsquo;s global
-                  thought leadership, global strategic client advisory practice,
-                  and cross-border business mandate. Earl is an Adjunct Instructor
-                  at NYU&rsquo;s Center for Global Affairs.
+                  {t.founder.bio1}
                 </p>
               </Reveal>
               <Reveal delay={0.3}>
@@ -101,13 +96,7 @@ export function Founder() {
                   className="text-[#A8B0C0] font-sans font-light leading-[1.85]"
                   style={{ fontSize: "16px" }}
                 >
-                  Earl has expertise in banking, wealth management, consulting,
-                  geopolitical analysis, U.S. foreign policy, and international
-                  development. He previously served as Vice President at Morgan
-                  Stanley&rsquo;s Institute for Sustainable Investing (ISI),
-                  working as a strategist and thought leader. Earl is a member of
-                  the Steering Committee for the inaugural National Asian American
-                  Book Club and is a monthly columnist at Forbes.com.
+                  {t.founder.bio2}
                 </p>
               </Reveal>
               <Reveal delay={0.36}>
@@ -115,12 +104,11 @@ export function Founder() {
                   className="text-[#A8B0C0] font-sans font-light leading-[1.85]"
                   style={{ fontSize: "16px" }}
                 >
-                  Mr. Carr is Editor of{" "}
+                  {t.founder.bio3editorPrefix}{" "}
                   <em className="not-italic text-[#F5F1E8]/85">
-                    From Trump to Biden and Beyond: Reimagining U.S.-China
-                    Relations
+                    {t.founder.bio3bookTitle}
                   </em>
-                  , published by Palgrave Macmillan, September 2021.
+                  {t.founder.bio3suffix}
                 </p>
               </Reveal>
             </div>
@@ -134,7 +122,7 @@ export function Founder() {
               className="text-[#C8A96A] font-sans font-medium uppercase tracking-[0.3em]"
               style={{ fontSize: "11px" }}
             >
-              Founder&rsquo;s Message
+              {t.founder.messageEyebrow}
             </span>
 
             <div className="flex flex-col gap-5">
@@ -142,44 +130,19 @@ export function Founder() {
                 className="text-[#A8B0C0] font-sans font-light leading-[1.85]"
                 style={{ fontSize: "16px" }}
               >
-                At CJPA Global Advisors, our exceptional team of research
-                analysts, software engineers, financial advisors, marketing
-                specialists, and geopolitical strategists strives to be a global
-                leader in advisory services, cross-border business development,
-                and customized research. Our firm&rsquo;s core specializations
-                include global risk analysis, international supply chain
-                analysis, trade analysis, risk management, geopolitical
-                analysis and financial markets, environmental sustainable
-                governance, racial justice investing, and financial literacy
-                training. What makes CJPA truly extraordinary is our dedication
-                to analytical rigor and access to proprietary research, people,
-                and intelligence through a global network of subject matter
-                experts and professionals.
+                {t.founder.message1}
               </p>
               <p
                 className="text-[#A8B0C0] font-sans font-light leading-[1.85]"
                 style={{ fontSize: "16px" }}
               >
-                Through a world-class Global Advisory Board, we ensure that the
-                firm&rsquo;s long-term goals and systems are guided and held
-                accountable while remaining good stewards of our financial
-                resources. At CJPA, we are passionate about how to utilize
-                capital, technology, and data to help solve some of the
-                world&rsquo;s most pressing problems, including racial
-                socio-economic equity, sustainability, and the transition to a
-                lower-carbon global economy &mdash; a transition we believe is
-                as much a historic investment opportunity as it is a risk to
-                manage.
+                {t.founder.message2}
               </p>
               <p
                 className="text-[#A8B0C0] font-sans font-light leading-[1.85]"
                 style={{ fontSize: "16px" }}
               >
-                Our company is determined to help you achieve your goals &mdash;
-                whether that means identifying geopolitical, financial, or
-                business risk, providing insight as you explore investing in a
-                new country, or helping to raise capital for projects around
-                the world. We are your trusted partner.
+                {t.founder.message3}
               </p>
             </div>
 
@@ -188,7 +151,7 @@ export function Founder() {
                 className="font-display text-[#F5F1E8]/90 italic font-normal"
                 style={{ fontSize: "18px" }}
               >
-                Cordially,
+                {t.founder.signOff}
               </p>
               <p
                 className="font-display text-[#C8A96A] italic font-normal mt-1"
@@ -200,7 +163,7 @@ export function Founder() {
                 className="text-[#A8B0C0] font-sans font-light uppercase tracking-[0.15em] mt-1"
                 style={{ fontSize: "11px" }}
               >
-                Founder and CEO, CJPA Global Advisors
+                {t.founder.signatureTitle}
               </p>
             </div>
           </Reveal>
@@ -218,9 +181,9 @@ export function Founder() {
                 className="text-[#A8B0C0]/50 font-sans font-light uppercase tracking-[0.2em] text-center px-8"
                 style={{ fontSize: "11px" }}
               >
-                Photo pending —
+                {t.founder.photoPendingLabel}
                 <br />
-                Earl Carr &amp; Jensen Huang, CFR
+                {t.founder.photoPendingName}
               </span>
             </div>
             <div className="absolute bottom-4 right-4 left-4 sm:left-auto sm:max-w-[80%] bg-[#F5F1E8] px-6 py-5">
@@ -228,8 +191,7 @@ export function Founder() {
                 className="font-display italic text-[#070B14] font-normal leading-[1.5]"
                 style={{ fontSize: "13.5px" }}
               >
-                CJPA&rsquo;s Founder, Earl Carr, with NVIDIA&rsquo;s CEO, Jensen
-                Huang, at the Council on Foreign Relations in Washington, D.C.
+                {t.founder.photoCaption}
               </p>
             </div>
           </Reveal>

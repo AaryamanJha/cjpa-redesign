@@ -3,10 +3,12 @@
 import { useRef, useState } from "react"
 import { motion, useInView } from "framer-motion"
 import { Play } from "lucide-react"
+import { useLanguage } from "@/contexts/LanguageContext"
 
 const EASE = [0.25, 0.1, 0.25, 1] as const
 
 export function TeamFilm() {
+  const { t } = useLanguage()
   const ref = useRef(null)
   const inView = useInView(ref, { once: true, margin: "-80px" })
   const [hovered, setHovered] = useState(false)
@@ -83,13 +85,13 @@ export function TeamFilm() {
                 className="text-[#A8B0C0]/40 font-sans uppercase tracking-[0.28em] mb-2"
                 style={{ fontSize: "10px" }}
               >
-                CJPA Global Advisors
+                {t.teamFilm.kicker}
               </p>
               <p
                 className="font-serif text-[#F5F1E8]/70 font-light"
                 style={{ fontSize: "clamp(18px, 2.5vw, 32px)" }}
               >
-                Our Approach to Global Advisory
+                {t.teamFilm.heading}
               </p>
             </div>
           </div>
@@ -100,13 +102,13 @@ export function TeamFilm() {
               className="text-[#A8B0C0]/25 font-sans"
               style={{ fontSize: "11px", letterSpacing: "0.12em" }}
             >
-              Video coming soon
+              {t.teamFilm.comingSoon}
             </span>
             <span
               className="text-[#C8A96A]/20 font-sans uppercase"
               style={{ fontSize: "10px", letterSpacing: "0.2em" }}
             >
-              Principal Message
+              {t.teamFilm.principalMessage}
             </span>
           </div>
         </motion.div>

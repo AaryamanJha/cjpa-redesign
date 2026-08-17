@@ -5,17 +5,8 @@ import Link from "next/link"
 import { motion, AnimatePresence } from "framer-motion"
 import { Menu, X } from "lucide-react"
 import { ThemeToggle } from "@/components/theme/ThemeToggle"
-
-const NAV_LINKS = [
-  { label: "About",        id: "about"        },
-  { label: "Services",     id: "services"     },
-  { label: "Team",         id: "team"         },
-  { label: "Impact",       id: "impact"       },
-  { label: "Insights",     id: "insights"     },
-  { label: "Publications", id: "publications" },
-  { label: "Partners",     id: "partners"     },
-  { label: "Contact",      id: "contact"      },
-]
+import { LanguageSwitcher } from "@/components/layout/LanguageSwitcher"
+import { useLanguage } from "@/contexts/LanguageContext"
 
 function scrollTo(id: string, onDone?: () => void) {
   const el = document.getElementById(id)
@@ -26,6 +17,7 @@ function scrollTo(id: string, onDone?: () => void) {
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
+  const { t } = useLanguage()
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 24)
@@ -64,7 +56,7 @@ export function Navbar() {
 
         {/* Desktop nav links */}
         <div className="hidden lg:flex items-center gap-6 xl:gap-7">
-          {NAV_LINKS.map((link) => (
+          {t.nav.links.map((link) => (
             <button
               key={link.id}
               onClick={() => scrollTo(link.id)}
@@ -78,13 +70,14 @@ export function Navbar() {
 
         {/* Desktop CTA */}
         <div className="hidden lg:flex items-center gap-3 shrink-0">
+          <LanguageSwitcher compact />
           <ThemeToggle compact />
           <Link
             href="/login"
             className="uppercase font-sans font-medium tracking-[0.16em] text-[#C8A96A] border border-[#C8A96A]/35 hover:border-[#C8A96A]/70 hover:bg-[#C8A96A]/6 px-4 py-2.5 transition-all duration-300 cursor-pointer"
             style={{ fontSize: "11px" }}
           >
-            Portal
+            {t.nav.portal}
           </Link>
         </div>
 
@@ -110,7 +103,7 @@ export function Navbar() {
             className="lg:hidden overflow-hidden bg-[#070B14]/98 backdrop-blur-md border-t border-[#C8A96A]/10"
           >
             <div className="max-w-7xl mx-auto px-6 py-8 flex flex-col gap-6">
-              {NAV_LINKS.map((link) => (
+              {t.nav.links.map((link) => (
                 <button
                   key={link.id}
                   onClick={() => scrollTo(link.id, () => setMobileOpen(false))}
@@ -125,9 +118,10 @@ export function Navbar() {
                 className="uppercase font-sans font-medium tracking-[0.16em] text-[#C8A96A] border border-[#C8A96A]/35 hover:border-[#C8A96A]/70 px-5 py-3 text-center transition-all duration-300 cursor-pointer mt-2"
                 style={{ fontSize: "13px" }}
               >
-                Client Portal
+                {t.nav.portal}
               </Link>
-              <div className="pt-1">
+              <div className="pt-1 flex items-center gap-3">
+                <LanguageSwitcher />
                 <ThemeToggle />
               </div>
             </div>

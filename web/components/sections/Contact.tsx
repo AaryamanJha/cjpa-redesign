@@ -4,25 +4,12 @@ import { useRef, useState } from "react"
 import { motion, useInView } from "framer-motion"
 import { WebGLShader } from "@/components/ui/web-gl-shader"
 import { LiquidButton } from "@/components/ui/liquid-glass-button"
+import { useLanguage } from "@/contexts/LanguageContext"
 
 const EASE = [0.25, 0.1, 0.25, 1] as const
 
-const OFFICES = [
-  { city: "New York", address: "45 Rockefeller Plaza, New York, NY 10111", role: "Headquarters" },
-  { city: "Global Network", address: "Asia-Pacific, Caribbean, Europe, Africa", role: "Subject-Matter Experts" },
-]
-
-const INQUIRY_TYPES = [
-  "Venture Capital",
-  "Research and Risk Analysis",
-  "Infrastructure and Renewable Energy",
-  "Training and Financial Literacy",
-  "Consulting",
-  "Market Entry Strategy",
-  "Other",
-]
-
 export function Contact() {
+  const { t } = useLanguage()
   const lineRef = useRef(null)
   const lineInView = useInView(lineRef, { once: true, margin: "-60px" })
   const headerRef = useRef(null)
@@ -82,7 +69,7 @@ export function Contact() {
               className="text-[#C8A96A] font-sans font-light uppercase tracking-[0.3em]"
               style={{ fontSize: "9px" }}
             >
-              Contact
+              {t.contact.eyebrow}
             </span>
           </motion.div>
 
@@ -93,9 +80,9 @@ export function Contact() {
             className="font-serif text-[#F5F1E8] font-light leading-[1.08] mb-5"
             style={{ fontSize: "clamp(32px, 4vw, 52px)" }}
           >
-            Begin a
+            {t.contact.headlineLine1}
             <br />
-            <em className="not-italic text-[#F5F1E8]/80">Conversation</em>
+            <em className="not-italic text-[#F5F1E8]/80">{t.contact.headlineLine2}</em>
           </motion.h2>
 
           <motion.p
@@ -105,9 +92,7 @@ export function Contact() {
             className="text-[#A8B0C0] font-sans font-light leading-[1.8] max-w-xl"
             style={{ fontSize: "15px" }}
           >
-            To help us best serve your inquiry, describe the issue you are
-            navigating and what you want to achieve. You may also email or call
-            to make an appointment.
+            {t.contact.body}
           </motion.p>
         </div>
 
@@ -124,10 +109,10 @@ export function Contact() {
                 className="text-[#A8B0C0]/50 font-sans font-light uppercase mb-8"
                 style={{ fontSize: "8px", letterSpacing: "0.3em" }}
               >
-                Contact
+                {t.contact.contactLabel}
               </p>
               <div className="flex flex-col gap-7">
-                {OFFICES.map((office) => (
+                {t.contact.offices.map((office) => (
                   <div key={office.city} className="flex flex-col gap-1 border-l border-[#C8A96A]/15 pl-5">
                     <span
                       className="font-serif text-[#F5F1E8] font-light"
@@ -157,7 +142,7 @@ export function Contact() {
                 className="text-[#A8B0C0]/50 font-sans font-light uppercase mb-2"
                 style={{ fontSize: "8px", letterSpacing: "0.2em" }}
               >
-                General Inquiries
+                {t.contact.generalInquiries}
               </p>
               <p
                 className="text-[#A8B0C0] font-sans font-light"
@@ -182,14 +167,13 @@ export function Contact() {
                   className="font-serif text-[#F5F1E8] font-light"
                   style={{ fontSize: "clamp(22px, 2.5vw, 32px)" }}
                 >
-                  Your inquiry has been received.
+                  {t.contact.successTitle}
                 </h3>
                 <p
                   className="text-[#A8B0C0] font-sans font-light leading-[1.8]"
                   style={{ fontSize: "14px" }}
                 >
-                  A member of the CJPA team will review your message and respond
-                  within one business day.
+                  {t.contact.successBody}
                 </p>
               </div>
             ) : (
@@ -198,7 +182,7 @@ export function Contact() {
                 <div className="grid sm:grid-cols-2 gap-7">
                   <FormField
                     id="name"
-                    label="Full Name"
+                    label={t.contact.formNameLabel}
                     name="name"
                     type="text"
                     value={form.name}
@@ -207,7 +191,7 @@ export function Contact() {
                   />
                   <FormField
                     id="organization"
-                    label="Organization"
+                    label={t.contact.formOrgLabel}
                     name="organization"
                     type="text"
                     value={form.organization}
@@ -220,7 +204,7 @@ export function Contact() {
                 <div className="grid sm:grid-cols-2 gap-7">
                   <FormField
                     id="email"
-                    label="Work Email"
+                    label={t.contact.formEmailLabel}
                     name="email"
                     type="email"
                     value={form.email}
@@ -233,7 +217,7 @@ export function Contact() {
                       className="text-[#A8B0C0]/60 font-sans font-light uppercase"
                       style={{ fontSize: "8px", letterSpacing: "0.2em" }}
                     >
-                      Nature of Inquiry
+                      {t.contact.formInquiryLabel}
                     </label>
                     <select
                       id="inquiry"
@@ -245,11 +229,11 @@ export function Contact() {
                       style={{ fontSize: "13px" }}
                     >
                       <option value="" className="bg-[#101827]">
-                        Select one
+                        {t.contact.formInquirySelectOne}
                       </option>
-                      {INQUIRY_TYPES.map((t) => (
-                        <option key={t} value={t} className="bg-[#101827]">
-                          {t}
+                      {t.contact.inquiryTypes.map((type) => (
+                        <option key={type} value={type} className="bg-[#101827]">
+                          {type}
                         </option>
                       ))}
                     </select>
@@ -263,7 +247,7 @@ export function Contact() {
                     className="text-[#A8B0C0]/60 font-sans font-light uppercase"
                     style={{ fontSize: "8px", letterSpacing: "0.2em" }}
                   >
-                    Brief Description
+                    {t.contact.formMessageLabel}
                   </label>
                   <textarea
                     id="message"
@@ -272,7 +256,7 @@ export function Contact() {
                     onChange={handleChange}
                     required
                     rows={5}
-                    placeholder="Describe the challenge or initiative you are navigating…"
+                    placeholder={t.contact.formMessagePlaceholder}
                     className="bg-transparent border-b border-[#C8A96A]/25 focus:border-[#C8A96A]/60 text-[#F5F1E8] placeholder:text-[#A8B0C0]/30 font-sans font-light py-3 outline-none transition-colors duration-300 resize-none"
                     style={{ fontSize: "13px" }}
                   />
@@ -285,13 +269,13 @@ export function Contact() {
                     className="text-[#C8A96A] border border-[#C8A96A]/40 hover:border-[#C8A96A]/70 font-sans font-light uppercase tracking-[0.18em] rounded-full"
                     style={{ fontSize: "10px" }}
                   >
-                    Send Inquiry
+                    {t.contact.sendInquiry}
                   </LiquidButton>
                   <p
                     className="text-[#A8B0C0]/40 font-sans font-light"
                     style={{ fontSize: "10px" }}
                   >
-                    All communications are strictly confidential.
+                    {t.contact.confidentialityNote}
                   </p>
                 </div>
               </form>

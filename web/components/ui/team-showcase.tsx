@@ -2,8 +2,10 @@
 
 import { useState } from "react"
 import { FaLinkedinIn } from "react-icons/fa"
+import { ChevronDown } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { publicTeamMembers } from "@/data/teamMembers"
+import { useLanguage } from "@/contexts/LanguageContext"
 
 export interface TeamMember {
   id: string
@@ -15,31 +17,38 @@ export interface TeamMember {
   linkedin?: string
 }
 
-const CJPA_TEAM: TeamMember[] = publicTeamMembers.map((member) => ({
-  id: member.id,
-  name: member.name,
-  role: member.publicRole,
-  region: member.region,
-  image: member.image,
-  bio: member.bio,
-  linkedin: member.linkedin,
-}))
-
 interface TeamShowcaseProps {
   members?: TeamMember[]
 }
 
-export function TeamShowcase({ members = CJPA_TEAM }: TeamShowcaseProps) {
+export function TeamShowcase({ members }: TeamShowcaseProps) {
+  const { t } = useLanguage()
   const [hoveredId, setHoveredId] = useState<string | null>(null)
+  const [expandedId, setExpandedId] = useState<string | null>(null)
 
-  const col1 = members.filter((_, i) => i % 3 === 0)
-  const col2 = members.filter((_, i) => i % 3 === 1)
-  const col3 = members.filter((_, i) => i % 3 === 2)
+  const resolvedMembers: TeamMember[] =
+    members ??
+    publicTeamMembers.map((member) => {
+      const translated = t.team.members[member.id]
+      return {
+        id: member.id,
+        name: member.name,
+        role: translated?.title ?? member.publicRole,
+        region: member.region,
+        image: member.image,
+        bio: translated?.bio ?? member.bio,
+        linkedin: member.linkedin,
+      }
+    })
+
+  const col1 = resolvedMembers.filter((_, i) => i % 3 === 0)
+  const col2 = resolvedMembers.filter((_, i) => i % 3 === 1)
+  const col3 = resolvedMembers.filter((_, i) => i % 3 === 2)
 
   return (
     <div className="flex flex-col lg:flex-row items-start gap-12 lg:gap-24 select-none w-full max-w-6xl mx-auto">
       {/* Photo grid */}
-      <div className="flex w-full max-w-full gap-3 overflow-x-auto pb-1 lg:w-auto lg:flex-shrink-0 lg:pb-0">
+      <div className="flex w-full max-w-full gap-3 overflow-x-auto pb-1 lg:sticky lg:top-28 lg:w-auto lg:flex-shrink-0 lg:pb-0">
         <div className="flex flex-col gap-3">
           {col1.map((m) => (
             <PhotoCard
@@ -77,12 +86,18 @@ export function TeamShowcase({ members = CJPA_TEAM }: TeamShowcaseProps) {
 
       {/* Name / info list */}
       <div className="flex flex-col gap-8 pt-0 lg:pt-6 flex-1 w-full">
-        {members.map((m) => (
+        {resolvedMembers.map((m) => (
           <MemberRow
             key={m.id}
             member={m}
             hoveredId={hoveredId}
             onHover={setHoveredId}
+            expanded={expandedId === m.id}
+            onToggleExpand={() =>
+              setExpandedId((current) => (current === m.id ? null : m.id))
+            }
+            readMoreLabel={t.team.readMore}
+            readLessLabel={t.team.readLess}
           />
         ))}
       </div>
@@ -164,24 +179,36 @@ function MemberRow({
   member,
   hoveredId,
   onHover,
+  expanded,
+  onToggleExpand,
+  readMoreLabel,
+  readLessLabel,
 }: {
   member: TeamMember
   hoveredId: string | null
   onHover: (id: string | null) => void
+  expanded: boolean
+  onToggleExpand: () => void
+  readMoreLabel: string
+  readLessLabel: string
 }) {
   const isActive = hoveredId === member.id
   const isDimmed = hoveredId !== null && !isActive
+  // Long bios (mostly the intern-analyst group) get clamped by default so
+  // the name list doesn't run far past the photo grid's height — expand on
+  // demand instead of always rendering the full paragraph.
+  const isLong = member.bio.length > 160
 
   return (
     <div
       className={cn(
-        "cursor-pointer transition-opacity duration-300",
+        "transition-opacity duration-300",
         isDimmed ? "opacity-35" : "opacity-100"
       )}
       onMouseEnter={() => onHover(member.id)}
       onMouseLeave={() => onHover(null)}
     >
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3 cursor-pointer">
         {/* Accent bar */}
         <span
           className={cn(
@@ -232,11 +259,32 @@ function MemberRow({
           {member.role}
         </p>
         <p
-          className="text-[#A8B0C0] font-sans font-light leading-[1.7]"
+          className={cn(
+            "text-[#A8B0C0] font-sans font-light leading-[1.7]",
+            isLong && !expanded && "line-clamp-2"
+          )}
           style={{ fontSize: "13px" }}
         >
           {member.bio}
         </p>
+        {isLong && (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation()
+              onToggleExpand()
+            }}
+            className="flex w-fit items-center gap-1 text-[#C8A96A]/80 hover:text-[#C8A96A] font-sans font-medium uppercase transition-colors cursor-pointer"
+            style={{ fontSize: "9px", letterSpacing: "0.18em" }}
+          >
+            {expanded ? readLessLabel : readMoreLabel}
+            <ChevronDown
+              size={11}
+              strokeWidth={2}
+              className={cn("transition-transform duration-300", expanded && "rotate-180")}
+            />
+          </button>
+        )}
         <p
           className="text-[#A8B0C0]/45 font-sans font-medium uppercase"
           style={{ fontSize: "9px", letterSpacing: "0.2em" }}

@@ -4,6 +4,7 @@ import { motion } from "framer-motion"
 import Link from "next/link"
 import { ArrowRight } from "lucide-react"
 import { GlobeInteractive } from "@/components/ui/GlobeInteractive"
+import { useLanguage } from "@/contexts/LanguageContext"
 
 const EASE = [0.25, 0.1, 0.25, 1] as const
 
@@ -29,6 +30,7 @@ function FadeUp({
 }
 
 export function Hero() {
+  const { t } = useLanguage()
   return (
     <section
       className="relative min-h-screen flex items-center overflow-x-hidden"
@@ -76,7 +78,7 @@ export function Hero() {
                   className="text-[#C8A96A] font-sans font-light uppercase"
                   style={{ fontSize: "10px", letterSpacing: "0.2em", lineHeight: 1.6 }}
                 >
-                  Geopolitical Intelligence Capital & Resources
+                  {t.hero.eyebrow}
                 </span>
               </div>
             </FadeUp>
@@ -87,10 +89,10 @@ export function Hero() {
                 className="font-serif text-[#F5F1E8] font-light leading-[1.06]"
                 style={{ fontSize: "clamp(48px, 7vw, 88px)" }}
               >
-                Connecting Global Insight,
+                {t.hero.headlineLine1}
                 <br />
                 <em className="font-light not-italic text-[#F5F1E8]/90">
-                  People, Capital & Resources
+                  {t.hero.headlineLine2}
                 </em>
               </h1>
             </FadeUp>
@@ -101,10 +103,7 @@ export function Hero() {
                 className="text-[#A8B0C0] font-sans font-light leading-relaxed max-w-lg"
                 style={{ fontSize: "15px", lineHeight: "1.75" }}
               >
-                CJPA Global Advisors provides data-driven scenario planning,
-                strategic advisory, geopolitical analysis, and capital access for
-                clients navigating global markets, infrastructure opportunities,
-                supply chain risk, and cross-border expansion.
+                {t.hero.body}
               </p>
             </FadeUp>
 
@@ -120,7 +119,7 @@ export function Hero() {
                   href="#contact"
                   className="inline-flex items-center gap-3 text-[#F5F1E8] border border-[#C8A96A]/40 hover:border-[#C8A96A]/80 hover:bg-[#C8A96A]/6 px-7 py-3.5 text-[11px] tracking-[0.18em] uppercase font-sans transition-all duration-300 cursor-pointer group"
                 >
-                  Begin a Conversation
+                  {t.hero.ctaPrimary}
                   <ArrowRight
                     size={12}
                     strokeWidth={1.5}
@@ -131,7 +130,7 @@ export function Hero() {
                   href="#services"
                   className="inline-flex items-center gap-2 text-[#A8B0C0] hover:text-[#F5F1E8] text-[11px] tracking-[0.15em] uppercase font-sans transition-colors duration-200 cursor-pointer px-1"
                 >
-                  Our Practice Areas
+                  {t.hero.ctaSecondary}
                   <ArrowRight size={11} strokeWidth={1.5} />
                 </Link>
               </div>
@@ -171,7 +170,7 @@ export function Hero() {
           className="text-[#A8B0C0]/50 font-sans uppercase"
           style={{ fontSize: "8px", letterSpacing: "0.3em" }}
         >
-          Scroll
+          {t.hero.scroll}
         </span>
         <motion.div
           className="h-6 w-px bg-[#C8A96A] opacity-30"
