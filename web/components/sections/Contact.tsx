@@ -148,7 +148,7 @@ export function Contact() {
                 className="text-[#A8B0C0] font-sans font-light"
                 style={{ fontSize: "14px" }}
               >
-                info@cjpa.us
+                earl@cjpa.us
                 <br />
                 (646) 428-5382
               </p>
