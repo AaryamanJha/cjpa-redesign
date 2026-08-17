@@ -147,7 +147,10 @@ const Logos3 = ({
         </h2>
       </div>
 
-      <div className="cjpa-logo-carousel-clip pt-12 md:pt-16 lg:pt-20">
+      {/* One continuous light band houses the whole strip, framed by thin
+          gold rules — reads as a single deliberate "trusted by" bar rather
+          than a scatter of individual cream cards dropped on the dark page. */}
+      <div className="mt-12 border-y border-[#C8A96A]/20 bg-[#F5F1E8] py-10 md:mt-16 md:py-12 lg:mt-20">
         <div className="cjpa-logo-carousel-clip relative mx-auto flex max-w-[1500px] items-center justify-center">
           <Carousel
             className="w-full max-w-full overflow-hidden"
@@ -168,15 +171,15 @@ const Logos3 = ({
                   key={`${logo.id}-${index}`}
                   className="flex basis-1/2 justify-center pl-0 sm:basis-1/3 md:basis-1/4 lg:basis-1/5 xl:basis-1/6"
                 >
-                  <div className="mx-3 flex h-36 w-full max-w-[220px] shrink-0 flex-col items-center justify-center gap-4 border border-[#C8A96A]/10 bg-[#F5F1E8] px-6 py-6 transition duration-300 hover:-translate-y-1 hover:border-[#C8A96A]/35 md:mx-5">
+                  <div className="mx-3 flex h-32 w-full max-w-[200px] shrink-0 flex-col items-center justify-center gap-3 border-l border-[#070B14]/8 px-6 first:border-l-0 md:mx-5">
                     <img
                       src={logo.image}
                       alt={logo.description}
-                      className={cn("max-w-full object-contain", logo.className)}
+                      className={cn("max-w-full object-contain opacity-80 grayscale transition duration-300 hover:opacity-100 hover:grayscale-0", logo.className)}
                       loading="lazy"
                     />
                     <p
-                      className="line-clamp-2 min-h-8 text-center font-sans font-medium leading-snug text-[#070B14]/70"
+                      className="line-clamp-2 min-h-8 text-center font-sans font-medium leading-snug text-[#070B14]/60"
                       style={{ fontSize: "11px", letterSpacing: "0.03em" }}
                     >
                       {logo.description}
@@ -186,8 +189,8 @@ const Logos3 = ({
               ))}
             </CarouselContent>
           </Carousel>
-          <div className="pointer-events-none absolute inset-y-0 left-0 w-16 bg-linear-to-r from-[#070B14] to-transparent" />
-          <div className="pointer-events-none absolute inset-y-0 right-0 w-16 bg-linear-to-l from-[#070B14] to-transparent" />
+          <div className="pointer-events-none absolute inset-y-0 left-0 w-16 bg-linear-to-r from-[#F5F1E8] to-transparent" />
+          <div className="pointer-events-none absolute inset-y-0 right-0 w-16 bg-linear-to-l from-[#F5F1E8] to-transparent" />
         </div>
       </div>
     </section>
