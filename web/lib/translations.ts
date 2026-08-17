@@ -78,6 +78,7 @@ export interface Translations {
     members: Record<string, TeamMemberText>
     readMore: string
     readLess: string
+    advisorsHeading: string
   }
   teamFilm: {
     kicker: string
@@ -269,6 +270,7 @@ export const en: Translations = {
     intro: "CJPA brings together senior consultants, advisors, analysts, legal counsel, technology specialists, and regional experts across Asia, Africa, the Caribbean, Europe, and the United States.",
     readMore: "Read more",
     readLess: "Read less",
+    advisorsHeading: "Advisors",
     members: {
       earlcarr: {
         title: "Founder & CEO",
@@ -278,17 +280,9 @@ export const en: Translations = {
         title: "Senior Consultant",
         bio: "Founder and managing member of Cowries and Rice, a China-Africa strategic consultancy focused on sustainable business practices by Chinese organizations operating in Africa.",
       },
-      davidzheng: {
-        title: "Senior Consultant",
-        bio: "Executive and consultant with 16+ years of experience across China, Southeast Asia, and the United States, including Fortune 500 companies, Chinese SOEs, and private Chinese firms.",
-      },
       jacobdreyer: {
         title: "Senior Consultant",
         bio: "Writer and editor based in Shanghai whose work focuses on China's middle class, Chinese politics and economics, and China's relationship with the world.",
-      },
-      owakhelak: {
-        title: "Senior Consultant",
-        bio: "Data analyst contributing statistical analysis and data-driven solutions, with training in econometrics and quantitative economics from NYU and analytics education at Fordham.",
       },
       essayworabo: {
         title: "Partner: Technology & Innovation",
@@ -305,10 +299,6 @@ export const en: Translations = {
       zackkennedy: {
         title: "Associate",
         bio: "New York-based consultant focused on geopolitical and geoeconomic issues, helping companies, governments, and NGOs navigate a changing global landscape.",
-      },
-      nathanielschochet: {
-        title: "Senior Associate",
-        bio: "Senior Associate contributing to research and publications on China's global engagement, with focus on its presence in Africa and economic activities in Latin America and the Caribbean.",
       },
       lorenajames: {
         title: "Senior Analyst",
@@ -346,25 +336,9 @@ export const en: Translations = {
         title: "Intern Analyst",
         bio: "Incoming senior at IE University, Madrid pursuing a Dual Bachelor's in Laws and International Relations. Her professional experience spans policy research, corporate responsibility, and legal compliance across Kenya, Spain, the United Kingdom, and Central Asia — including work with Aga Khan Foundation USA in collaboration with USAID and at Igeria & Ngugi Advocates in Nairobi. Her analytical work bridges corporate compliance with regional economic realities, covering trade dynamics, infrastructure corridors, and macroeconomic policy alignment.",
       },
-      senjunlu: {
-        title: "Intern Analyst",
-        bio: "Finance and accounting student at Indiana University focused on investment banking, restructuring, distressed investing, market research, and financial modeling.",
-      },
-      georgiapollard: {
-        title: "Intern Analyst",
-        bio: "Chinese Language and Culture and Anthropology student with Indo-Pacific policy experience in Taiwan, China, South Africa, and the United States.",
-      },
-      emmaxing: {
-        title: "Intern Analyst",
-        bio: "Rising freshman at Duke University with interests in history, economics, and sociology. Emma has worked as a research assistant at the University of South Dakota and Montclair State University, reinforcing her passion for the humanities. Her interests center on the legal and ethical dimensions of markets, and how political institutions shape economic behavior. She is also a cofounder of a local chapter of She's the First, helping lead girls' education fundraising and community engagement initiatives.",
-      },
       megan: {
         title: "Strategic Marketing Intern",
         bio: "Recent graduate of Montclair State University with a major in Animation and Visual Effects. Megan brings an artistic background to strategic marketing, with college experience in Red Hawk Studio's semester-long animation pipeline productions and social media work with Viva la Animacion, an organization celebrating Latin artists. They believe art and graphic design can bridge cultures and are looking forward to contributing to CJPA.",
-      },
-      kevinzhang: {
-        title: "Intern Analyst",
-        bio: "Rising sophomore at Duke University studying economics and political science, with an interest in a career in finance. Kevin recently returned from Accra, Ghana, where he taught basketball to youth, and is excited to gain summer experience at the intersection of capital raising, international relations, and thought leadership, especially in spaces shaped by future technologies.",
       },
       aaryamanajjha: {
         title: "Intern Analyst",
@@ -633,6 +607,7 @@ export const es: Translations = {
     intro: "CJPA reúne a consultores senior, asesores, analistas, asesoría legal, especialistas en tecnología y expertos regionales en Asia, África, el Caribe, Europa y Estados Unidos.",
     readMore: "Leer más",
     readLess: "Leer menos",
+    advisorsHeading: "Asesores",
     members: {
       earlcarr: {
         title: "Fundador y Director Ejecutivo",
@@ -642,17 +617,9 @@ export const es: Translations = {
         title: "Consultor Senior",
         bio: "Fundador y socio gerente de Cowries and Rice, una consultoría estratégica sobre China-África enfocada en prácticas empresariales sostenibles de organizaciones chinas que operan en África.",
       },
-      davidzheng: {
-        title: "Consultor Senior",
-        bio: "Ejecutivo y consultor con más de 16 años de experiencia en China, el Sudeste Asiático y Estados Unidos, incluyendo empresas Fortune 500, empresas estatales chinas y firmas privadas chinas.",
-      },
       jacobdreyer: {
         title: "Consultor Senior",
         bio: "Escritor y editor radicado en Shanghái cuyo trabajo se centra en la clase media china, la política y economía chinas, y la relación de China con el mundo.",
-      },
-      owakhelak: {
-        title: "Consultor Senior",
-        bio: "Analista de datos que aporta análisis estadístico y soluciones basadas en datos, con formación en econometría y economía cuantitativa de NYU y educación en analítica de Fordham.",
       },
       essayworabo: {
         title: "Socio: Tecnología e Innovación",
@@ -669,10 +636,6 @@ export const es: Translations = {
       zackkennedy: {
         title: "Asociado",
         bio: "Consultor con sede en Nueva York enfocado en temas geopolíticos y geoeconómicos, ayudando a empresas, gobiernos y ONGs a navegar un panorama global cambiante.",
-      },
-      nathanielschochet: {
-        title: "Asociado Senior",
-        bio: "Asociado senior que contribuye a la investigación y publicaciones sobre el compromiso global de China, con enfoque en su presencia en África y actividades económicas en América Latina y el Caribe.",
       },
       lorenajames: {
         title: "Analista Senior",
@@ -710,25 +673,9 @@ export const es: Translations = {
         title: "Analista en Prácticas",
         bio: "Estudiante de último año en la Universidad IE, Madrid, cursando un Doble Grado en Derecho y Relaciones Internacionales. Su experiencia profesional abarca investigación de políticas públicas, responsabilidad corporativa y cumplimiento legal en Kenia, España, el Reino Unido y Asia Central — incluyendo trabajo con la Aga Khan Foundation USA en colaboración con USAID y en Igeria & Ngugi Advocates en Nairobi. Su trabajo analítico conecta el cumplimiento corporativo con realidades económicas regionales, abarcando dinámicas comerciales, corredores de infraestructura y alineación de políticas macroeconómicas.",
       },
-      senjunlu: {
-        title: "Analista en Prácticas",
-        bio: "Estudiante de finanzas y contabilidad en la Universidad de Indiana enfocado en banca de inversión, reestructuración, inversión en activos en dificultades, investigación de mercado y modelado financiero.",
-      },
-      georgiapollard: {
-        title: "Analista en Prácticas",
-        bio: "Estudiante de Lengua y Cultura China y Antropología con experiencia en políticas del Indo-Pacífico en Taiwán, China, Sudáfrica y Estados Unidos.",
-      },
-      emmaxing: {
-        title: "Analista en Prácticas",
-        bio: "Estudiante de primer año en la Universidad de Duke con interés en historia, economía y sociología. Emma ha trabajado como asistente de investigación en la Universidad de Dakota del Sur y en la Universidad Estatal de Montclair, reforzando su pasión por las humanidades. Sus intereses se centran en las dimensiones legales y éticas de los mercados, y en cómo las instituciones políticas moldean el comportamiento económico. También es cofundadora de un capítulo local de She's the First, ayudando a liderar iniciativas de recaudación de fondos para la educación de niñas y participación comunitaria.",
-      },
       megan: {
         title: "Practicante de Marketing Estratégico",
         bio: "Recién graduada de la Universidad Estatal de Montclair con especialización en Animación y Efectos Visuales. Megan aporta un trasfondo artístico al marketing estratégico, con experiencia universitaria en las producciones de animación de un semestre completo de Red Hawk Studio y trabajo en redes sociales con Viva la Animación, una organización que celebra a artistas latinos. Cree que el arte y el diseño gráfico pueden unir culturas y espera contribuir a CJPA.",
-      },
-      kevinzhang: {
-        title: "Analista en Prácticas",
-        bio: "Estudiante de segundo año en la Universidad de Duke, estudiando economía y ciencias políticas, con interés en una carrera en finanzas. Kevin recientemente regresó de Accra, Ghana, donde enseñó baloncesto a jóvenes, y está entusiasmado por adquirir experiencia de verano en la intersección de la recaudación de capital, las relaciones internacionales y el liderazgo intelectual, especialmente en espacios moldeados por las tecnologías del futuro.",
       },
       aaryamanajjha: {
         title: "Analista en Prácticas",
@@ -997,6 +944,7 @@ export const zhCN: Translations = {
     intro: "CJPA 汇聚了高级顾问、咨询专家、分析师、法律顾问、技术专家以及遍布亚洲、非洲、加勒比地区、欧洲和美国的区域专家。",
     readMore: "阅读更多",
     readLess: "收起",
+    advisorsHeading: "顾问团队",
     members: {
       earlcarr: {
         title: "创始人兼首席执行官",
@@ -1006,17 +954,9 @@ export const zhCN: Translations = {
         title: "高级顾问",
         bio: "Cowries and Rice 创始人兼执行合伙人,该机构是一家专注于中国企业在非洲开展可持续商业实践的中非战略咨询公司。",
       },
-      davidzheng: {
-        title: "高级顾问",
-        bio: "拥有超过 16 年中国、东南亚及美国从业经验的高管兼顾问,曾服务于财富 500 强企业、中国国有企业及中国民营企业。",
-      },
       jacobdreyer: {
         title: "高级顾问",
         bio: "常驻上海的作家兼编辑,专注于中国中产阶级、中国政治经济以及中国与世界关系等议题的研究与写作。",
-      },
-      owakhelak: {
-        title: "高级顾问",
-        bio: "数据分析师,负责提供统计分析与数据驱动的解决方案,拥有纽约大学计量经济学与定量经济学培训背景及福特汉姆大学数据分析教育经历。",
       },
       essayworabo: {
         title: "合伙人:技术与创新",
@@ -1033,10 +973,6 @@ export const zhCN: Translations = {
       zackkennedy: {
         title: "助理顾问",
         bio: "常驻纽约的顾问,专注于地缘政治与地缘经济议题,协助企业、政府及非政府组织应对不断变化的全球格局。",
-      },
-      nathanielschochet: {
-        title: "高级助理顾问",
-        bio: "高级助理顾问,负责撰写关于中国全球参与的研究与出版物,重点关注中国在非洲的存在及其在拉丁美洲与加勒比地区的经济活动。",
       },
       lorenajames: {
         title: "高级分析师",
@@ -1074,25 +1010,9 @@ export const zhCN: Translations = {
         title: "实习分析师",
         bio: "马德里 IE 大学即将升入大四的学生,主修法律与国际关系双学位。其专业经验涵盖政策研究、企业社会责任及法律合规工作,足迹遍及肯尼亚、西班牙、英国及中亚地区——包括与美国阿迦汗基金会(与美国国际开发署合作)以及内罗毕 Igeria & Ngugi Advocates 律师事务所的合作经历。她的分析工作将企业合规与区域经济现实相结合,涵盖贸易动态、基础设施走廊及宏观经济政策协调等领域。",
       },
-      senjunlu: {
-        title: "实习分析师",
-        bio: "印第安纳大学金融与会计专业学生,专注于投资银行、企业重组、困境投资、市场研究与财务建模。",
-      },
-      georgiapollard: {
-        title: "实习分析师",
-        bio: "主修中文语言文化与人类学,拥有在台湾、中国、南非及美国的印太政策相关经验。",
-      },
-      emmaxing: {
-        title: "实习分析师",
-        bio: "杜克大学即将升入大一的新生,兴趣涵盖历史、经济学与社会学。Emma 曾在南达科他大学和蒙特克莱尔州立大学担任研究助理,进一步坚定了她对人文学科的热忱。她的关注重点在于市场的法律与伦理维度,以及政治制度如何塑造经济行为。她还是当地 She's the First 分会的联合创始人,致力于推动女童教育筹款与社区参与项目。",
-      },
       megan: {
         title: "战略市场营销实习生",
         bio: "蒙特克莱尔州立大学动画与视觉特效专业应届毕业生。Megan 将艺术背景融入战略营销工作,大学期间曾参与 Red Hawk Studio 为期一学期的动画制作项目,并为庆祝拉丁裔艺术家的组织 Viva la Animacion 从事社交媒体工作。她相信艺术与平面设计能够连接不同文化,并期待为 CJPA 的发展贡献力量。",
-      },
-      kevinzhang: {
-        title: "实习分析师",
-        bio: "杜克大学即将升入大二的学生,主修经济学与政治学,有志于从事金融行业。Kevin 最近从加纳阿克拉回国,在当地为青少年教授篮球,他期待在资本募集、国际关系与思想领导力交汇的领域积累暑期经验,尤其是在受未来科技塑造的领域。",
       },
       aaryamanajjha: {
         title: "实习分析师",
@@ -1361,6 +1281,7 @@ export const zhTW: Translations = {
     intro: "CJPA 匯聚了高階顧問、諮詢專家、分析師、法律顧問、技術專家以及遍布亞洲、非洲、加勒比地區、歐洲和美國的區域專家。",
     readMore: "閱讀更多",
     readLess: "收合",
+    advisorsHeading: "顧問團隊",
     members: {
       earlcarr: {
         title: "創辦人兼執行長",
@@ -1370,17 +1291,9 @@ export const zhTW: Translations = {
         title: "資深顧問",
         bio: "Cowries and Rice 創辦人兼執行合夥人,該機構是一家專注於中國企業在非洲開展永續商業實務的中非策略諮詢公司。",
       },
-      davidzheng: {
-        title: "資深顧問",
-        bio: "擁有超過 16 年中國、東南亞及美國從業經驗的高階主管兼顧問,曾服務於財星 500 大企業、中國國有企業及中國民營企業。",
-      },
       jacobdreyer: {
         title: "資深顧問",
         bio: "常駐上海的作家兼編輯,專注於中國中產階級、中國政治經濟以及中國與世界關係等議題的研究與寫作。",
-      },
-      owakhelak: {
-        title: "資深顧問",
-        bio: "數據分析師,負責提供統計分析與數據驅動的解決方案,擁有紐約大學計量經濟學與定量經濟學訓練背景及福坦莫大學數據分析教育經歷。",
       },
       essayworabo: {
         title: "合夥人:科技與創新",
@@ -1397,10 +1310,6 @@ export const zhTW: Translations = {
       zackkennedy: {
         title: "助理顧問",
         bio: "常駐紐約的顧問,專注於地緣政治與地緣經濟議題,協助企業、政府及非政府組織因應不斷變化的全球格局。",
-      },
-      nathanielschochet: {
-        title: "資深助理顧問",
-        bio: "資深助理顧問,負責撰寫關於中國全球參與的研究與出版品,重點關注中國在非洲的存在及其在拉丁美洲與加勒比地區的經濟活動。",
       },
       lorenajames: {
         title: "資深分析師",
@@ -1438,25 +1347,9 @@ export const zhTW: Translations = {
         title: "實習分析師",
         bio: "馬德里 IE 大學即將升上大四的學生,主修法律與國際關係雙學位。其專業經驗涵蓋政策研究、企業社會責任及法律遵循工作,足跡遍及肯亞、西班牙、英國及中亞地區——包括與美國阿迦汗基金會(與美國國際開發總署合作)以及奈洛比 Igeria & Ngugi Advocates 律師事務所的合作經歷。她的分析工作將企業遵循與區域經濟現實相結合,涵蓋貿易動態、基礎建設走廊及總體經濟政策協調等領域。",
       },
-      senjunlu: {
-        title: "實習分析師",
-        bio: "印第安納大學財務與會計專業學生,專注於投資銀行、企業重組、困境投資、市場研究與財務建模。",
-      },
-      georgiapollard: {
-        title: "實習分析師",
-        bio: "主修中文語言文化與人類學,擁有在台灣、中國、南非及美國的印太政策相關經驗。",
-      },
-      emmaxing: {
-        title: "實習分析師",
-        bio: "杜克大學即將升上大一的新生,興趣涵蓋歷史、經濟學與社會學。Emma 曾在南達科他大學和蒙特克萊爾州立大學擔任研究助理,進一步堅定了她對人文學科的熱忱。她的關注重點在於市場的法律與倫理面向,以及政治制度如何形塑經濟行為。她也是當地 She's the First 分會的共同創辦人,致力於推動女童教育募款與社區參與計畫。",
-      },
       megan: {
         title: "策略行銷實習生",
         bio: "蒙特克萊爾州立大學動畫與視覺特效專業應屆畢業生。Megan 將藝術背景融入策略行銷工作,大學期間曾參與 Red Hawk Studio 為期一學期的動畫製作專案,並為慶祝拉丁裔藝術家的組織 Viva la Animacion 從事社群媒體工作。她相信藝術與平面設計能夠連結不同文化,並期待為 CJPA 的發展貢獻心力。",
-      },
-      kevinzhang: {
-        title: "實習分析師",
-        bio: "杜克大學即將升上大二的學生,主修經濟學與政治學,有志於從事金融業。Kevin 最近從迦納阿克拉返國,在當地為青少年教授籃球,他期待在資本募集、國際關係與思想領導力交會的領域累積暑期經驗,尤其是在受未來科技形塑的領域。",
       },
       aaryamanajjha: {
         title: "實習分析師",

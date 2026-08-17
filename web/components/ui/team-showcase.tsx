@@ -4,7 +4,7 @@ import { useState } from "react"
 import { FaLinkedinIn } from "react-icons/fa"
 import { ChevronDown } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { publicTeamMembers } from "@/data/teamMembers"
+import { publicTeamMembers, type TeamMemberProfile } from "@/data/teamMembers"
 import { useLanguage } from "@/contexts/LanguageContext"
 
 export interface TeamMember {
@@ -19,27 +19,31 @@ export interface TeamMember {
 
 interface TeamShowcaseProps {
   members?: TeamMember[]
+  /** Restrict the showcase to specific roster groups (e.g. just "Advisors"). Omit to include everyone. */
+  groups?: TeamMemberProfile["group"][]
 }
 
-export function TeamShowcase({ members }: TeamShowcaseProps) {
+export function TeamShowcase({ members, groups }: TeamShowcaseProps) {
   const { t } = useLanguage()
   const [hoveredId, setHoveredId] = useState<string | null>(null)
   const [expandedId, setExpandedId] = useState<string | null>(null)
 
   const resolvedMembers: TeamMember[] =
     members ??
-    publicTeamMembers.map((member) => {
-      const translated = t.team.members[member.id]
-      return {
-        id: member.id,
-        name: member.name,
-        role: translated?.title ?? member.publicRole,
-        region: member.region,
-        image: member.image,
-        bio: translated?.bio ?? member.bio,
-        linkedin: member.linkedin,
-      }
-    })
+    publicTeamMembers
+      .filter((member) => !groups || groups.includes(member.group))
+      .map((member) => {
+        const translated = t.team.members[member.id]
+        return {
+          id: member.id,
+          name: member.name,
+          role: translated?.title ?? member.publicRole,
+          region: member.region,
+          image: member.image,
+          bio: translated?.bio ?? member.bio,
+          linkedin: member.linkedin,
+        }
+      })
 
   const col1 = resolvedMembers.filter((_, i) => i % 3 === 0)
   const col2 = resolvedMembers.filter((_, i) => i % 3 === 1)
@@ -167,9 +171,6 @@ function PhotoCard({
           </div>
         )}
         <div className="absolute inset-0 bg-[#070B14]/10 mix-blend-multiply" />
-        <div className="absolute inset-x-4 top-4 h-px bg-[#C8A96A]/35" />
-        <div className="absolute left-4 top-8 bottom-4 w-px bg-[#F5F1E8]/10" />
-        <div className="absolute right-4 bottom-4 h-10 w-10 border border-[#C8A96A]/25" />
       </div>
     </div>
   )

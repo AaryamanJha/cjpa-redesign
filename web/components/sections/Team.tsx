@@ -15,6 +15,8 @@ export function Team() {
   const headerInView = useInView(headerRef, { once: true, margin: "-60px" })
   const showcaseRef = useRef(null)
   const showcaseInView = useInView(showcaseRef, { once: true, margin: "-60px" })
+  const advisorsRef = useRef(null)
+  const advisorsInView = useInView(advisorsRef, { once: true, margin: "-60px" })
 
   return (
     <section id="team" className="relative bg-[#070B14] py-28 lg:py-36">
@@ -81,8 +83,30 @@ export function Team() {
           animate={showcaseInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.9, ease: EASE }}
         >
-          <TeamShowcase />
+          <TeamShowcase groups={["Leadership", "Team", "Intern Analysts"]} />
         </motion.div>
+
+        {/* Advisors — separate roster, same showcase format */}
+        <div className="mt-24 lg:mt-28 pt-16 lg:pt-20 border-t border-[#C8A96A]/10">
+          <motion.span
+            initial={{ opacity: 0, y: 14 }}
+            animate={advisorsInView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.7, ease: EASE }}
+            className="mb-12 block text-[#C8A96A] font-sans font-medium uppercase tracking-[0.3em]"
+            style={{ fontSize: "11px" }}
+          >
+            {t.team.advisorsHeading}
+          </motion.span>
+
+          <motion.div
+            ref={advisorsRef}
+            initial={{ opacity: 0, y: 24 }}
+            animate={advisorsInView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.9, delay: 0.1, ease: EASE }}
+          >
+            <TeamShowcase groups={["Advisors"]} />
+          </motion.div>
+        </div>
       </div>
     </section>
   )
