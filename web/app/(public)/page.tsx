@@ -1,6 +1,8 @@
 import { SplashScreen } from "@/components/sections/SplashScreen"
 import { Hero } from "@/components/sections/Hero"
 import { About } from "@/components/sections/About"
+import { Mission } from "@/components/sections/Mission"
+import { Founder } from "@/components/sections/Founder"
 import { Services } from "@/components/sections/Services"
 import { Team } from "@/components/sections/Team"
 import { TeamFilm } from "@/components/sections/TeamFilm"
@@ -17,6 +19,8 @@ export default function Home() {
       <SplashScreen />
       <Hero />
       <About />
+      <Mission />
+      <Founder />
       <Services />
       <Team />
       <TeamFilm />
