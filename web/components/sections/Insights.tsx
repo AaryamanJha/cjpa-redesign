@@ -10,21 +10,9 @@ const EASE = [0.25, 0.1, 0.25, 1] as const
 const ARTICLE_META = [
   {
     tag: "Forbes",
-    date: "Feb 18, 2025",
-    image: "/insights/panama-canal.png",
-    href: "https://www.forbes.com/sites/earlcarr/2025/02/18/reimagining-us--chinese-influence-in-central-america-critical-implications-for-the-panama-canal/",
-  },
-  {
-    tag: "Forbes",
     date: "May 15, 2025",
     image: "/insights/circle-ipo-stablecoin.png",
     href: "https://www.forbes.com/sites/earlcarr/2025/05/15/speed-and-safety-what-circles-ipo-means-for-stablecoins/",
-  },
-  {
-    tag: "Forbes",
-    date: "Mar 24, 2025",
-    image: "/insights/market-volatility.png",
-    href: "https://www.forbes.com/sites/earlcarr/2025/03/24/geopolitical-risk-and-volatility-what-are-advisors-telling-clients/",
   },
 ]
 

@@ -360,16 +360,8 @@ export const en: Translations = {
     inThePress: "In the Press",
     articles: [
       {
-        title: "How U.S. And Chinese Influence In Central America Affects The Panama Canal",
-        excerpt: "A Forbes article by Earl Carr examining how U.S. and Chinese influence in Central America affects the Panama Canal and the wider strategic environment.",
-      },
-      {
         title: "Speed And Safety: What Circle's IPO Means For Stablecoins Geopolitical Risk",
         excerpt: "A Forbes article by Earl Carr and intern analyst Jonah Kim on stablecoins, Circle's IPO, and the geopolitical risk dimensions of digital finance.",
-      },
-      {
-        title: "Geopolitical Risk And Market Volatility: What Are Advisors Telling Clients?",
-        excerpt: "A Forbes article by Earl Carr on market volatility, geopolitical risk, and the counsel advisors are providing clients.",
       },
     ],
     press: [
@@ -697,16 +689,8 @@ export const es: Translations = {
     inThePress: "En la Prensa",
     articles: [
       {
-        title: "Cómo la influencia de EE. UU. y China en Centroamérica afecta al Canal de Panamá",
-        excerpt: "Un artículo de Forbes por Earl Carr que examina cómo la influencia de EE. UU. y China en Centroamérica afecta al Canal de Panamá y al entorno estratégico más amplio.",
-      },
-      {
         title: "Velocidad y seguridad: qué significa la OPI de Circle para el riesgo geopolítico de las stablecoins",
         excerpt: "Un artículo de Forbes por Earl Carr y el analista en prácticas Jonah Kim sobre las stablecoins, la OPI de Circle y las dimensiones de riesgo geopolítico de las finanzas digitales.",
-      },
-      {
-        title: "Riesgo geopolítico y volatilidad del mercado: ¿qué les dicen los asesores a sus clientes?",
-        excerpt: "Un artículo de Forbes por Earl Carr sobre la volatilidad del mercado, el riesgo geopolítico y la orientación que los asesores brindan a sus clientes.",
       },
     ],
     press: [
@@ -1034,16 +1018,8 @@ export const zhCN: Translations = {
     inThePress: "媒体报道",
     articles: [
       {
-        title: "美中在中美洲的影响力如何波及巴拿马运河",
-        excerpt: "Earl Carr 在《福布斯》(Forbes)发表的文章,探讨美中两国在中美洲的影响力如何波及巴拿马运河及更广泛的战略格局。",
-      },
-      {
         title: "速度与安全:Circle 首次公开募股(IPO)对稳定币地缘政治风险意味着什么",
         excerpt: "Earl Carr 与实习分析师 Jonah Kim 在《福布斯》联合撰写的文章,探讨稳定币、Circle 的 IPO 及数字金融的地缘政治风险维度。",
-      },
-      {
-        title: "地缘政治风险与市场波动:顾问们正在向客户传达什么信息?",
-        excerpt: "Earl Carr 在《福布斯》发表的文章,探讨市场波动、地缘政治风险以及顾问向客户提供的相关建议。",
       },
     ],
     press: [
@@ -1371,16 +1347,8 @@ export const zhTW: Translations = {
     inThePress: "媒體報導",
     articles: [
       {
-        title: "美中在中美洲的影響力如何波及巴拿馬運河",
-        excerpt: "Earl Carr 在《富比士》(Forbes)發表的文章,探討美中兩國在中美洲的影響力如何波及巴拿馬運河及更廣泛的戰略格局。",
-      },
-      {
         title: "速度與安全:Circle 首次公開發行(IPO)對穩定幣地緣政治風險意味著什麼",
         excerpt: "Earl Carr 與實習分析師 Jonah Kim 在《富比士》聯合撰寫的文章,探討穩定幣、Circle 的 IPO 及數位金融的地緣政治風險面向。",
-      },
-      {
-        title: "地緣政治風險與市場波動:顧問們正在向客戶傳達什麼訊息?",
-        excerpt: "Earl Carr 在《富比士》發表的文章,探討市場波動、地緣政治風險以及顧問向客戶提供的相關建議。",
       },
     ],
     press: [
